@@ -23,6 +23,7 @@ const fmt = {
 	proseWrap: 'always',
 	ignorePatterns: [
 		'**/.output',
+		'**/.vite',
 		'**/dist/**',
 		'pnpm-lock.yaml',
 		'env.d.ts',
