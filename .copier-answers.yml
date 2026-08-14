@@ -1,0 +1,7 @@
+# Changes here will be overwritten by Copier; do not edit manually
+_commit: v0.0.1
+_src_path: /home/aamini.linux/dotfiles
+app_name: dutch-oven
+google_auth: true
+posthog: true
+sentry: true
