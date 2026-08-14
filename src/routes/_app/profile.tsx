@@ -7,7 +7,7 @@ import { authClient } from '@/lib/auth/client'
 import { redirectUnauthenticatedUsers } from '@/lib/auth/functions'
 import { getAvatarUploadUrl, getAvatarUrl } from '@/lib/s3'
 
-export const Route = createFileRoute('/(app)/profile')({
+export const Route = createFileRoute('/_app/profile')({
 	beforeLoad: () => redirectUnauthenticatedUsers({ redirectTo: '/profile' }),
 	component: Profile,
 })

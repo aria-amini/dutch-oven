@@ -137,8 +137,10 @@ Font:** JetBrains Mono Variable — code and data only, never decoration
 
 ### Hierarchy
 
-- **Display** (800, clamp(5rem,10vw,9rem), 0.95): "your shelf" — the only giant
-  type on a page. Shrinks to 4–6rem once the shelf outgrows the welcome.
+- **Display** (800, clamp(5rem,10vw,9rem), 0.95): reserved for brand moments
+  (landing, WIP stubs) — never for app page titles.
+- **Page Title** (800, 2.25–3rem, tight): app page headers like "your recipes" —
+  plain lowercase type, no sticker.
 - **Tile Title** (800, 1.25rem, tight): recipe names, bottom-left of tiles.
 - **Label/Sticker** (700, 13px, uppercase, slight rotate): group labels, badges,
   nav items. Stickers are inline-block, rotated -1deg.
@@ -151,11 +153,11 @@ uppercase. Nothing in between — no Title Case anywhere.
 
 ## Layout
 
-The dashboard is a horizontal panorama behind a fixed left rail (~7rem, icon
-tiles, active = yolk sticker). Groups of square tiles flow left to right on
-desktop (`--spacing-tile`, 16px gaps), stacking vertically on mobile with a top
-bar instead of the rail. The display headline leads; when the shelf grows past
-~12 recipes it steps down to a compact header and the tiles take over.
+The dashboard is a horizontal panorama behind a fixed left rail (~12rem,
+full-width rows, active = yolk fill). Groups of square tiles flow left to right
+on desktop (`--spacing-tile`, 16px gaps), stacking vertically on mobile with a
+top bar instead of the rail. A plain page title ("your recipes") leads; the
+tiles carry the page.
 
 ## Elevation & Depth
 
@@ -216,9 +218,11 @@ content — are drawn dashed; once real, the border goes solid.
 
 ### Navigation
 
-- Left rail of square icon tiles (Phosphor icons, 22px). Active = yolk fill
-  sticker with resting shadow; inactive = transparent with ink border on hover;
-  disabled = 35% opacity, no pointer.
+- Left rail (~12rem) of full-width rows: Phosphor icon (18px, filled when
+  active) + uppercase 13px label. Active row = yolk fill edge-to-edge with 2px
+  ink border and resting shadow; inactive = transparent, ink border + shadow on
+  hover; disabled = 35% opacity, no pointer. Mobile collapses to a horizontally
+  scrollable top bar of the same rows.
 
 ## Do's and Don'ts
 

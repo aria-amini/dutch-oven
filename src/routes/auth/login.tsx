@@ -36,7 +36,7 @@ function Login() {
 			<Card className="w-full max-w-md">
 				<CardContent className="space-y-6 pt-6">
 					<h1 className="text-3xl font-bold">Sign in</h1>
-					<GoogleAuthButton fallbackRedirect="/pantry" className="w-full" />
+					<GoogleAuthButton fallbackRedirect="/recipes" className="w-full" />
 					<form onSubmit={submit} className="space-y-4">
 						<Input
 							required

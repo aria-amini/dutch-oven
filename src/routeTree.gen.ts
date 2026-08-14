@@ -10,12 +10,15 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as appDashboardRouteImport } from './routes/(app)/dashboard'
-import { Route as appPantryRouteImport } from './routes/(app)/pantry'
-import { Route as appProfileRouteImport } from './routes/(app)/profile'
+import { Route as AppRouteImport } from './routes/_app'
+import { Route as AppHomeRouteImport } from './routes/_app/home'
+import { Route as AppProfileRouteImport } from './routes/_app/profile'
+import { Route as AppSettingsRouteImport } from './routes/_app/settings'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as AuthSignupRouteImport } from './routes/auth/signup'
-import { Route as appRecipesRecipeIdRouteImport } from './routes/(app)/recipes.$recipeId'
+import { Route as AppRecipesIndexRouteImport } from './routes/_app/recipes.index'
+import { Route as AppRecipesRecipeIdRouteImport } from './routes/_app/recipes.$recipeId'
+import { Route as AppRecipesNewRouteImport } from './routes/_app/recipes.new'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth.$'
 import { Route as ApiIngestSplatRouteImport } from './routes/api/ingest.$'
 
@@ -24,20 +27,24 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const appDashboardRoute = appDashboardRouteImport.update({
-  id: '/(app)/dashboard',
-  path: '/dashboard',
+const AppRoute = AppRouteImport.update({
+  id: '/_app',
   getParentRoute: () => rootRouteImport,
 } as any)
-const appPantryRoute = appPantryRouteImport.update({
-  id: '/(app)/pantry',
-  path: '/pantry',
-  getParentRoute: () => rootRouteImport,
+const AppHomeRoute = AppHomeRouteImport.update({
+  id: '/home',
+  path: '/home',
+  getParentRoute: () => AppRoute,
 } as any)
-const appProfileRoute = appProfileRouteImport.update({
-  id: '/(app)/profile',
+const AppProfileRoute = AppProfileRouteImport.update({
+  id: '/profile',
   path: '/profile',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSettingsRoute = AppSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AppRoute,
 } as any)
 const AuthLoginRoute = AuthLoginRouteImport.update({
   id: '/auth/login',
@@ -49,10 +56,20 @@ const AuthSignupRoute = AuthSignupRouteImport.update({
   path: '/auth/signup',
   getParentRoute: () => rootRouteImport,
 } as any)
-const appRecipesRecipeIdRoute = appRecipesRecipeIdRouteImport.update({
-  id: '/(app)/recipes/$recipeId',
+const AppRecipesIndexRoute = AppRecipesIndexRouteImport.update({
+  id: '/recipes/',
+  path: '/recipes/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppRecipesRecipeIdRoute = AppRecipesRecipeIdRouteImport.update({
+  id: '/recipes/$recipeId',
   path: '/recipes/$recipeId',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AppRoute,
+} as any)
+const AppRecipesNewRoute = AppRecipesNewRouteImport.update({
+  id: '/recipes/new',
+  path: '/recipes/new',
+  getParentRoute: () => AppRoute,
 } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
@@ -67,82 +84,93 @@ const ApiIngestSplatRoute = ApiIngestSplatRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/dashboard': typeof appDashboardRoute
-  '/pantry': typeof appPantryRoute
-  '/profile': typeof appProfileRoute
+  '/home': typeof AppHomeRoute
+  '/profile': typeof AppProfileRoute
+  '/settings': typeof AppSettingsRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/signup': typeof AuthSignupRoute
-  '/recipes/$recipeId': typeof appRecipesRecipeIdRoute
+  '/recipes/$recipeId': typeof AppRecipesRecipeIdRoute
+  '/recipes/new': typeof AppRecipesNewRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/ingest/$': typeof ApiIngestSplatRoute
+  '/recipes/': typeof AppRecipesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/dashboard': typeof appDashboardRoute
-  '/pantry': typeof appPantryRoute
-  '/profile': typeof appProfileRoute
+  '/home': typeof AppHomeRoute
+  '/profile': typeof AppProfileRoute
+  '/settings': typeof AppSettingsRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/signup': typeof AuthSignupRoute
-  '/recipes/$recipeId': typeof appRecipesRecipeIdRoute
+  '/recipes/$recipeId': typeof AppRecipesRecipeIdRoute
+  '/recipes/new': typeof AppRecipesNewRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/ingest/$': typeof ApiIngestSplatRoute
+  '/recipes': typeof AppRecipesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/(app)/dashboard': typeof appDashboardRoute
-  '/(app)/pantry': typeof appPantryRoute
-  '/(app)/profile': typeof appProfileRoute
+  '/_app': typeof AppRouteWithChildren
+  '/_app/home': typeof AppHomeRoute
+  '/_app/profile': typeof AppProfileRoute
+  '/_app/settings': typeof AppSettingsRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/signup': typeof AuthSignupRoute
-  '/(app)/recipes/$recipeId': typeof appRecipesRecipeIdRoute
+  '/_app/recipes/$recipeId': typeof AppRecipesRecipeIdRoute
+  '/_app/recipes/new': typeof AppRecipesNewRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/ingest/$': typeof ApiIngestSplatRoute
+  '/_app/recipes/': typeof AppRecipesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/dashboard'
-    | '/pantry'
+    | '/home'
     | '/profile'
+    | '/settings'
     | '/auth/login'
     | '/auth/signup'
     | '/recipes/$recipeId'
+    | '/recipes/new'
     | '/api/auth/$'
     | '/api/ingest/$'
+    | '/recipes/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/dashboard'
-    | '/pantry'
+    | '/home'
     | '/profile'
+    | '/settings'
     | '/auth/login'
     | '/auth/signup'
     | '/recipes/$recipeId'
+    | '/recipes/new'
     | '/api/auth/$'
     | '/api/ingest/$'
+    | '/recipes'
   id:
     | '__root__'
     | '/'
-    | '/(app)/dashboard'
-    | '/(app)/pantry'
-    | '/(app)/profile'
+    | '/_app'
+    | '/_app/home'
+    | '/_app/profile'
+    | '/_app/settings'
     | '/auth/login'
     | '/auth/signup'
-    | '/(app)/recipes/$recipeId'
+    | '/_app/recipes/$recipeId'
+    | '/_app/recipes/new'
     | '/api/auth/$'
     | '/api/ingest/$'
+    | '/_app/recipes/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  appDashboardRoute: typeof appDashboardRoute
-  appPantryRoute: typeof appPantryRoute
-  appProfileRoute: typeof appProfileRoute
+  AppRoute: typeof AppRouteWithChildren
   AuthLoginRoute: typeof AuthLoginRoute
   AuthSignupRoute: typeof AuthSignupRoute
-  appRecipesRecipeIdRoute: typeof appRecipesRecipeIdRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiIngestSplatRoute: typeof ApiIngestSplatRoute
 }
@@ -156,26 +184,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/(app)/dashboard': {
-      id: '/(app)/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof appDashboardRouteImport
+    '/_app': {
+      id: '/_app'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AppRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/(app)/pantry': {
-      id: '/(app)/pantry'
-      path: '/pantry'
-      fullPath: '/pantry'
-      preLoaderRoute: typeof appPantryRouteImport
-      parentRoute: typeof rootRouteImport
+    '/_app/home': {
+      id: '/_app/home'
+      path: '/home'
+      fullPath: '/home'
+      preLoaderRoute: typeof AppHomeRouteImport
+      parentRoute: typeof AppRoute
     }
-    '/(app)/profile': {
-      id: '/(app)/profile'
+    '/_app/profile': {
+      id: '/_app/profile'
       path: '/profile'
       fullPath: '/profile'
-      preLoaderRoute: typeof appProfileRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AppProfileRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/settings': {
+      id: '/_app/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AppSettingsRouteImport
+      parentRoute: typeof AppRoute
     }
     '/auth/login': {
       id: '/auth/login'
@@ -191,12 +226,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthSignupRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/(app)/recipes/$recipeId': {
-      id: '/(app)/recipes/$recipeId'
+    '/_app/recipes/': {
+      id: '/_app/recipes/'
+      path: '/recipes'
+      fullPath: '/recipes/'
+      preLoaderRoute: typeof AppRecipesIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/recipes/$recipeId': {
+      id: '/_app/recipes/$recipeId'
       path: '/recipes/$recipeId'
       fullPath: '/recipes/$recipeId'
-      preLoaderRoute: typeof appRecipesRecipeIdRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AppRecipesRecipeIdRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/recipes/new': {
+      id: '/_app/recipes/new'
+      path: '/recipes/new'
+      fullPath: '/recipes/new'
+      preLoaderRoute: typeof AppRecipesNewRouteImport
+      parentRoute: typeof AppRoute
     }
     '/api/auth/$': {
       id: '/api/auth/$'
@@ -215,14 +264,31 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AppRouteChildren {
+  AppHomeRoute: typeof AppHomeRoute
+  AppProfileRoute: typeof AppProfileRoute
+  AppSettingsRoute: typeof AppSettingsRoute
+  AppRecipesRecipeIdRoute: typeof AppRecipesRecipeIdRoute
+  AppRecipesNewRoute: typeof AppRecipesNewRoute
+  AppRecipesIndexRoute: typeof AppRecipesIndexRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppHomeRoute: AppHomeRoute,
+  AppProfileRoute: AppProfileRoute,
+  AppSettingsRoute: AppSettingsRoute,
+  AppRecipesRecipeIdRoute: AppRecipesRecipeIdRoute,
+  AppRecipesNewRoute: AppRecipesNewRoute,
+  AppRecipesIndexRoute: AppRecipesIndexRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  appDashboardRoute: appDashboardRoute,
-  appPantryRoute: appPantryRoute,
-  appProfileRoute: appProfileRoute,
+  AppRoute: AppRouteWithChildren,
   AuthLoginRoute: AuthLoginRoute,
   AuthSignupRoute: AuthSignupRoute,
-  appRecipesRecipeIdRoute: appRecipesRecipeIdRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiIngestSplatRoute: ApiIngestSplatRoute,
 }

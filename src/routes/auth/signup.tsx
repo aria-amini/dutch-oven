@@ -22,14 +22,14 @@ function Signup() {
 		event.preventDefault()
 		const { error } = await authClient.signUp.email({ name, email, password })
 		if (error) toast.error(error.message)
-		else await navigate({ to: '/pantry' })
+		else await navigate({ to: '/recipes' })
 	}
 	return (
 		<main className="grid min-h-dvh place-items-center p-6">
 			<Card className="w-full max-w-md">
 				<CardContent className="space-y-6 pt-6">
 					<h1 className="text-3xl font-bold">Create account</h1>
-					<GoogleAuthButton fallbackRedirect="/pantry" className="w-full" />
+					<GoogleAuthButton fallbackRedirect="/recipes" className="w-full" />
 					<form onSubmit={submit} className="space-y-4">
 						<Input
 							required

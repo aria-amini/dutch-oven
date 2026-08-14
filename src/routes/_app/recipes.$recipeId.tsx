@@ -4,8 +4,8 @@ import { createFileRoute, Link, notFound } from '@tanstack/react-router'
 import { redirectUnauthenticatedUsers } from '@/lib/auth/functions'
 import { getRecipe } from '@/lib/recipes/server'
 
-export const Route = createFileRoute('/(app)/recipes/$recipeId')({
-	beforeLoad: () => redirectUnauthenticatedUsers({ redirectTo: '/dashboard' }),
+export const Route = createFileRoute('/_app/recipes/$recipeId')({
+	beforeLoad: () => redirectUnauthenticatedUsers({ redirectTo: '/recipes' }),
 	loader: async ({ params }) => {
 		const recipe = await getRecipe({ data: { id: params.recipeId } })
 		if (!recipe) throw notFound()
@@ -25,7 +25,7 @@ function RecipeDetail() {
 	return (
 		<main className="bg-background text-foreground min-h-dvh p-6 md:p-10">
 			<Link
-				to="/dashboard"
+				to="/recipes"
 				className="border-foreground bg-card focus-visible:outline-kitchen-eggplant inline-flex items-center gap-2 border-2 px-3 py-2 text-[13px] font-bold uppercase shadow-sm transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2"
 			>
 				<ArrowLeft weight="bold" aria-hidden />

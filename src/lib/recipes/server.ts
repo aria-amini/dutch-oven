@@ -7,8 +7,10 @@ import { getCurrentSession } from '@/lib/auth/session'
 import {
 	createCollectionForUser,
 	createRecipeForUser,
+	deleteCollectionForUser,
 	getRecipeForUser,
 	listShelfForUser,
+	renameCollectionForUser,
 } from './repository'
 
 async function requireUserId() {
@@ -29,6 +31,23 @@ export const createCollection = createServerFn({ method: 'POST' })
 	.validator(z.object({ name: z.string().trim().min(1).max(60) }))
 	.handler(async ({ data }) =>
 		createCollectionForUser(await requireUserId(), data.name),
+	)
+
+export const renameCollection = createServerFn({ method: 'POST' })
+	.validator(
+		z.object({
+			id: z.string().min(1),
+			name: z.string().trim().min(1).max(60),
+		}),
+	)
+	.handler(async ({ data }) =>
+		renameCollectionForUser(await requireUserId(), data.id, data.name),
+	)
+
+export const deleteCollection = createServerFn({ method: 'POST' })
+	.validator(z.object({ id: z.string().min(1) }))
+	.handler(async ({ data }) =>
+		deleteCollectionForUser(await requireUserId(), data.id),
 	)
 
 export const createRecipe = createServerFn({ method: 'POST' })

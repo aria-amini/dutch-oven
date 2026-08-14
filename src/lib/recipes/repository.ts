@@ -56,6 +56,32 @@ export async function createCollectionForUser(
 	return collection
 }
 
+export async function renameCollectionForUser(
+	userId: string,
+	id: string,
+	name: string,
+	database: typeof db = db,
+) {
+	const [collection] = await database
+		.update(collections)
+		.set({ name })
+		.where(and(eq(collections.id, id), eq(collections.userId, userId)))
+		.returning()
+	return collection ?? null
+}
+
+export async function deleteCollectionForUser(
+	userId: string,
+	id: string,
+	database: typeof db = db,
+) {
+	const [collection] = await database
+		.delete(collections)
+		.where(and(eq(collections.id, id), eq(collections.userId, userId)))
+		.returning({ id: collections.id })
+	return collection ?? null
+}
+
 export async function createRecipeForUser(
 	userId: string,
 	input: {

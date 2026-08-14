@@ -35,10 +35,11 @@ diner ticket-rail.
 
 ## Composition commitments (built)
 
-- Rail: home / shelf / pantry / plan / search; plan + search are disabled
-  placeholders. Active = yolk sticker.
-- Headline "your shelf" with rotated yolk marker; steps down to compact once the
-  shelf passes ~12 recipes.
+- Rail (shared `_app` layout, `src/components/app-nav.tsx`): home / recipes /
+  start meal / settings. Start meal is a disabled placeholder; settings is
+  pinned to the rail bottom. Active = full-width yolk row. Home is a WIP stub at
+  `/home`; `/` redirects signed-in users there.
+- Headline "your recipes" — plain page title, no giant display type or sticker.
 - One section per user collection (position-ordered), basil sticker label,
   square tiles capped at 8 per group → "+N more" overflow tile (group view
   unbuilt). Ungrouped recipes fall under an "ungrouped" sticker.
