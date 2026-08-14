@@ -1,0 +1,39 @@
+{
+	"title": "dutch-oven — pick the composition",
+	"question": "Three compositions of the diner ticket-rail world for the main recipe surface. Which one carries forward — approve, combine, revise, or reject?",
+	"options": [
+		{
+			"id": "rail-top",
+			"label": "A. Rail on Top",
+			"kicker": "WEEKNIGHT HOME",
+			"thesis": "The week's dinners clipped to a steel rail above a mustard hero; specials cards and a torn-ticket log below.",
+			"palette": ["#e8a812", "#c0271a", "#f3ead8", "#8a8d91"],
+			"materials": ["carbon-copy paper", "stainless rail", "rubber stamps"],
+			"viewport": "Full-width ticket rail with 4 day stubs; 'WHAT'S FOR DINNER?' headline; 3 menu-board recipe cards; 'LAST SERVED' ticket strip.",
+			"risk": "Safest of the three; the rail is decoration unless the stubs are real interactive state.",
+			"hero": ".impeccable/mocks/comp-rail-top.png"
+		},
+		{
+			"id": "counter-pass",
+			"label": "B. Counter Pass",
+			"kicker": "MENU BOARD + LOG",
+			"thesis": "A stainless pass splits the screen: recipe library as a painted menu board above, your active and served tickets below.",
+			"palette": ["#e8a812", "#c0271a", "#f3ead8", "#2b2b2b"],
+			"materials": ["painted menu board", "chalkboard specials", "ticket rail"],
+			"viewport": "Two-column menu board (MAINS / SIDES & SWEETS) with cook-time tags; steel pass holding ready tickets; 'YOUR TICKETS' log strip with SERVED stamps.",
+			"risk": "Dense; the menu board must stay scannable with 20+ real recipes, not 8 pretty ones.",
+			"hero": ".impeccable/mocks/comp-counter-pass.png"
+		},
+		{
+			"id": "giant-ticket",
+			"label": "C. The Ticket Is the Page",
+			"kicker": "TONIGHT'S ORDER",
+			"thesis": "The whole surface is one order dupe: tonight's recipe as line items with checkboxes, the queue and the log as perforated sections.",
+			"palette": ["#f3ead8", "#c0271a", "#e8a812", "#1e1e1e"],
+			"materials": ["carbon-copy dupe", "bottle-cap buttons", "date stamps"],
+			"viewport": "Full-bleed ticket: 'ORDER #042 — TONIGHT', dish name huge, ingredient checkbox line items, UP NEXT queue, SERVED count strip, bottle-cap nav on the right margin.",
+			"risk": "Most radical; recipe discovery needs a second screen or the bottle-cap search must carry it.",
+			"hero": ".impeccable/mocks/comp-giant-ticket.png"
+		}
+	]
+}

@@ -10,16 +10,23 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as appDashboardRouteImport } from './routes/(app)/dashboard'
 import { Route as appPantryRouteImport } from './routes/(app)/pantry'
 import { Route as appProfileRouteImport } from './routes/(app)/profile'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as AuthSignupRouteImport } from './routes/auth/signup'
+import { Route as appRecipesRecipeIdRouteImport } from './routes/(app)/recipes.$recipeId'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth.$'
 import { Route as ApiIngestSplatRouteImport } from './routes/api/ingest.$'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const appDashboardRoute = appDashboardRouteImport.update({
+  id: '/(app)/dashboard',
+  path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
 const appPantryRoute = appPantryRouteImport.update({
@@ -42,6 +49,11 @@ const AuthSignupRoute = AuthSignupRouteImport.update({
   path: '/auth/signup',
   getParentRoute: () => rootRouteImport,
 } as any)
+const appRecipesRecipeIdRoute = appRecipesRecipeIdRouteImport.update({
+  id: '/(app)/recipes/$recipeId',
+  path: '/recipes/$recipeId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -55,29 +67,35 @@ const ApiIngestSplatRoute = ApiIngestSplatRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/dashboard': typeof appDashboardRoute
   '/pantry': typeof appPantryRoute
   '/profile': typeof appProfileRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/signup': typeof AuthSignupRoute
+  '/recipes/$recipeId': typeof appRecipesRecipeIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/ingest/$': typeof ApiIngestSplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/dashboard': typeof appDashboardRoute
   '/pantry': typeof appPantryRoute
   '/profile': typeof appProfileRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/signup': typeof AuthSignupRoute
+  '/recipes/$recipeId': typeof appRecipesRecipeIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/ingest/$': typeof ApiIngestSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/(app)/dashboard': typeof appDashboardRoute
   '/(app)/pantry': typeof appPantryRoute
   '/(app)/profile': typeof appProfileRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/signup': typeof AuthSignupRoute
+  '/(app)/recipes/$recipeId': typeof appRecipesRecipeIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/ingest/$': typeof ApiIngestSplatRoute
 }
@@ -85,38 +103,46 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/dashboard'
     | '/pantry'
     | '/profile'
     | '/auth/login'
     | '/auth/signup'
+    | '/recipes/$recipeId'
     | '/api/auth/$'
     | '/api/ingest/$'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/dashboard'
     | '/pantry'
     | '/profile'
     | '/auth/login'
     | '/auth/signup'
+    | '/recipes/$recipeId'
     | '/api/auth/$'
     | '/api/ingest/$'
   id:
     | '__root__'
     | '/'
+    | '/(app)/dashboard'
     | '/(app)/pantry'
     | '/(app)/profile'
     | '/auth/login'
     | '/auth/signup'
+    | '/(app)/recipes/$recipeId'
     | '/api/auth/$'
     | '/api/ingest/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  appDashboardRoute: typeof appDashboardRoute
   appPantryRoute: typeof appPantryRoute
   appProfileRoute: typeof appProfileRoute
   AuthLoginRoute: typeof AuthLoginRoute
   AuthSignupRoute: typeof AuthSignupRoute
+  appRecipesRecipeIdRoute: typeof appRecipesRecipeIdRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiIngestSplatRoute: typeof ApiIngestSplatRoute
 }
@@ -128,6 +154,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(app)/dashboard': {
+      id: '/(app)/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof appDashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/(app)/pantry': {
@@ -158,6 +191,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthSignupRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/(app)/recipes/$recipeId': {
+      id: '/(app)/recipes/$recipeId'
+      path: '/recipes/$recipeId'
+      fullPath: '/recipes/$recipeId'
+      preLoaderRoute: typeof appRecipesRecipeIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -177,10 +217,12 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  appDashboardRoute: appDashboardRoute,
   appPantryRoute: appPantryRoute,
   appProfileRoute: appProfileRoute,
   AuthLoginRoute: AuthLoginRoute,
   AuthSignupRoute: AuthSignupRoute,
+  appRecipesRecipeIdRoute: appRecipesRecipeIdRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiIngestSplatRoute: ApiIngestSplatRoute,
 }

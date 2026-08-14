@@ -1,0 +1,840 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>dutch-oven — dashboard shape brief</title>
+		<style>
+			*,
+			*::before,
+			*::after {
+				box-sizing: border-box;
+			}
+			:root {
+				--cream: #fdf6ec;
+				--ink: #16130e;
+				--tomato: #ff4b26;
+				--yolk: #ffc21c;
+				--basil: #2fa84f;
+				--eggplant: #5b3df5;
+			}
+			body {
+				margin: 0;
+				background: var(--cream);
+				color: var(--ink);
+				font-family: 'Open Sans', 'Segoe UI', system-ui, sans-serif;
+				line-height: 1.5;
+			}
+			.wrap {
+				max-width: 1100px;
+				margin: 0 auto;
+				padding: 2rem 1.25rem 5rem;
+			}
+			.kicker {
+				display: inline-block;
+				background: var(--ink);
+				color: var(--cream);
+				font-weight: 800;
+				text-transform: uppercase;
+				letter-spacing: 0.08em;
+				font-size: 0.72rem;
+				padding: 0.3rem 0.7rem;
+				margin-bottom: 1rem;
+			}
+			h1 {
+				font-size: clamp(2rem, 5vw, 3.2rem);
+				font-weight: 800;
+				text-transform: uppercase;
+				letter-spacing: -0.02em;
+				line-height: 1.05;
+				margin: 0 0 0.5rem;
+			}
+			h1 .hl {
+				background: var(--yolk);
+				padding: 0 0.35rem;
+				box-decoration-break: clone;
+				-webkit-box-decoration-break: clone;
+			}
+			h2 {
+				font-size: 1.15rem;
+				font-weight: 800;
+				text-transform: uppercase;
+				letter-spacing: 0.04em;
+				margin: 0 0 1rem;
+			}
+			h2 .dot {
+				color: var(--tomato);
+			}
+			section {
+				margin-top: 3.5rem;
+			}
+			.lede {
+				font-size: 1.05rem;
+				max-width: 62ch;
+			}
+			.card {
+				background: #fff;
+				border: 2px solid var(--ink);
+				box-shadow: 6px 6px 0 var(--ink);
+				padding: 1.25rem 1.5rem;
+			}
+			.grid2 {
+				display: grid;
+				grid-template-columns: repeat(2, minmax(0, 1fr));
+				gap: 1.5rem;
+			}
+			.grid3 {
+				display: grid;
+				grid-template-columns: repeat(3, minmax(0, 1fr));
+				gap: 1.5rem;
+			}
+			@media (max-width: 800px) {
+				.grid2,
+				.grid3 {
+					grid-template-columns: minmax(0, 1fr);
+				}
+			}
+			img.shot {
+				width: 100%;
+				border: 2px solid var(--ink);
+				box-shadow: 6px 6px 0 var(--ink);
+				display: block;
+			}
+			figure {
+				margin: 0;
+			}
+			figcaption {
+				font-size: 0.8rem;
+				font-weight: 700;
+				text-transform: uppercase;
+				letter-spacing: 0.05em;
+				margin-top: 0.6rem;
+				opacity: 0.75;
+			}
+			.vs {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-weight: 800;
+				font-size: 1.4rem;
+			}
+			ul.tight {
+				margin: 0;
+				padding-left: 1.1rem;
+			}
+			ul.tight li {
+				margin-bottom: 0.45rem;
+			}
+			.tag {
+				display: inline-block;
+				border: 2px solid var(--ink);
+				padding: 0.1rem 0.55rem;
+				font-size: 0.72rem;
+				font-weight: 800;
+				text-transform: uppercase;
+				letter-spacing: 0.06em;
+			}
+			.tag.t {
+				background: var(--tomato);
+			}
+			.tag.y {
+				background: var(--yolk);
+			}
+			.tag.b {
+				background: var(--basil);
+			}
+			.tag.e {
+				background: var(--eggplant);
+				color: #fff;
+			}
+			.tag.ghost {
+				background: #fff;
+			}
+			table {
+				width: 100%;
+				border-collapse: collapse;
+				background: #fff;
+				border: 2px solid var(--ink);
+				box-shadow: 6px 6px 0 var(--ink);
+			}
+			th,
+			td {
+				border: 1px solid var(--ink);
+				padding: 0.6rem 0.8rem;
+				text-align: left;
+				vertical-align: top;
+				font-size: 0.92rem;
+			}
+			th {
+				background: var(--ink);
+				color: var(--cream);
+				text-transform: uppercase;
+				font-size: 0.72rem;
+				letter-spacing: 0.06em;
+			}
+			.mock {
+				border: 2px solid var(--ink);
+				background: var(--cream);
+				box-shadow: 6px 6px 0 var(--ink);
+				padding: 0.9rem;
+			}
+			.mock-bar {
+				display: flex;
+				gap: 0.5rem;
+				margin-bottom: 0.8rem;
+			}
+			.mock-rail {
+				width: 34px;
+				display: flex;
+				flex-direction: column;
+				gap: 6px;
+			}
+			.mock-rail i {
+				display: block;
+				width: 34px;
+				height: 34px;
+				border: 2px solid var(--ink);
+				background: #fff;
+			}
+			.mock-rail i.on {
+				background: var(--tomato);
+			}
+			.mock-main {
+				flex: 1;
+				min-width: 0;
+			}
+			.mock-title {
+				font-weight: 800;
+				text-transform: uppercase;
+				font-size: 1rem;
+				letter-spacing: -0.01em;
+				margin: 0 0 0.6rem;
+			}
+			.mock-title em {
+				font-style: normal;
+				background: var(--yolk);
+				padding: 0 0.25rem;
+			}
+			.tiles {
+				display: grid;
+				grid-template-columns: repeat(4, minmax(0, 1fr));
+				gap: 6px;
+			}
+			.tile {
+				border: 2px solid var(--ink);
+				aspect-ratio: 1;
+				display: flex;
+				align-items: flex-end;
+				padding: 0.35rem;
+				font-size: 0.58rem;
+				font-weight: 800;
+				text-transform: uppercase;
+				line-height: 1.15;
+			}
+			.tile.t {
+				background: var(--tomato);
+			}
+			.tile.y {
+				background: var(--yolk);
+			}
+			.tile.b {
+				background: var(--basil);
+			}
+			.tile.e {
+				background: var(--eggplant);
+				color: #fff;
+			}
+			.tile.w {
+				background: #fff;
+			}
+			.tile.big {
+				grid-column: span 2;
+				grid-row: span 2;
+				font-size: 0.8rem;
+			}
+			.tile.dash {
+				border-style: dashed;
+				align-items: center;
+				justify-content: center;
+				text-align: center;
+			}
+			.mock-label {
+				font-size: 0.62rem;
+				font-weight: 800;
+				text-transform: uppercase;
+				letter-spacing: 0.06em;
+				background: var(--basil);
+				display: inline-block;
+				border: 2px solid var(--ink);
+				padding: 0.05rem 0.4rem;
+				margin: 0.7rem 0 0.4rem;
+				transform: rotate(-1.5deg);
+			}
+			.mock-caption {
+				font-size: 0.78rem;
+				font-weight: 700;
+				margin-top: 0.7rem;
+			}
+			.decision {
+				border: 2px solid var(--ink);
+				background: #fff;
+				box-shadow: 6px 6px 0 var(--ink);
+				padding: 1.25rem 1.5rem;
+				margin-bottom: 1.5rem;
+			}
+			.decision h3 {
+				margin: 0 0 0.35rem;
+				font-size: 1rem;
+				text-transform: uppercase;
+				font-weight: 800;
+			}
+			.decision p {
+				margin: 0 0 0.9rem;
+				font-size: 0.92rem;
+			}
+			.opt {
+				display: flex;
+				gap: 0.6rem;
+				align-items: flex-start;
+				border: 2px solid var(--ink);
+				padding: 0.6rem 0.8rem;
+				margin-bottom: 0.5rem;
+				cursor: pointer;
+				background: var(--cream);
+			}
+			.opt:has(input:checked) {
+				background: var(--yolk);
+			}
+			.opt input {
+				margin-top: 0.25rem;
+				accent-color: var(--ink);
+			}
+			.opt b {
+				text-transform: uppercase;
+				font-size: 0.82rem;
+				letter-spacing: 0.03em;
+			}
+			.opt span {
+				display: block;
+				font-size: 0.85rem;
+			}
+			.qbtn {
+				border: 2px solid var(--ink);
+				background: var(--ink);
+				color: var(--cream);
+				font-weight: 800;
+				text-transform: uppercase;
+				letter-spacing: 0.06em;
+				font-size: 0.78rem;
+				padding: 0.55rem 1.1rem;
+				cursor: pointer;
+				box-shadow: 4px 4px 0 var(--tomato);
+			}
+			.qbtn:active {
+				transform: translate(2px, 2px);
+				box-shadow: 2px 2px 0 var(--tomato);
+			}
+			.antigoal {
+				border: 2px dashed var(--ink);
+				padding: 0.6rem 0.9rem;
+				font-size: 0.9rem;
+				background: transparent;
+			}
+			.num {
+				display: inline-block;
+				width: 1.6rem;
+				height: 1.6rem;
+				line-height: 1.6rem;
+				text-align: center;
+				background: var(--tomato);
+				border: 2px solid var(--ink);
+				font-weight: 800;
+				font-size: 0.8rem;
+				margin-right: 0.5rem;
+			}
+			.mermaid {
+				background: #fff;
+				border: 2px solid var(--ink);
+				box-shadow: 6px 6px 0 var(--ink);
+				padding: 1.5rem;
+			}
+			p,
+			li,
+			td,
+			figcaption {
+				overflow-wrap: anywhere;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="wrap">
+			<span class="kicker">shape brief — confirmed 2026-08-14</span>
+			<h1>
+				dutch-oven dashboard:<br />the shelf is <span class="hl">yours</span>
+			</h1>
+			<p class="lede">
+				From fixed-group prototype to the real, DB-backed dashboard. Groups
+				become <b>your collections</b>, in your order.
+				<b>Recently cooked</b> and meal logging are deferred — they ship when
+				<code>meal_logs</code> lands later.
+			</p>
+
+			<section>
+				<h2>Where we are <span class="dot">/</span> current prototype</h2>
+				<div class="grid2">
+					<figure>
+						<img
+							class="shot"
+							src="current-desktop.png"
+							alt="Current dashboard prototype, desktop"
+						/>
+						<figcaption>
+							Desktop — fixed groups: tonight / weeknight / slow sunday
+						</figcaption>
+					</figure>
+					<figure>
+						<img
+							class="shot"
+							src="current-mobile.png"
+							alt="Current dashboard prototype, mobile"
+						/>
+						<figcaption>
+							Mobile — same fixed taxonomy, synthetic data
+						</figcaption>
+					</figure>
+				</div>
+			</section>
+
+			<section>
+				<h2>What changes <span class="dot">/</span> prototype vs real</h2>
+				<div class="grid2">
+					<div class="card">
+						<span class="tag ghost">prototype — now</span>
+						<ul class="tight" style="margin-top: 0.8rem">
+							<li>
+								Fixed groups the user can't edit (tonight / weeknight / slow
+								sunday)
+							</li>
+							<li>Synthetic, labeled demo recipes</li>
+							<li>No persistence — one static route</li>
+							<li>No empty state; shelf is always full</li>
+							<li>
+								Rail destinations (pantry / plan / search) are placeholders
+							</li>
+						</ul>
+					</div>
+					<div class="card" style="box-shadow: 6px 6px 0 var(--tomato)">
+						<span class="tag t">real — proposed</span>
+						<ul class="tight" style="margin-top: 0.8rem">
+							<li>
+								User-created collections, user-ordered, inline rename/reorder —
+								one group per recipe at first
+							</li>
+							<li>Real recipes from Postgres (Drizzle schema below)</li>
+							<li>
+								Ungrouped recipes allowed; multi-group membership comes later
+								via a join table
+							</li>
+							<li>
+								First-class empty/first-run state — the shelf invites the first
+								save
+							</li>
+							<li>Rail placeholders stay; dashboard only this round</li>
+						</ul>
+					</div>
+				</div>
+				<p style="font-size: 0.9rem; margin-top: 1rem">
+					<b>Explicitly out:</b> cooking-in-progress state (deferred by you),
+					social/discovery feeds, nutrition dashboards, any fixed taxonomy,
+					data-entry forms on this surface.
+				</p>
+			</section>
+
+			<section>
+				<h2>How it looks <span class="dot">/</span> composition mocks</h2>
+				<div class="grid2">
+					<div>
+						<div class="mock">
+							<div class="mock-bar">
+								<div class="mock-rail">
+									<i class="on"></i><i></i><i></i><i></i><i></i>
+								</div>
+								<div class="mock-main">
+									<p class="mock-title">your <em>shelf</em></p>
+									<div class="tiles">
+										<div class="tile big t">save your first recipe</div>
+										<div class="tile dash w">+</div>
+										<div class="tile dash w">+</div>
+										<div class="tile dash w">+</div>
+										<div class="tile dash w">+</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<p class="mock-caption">
+							<span class="tag y">empty / first-run</span> Zero recipes → one
+							oversized tomato invitation tile. No fake content, no ghost
+							groups.
+						</p>
+					</div>
+					<div>
+						<div class="mock">
+							<div class="mock-bar">
+								<div class="mock-rail">
+									<i class="on"></i><i></i><i></i><i></i><i></i>
+								</div>
+								<div class="mock-main">
+									<p class="mock-title" style="font-size: 0.8rem">
+										your shelf <span style="opacity: 0.5">— 64 recipes</span>
+									</p>
+									<span class="mock-label">weeknight heroes</span>
+									<div class="tiles">
+										<div class="tile t">ragù</div>
+										<div class="tile y">dal</div>
+										<div class="tile b">pesto</div>
+										<div class="tile e">ramen</div>
+									</div>
+									<span class="mock-label">project bakes</span>
+									<div class="tiles">
+										<div class="tile b">bread</div>
+										<div class="tile w">+3 more →</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<p class="mock-caption">
+							<span class="tag b">established shelf</span> Headline shrinks,
+							user's collections take over. Overflow collapses to "N more →"
+							group view.
+						</p>
+					</div>
+				</div>
+				<div class="card" style="margin-top: 1.5rem">
+					<ul class="tight">
+						<li>
+							<b>Headline scales:</b> ~20vh with a small shelf → compact header
+							once collections multiply.
+						</li>
+						<li>
+							<b>Collection management is inline</b> on the shelf — create,
+							rename, reorder. Never in a settings page.
+						</li>
+						<li>
+							<b>Recently cooked</b> is deferred with <code>meal_logs</code> —
+							the bottom row ships when logging lands.
+						</li>
+						<li>
+							<b>Primary action:</b> tap a tile → recipe detail (page itself out
+							of scope). Logging stays a flip/tap away.
+						</li>
+					</ul>
+				</div>
+			</section>
+
+			<section>
+				<h2>States &amp; ranges</h2>
+				<table>
+					<thead>
+						<tr>
+							<th>State</th>
+							<th>Trigger</th>
+							<th>Behavior</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td><span class="tag t">empty</span></td>
+							<td>0 recipes (new user)</td>
+							<td>
+								Shelf area = one oversized "save your first recipe" tile + rail.
+								Must not depend on import-from-URL existing.
+							</td>
+						</tr>
+						<tr>
+							<td><span class="tag y">typical</span></td>
+							<td>20–80 recipes, 3–8 collections</td>
+							<td>
+								Panorama composition as prototyped; all collection tiles
+								visible.
+							</td>
+						</tr>
+						<tr>
+							<td><span class="tag b">overflow</span></td>
+							<td>200+ recipes, long names</td>
+							<td>
+								Collections show a capped tile count with "see all" into a group
+								view; names truncate without breaking the grid.
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</section>
+
+			<section>
+				<h2>
+					Data model <span class="dot">/</span> builder must not invent
+					differently
+				</h2>
+				<p class="lede" style="font-size: 0.95rem">
+					Current DB is template-only (auth + a placeholder
+					<code>items</code> table).
+					<b>Two new tables now, two deferred.</b> The relationships in plain
+					English:
+				</p>
+				<div class="card" style="margin-bottom: 1.5rem">
+					<ul class="tight">
+						<li>
+							Everything belongs to a <b>user</b> — recipes, collections, and
+							logs each carry your <code>userId</code>.
+						</li>
+						<li>
+							A <b>collection</b> is the group itself — one row per shelf group
+							you make ("weeknight heroes", position 1). Just a name and an
+							order. A recipe sits in <b>one</b> group via its
+							<code>collectionId</code> column.
+						</li>
+						<li>
+							<span class="tag ghost">deferred</span>
+							<b>recipe_collections</b> (the membership join table) is only
+							needed when a recipe can live in <b>several</b> groups. Cut from
+							the first build — upgrading later backfills it from
+							<code>collectionId</code>, no data loss.
+						</li>
+						<li>
+							<span class="tag ghost">deferred</span> A <b>meal_log</b> would be
+							one row per cooked meal ("ragù, last Tuesday") → the record of the
+							core loop closing: <i>find it, cook it, log it</i>. Cut from the
+							first build — with it go "recently cooked", history, and streaks.
+							Adding it later is a clean append: new table, no migration of
+							existing data.
+						</li>
+					</ul>
+				</div>
+				<div class="grid2">
+					<div class="mock">
+						<p class="mock-title" style="font-size: 0.85rem">recipes</p>
+						<table style="box-shadow: none; border-width: 1px">
+							<tbody>
+								<tr>
+									<td><b>id</b></td>
+									<td>text</td>
+									<td><span class="tag ghost">pk</span></td>
+								</tr>
+								<tr>
+									<td><b>userId</b></td>
+									<td>text</td>
+									<td><span class="tag y">→ user</span></td>
+								</tr>
+								<tr>
+									<td>title</td>
+									<td>text</td>
+									<td></td>
+								</tr>
+								<tr>
+									<td>imageUrl</td>
+									<td>text, nullable</td>
+									<td><span class="tag b">tile photo</span></td>
+								</tr>
+								<tr>
+									<td><b>collectionId</b></td>
+									<td>text, nullable</td>
+									<td><span class="tag e">→ collections</span></td>
+								</tr>
+								<tr>
+									<td>createdAt</td>
+									<td>timestamp</td>
+									<td></td>
+								</tr>
+							</tbody>
+						</table>
+						<p class="mock-caption">
+							One row per saved recipe. <code>imageUrl</code> nullable → flat
+							color tiles are the fallback. <code>collectionId</code> nullable →
+							ungrouped recipes sit loose on the shelf.
+						</p>
+					</div>
+					<div class="mock">
+						<p class="mock-title" style="font-size: 0.85rem">collections</p>
+						<table style="box-shadow: none; border-width: 1px">
+							<tbody>
+								<tr>
+									<td><b>id</b></td>
+									<td>text</td>
+									<td><span class="tag ghost">pk</span></td>
+								</tr>
+								<tr>
+									<td><b>userId</b></td>
+									<td>text</td>
+									<td><span class="tag y">→ user</span></td>
+								</tr>
+								<tr>
+									<td>name</td>
+									<td>text</td>
+									<td></td>
+								</tr>
+								<tr>
+									<td>position</td>
+									<td>int</td>
+									<td><span class="tag b">shelf order</span></td>
+								</tr>
+							</tbody>
+						</table>
+						<p class="mock-caption">
+							One row per shelf group you create. <code>position</code> stores
+							your ordering.
+						</p>
+					</div>
+					<div
+						class="mock"
+						style="
+							border-style: dashed;
+							box-shadow: 6px 6px 0 rgba(22, 19, 14, 0.25);
+							opacity: 0.75;
+						"
+					>
+						<p class="mock-title" style="font-size: 0.85rem">
+							recipe_collections <span class="tag ghost">later</span>
+						</p>
+						<table style="box-shadow: none; border-width: 1px">
+							<tbody>
+								<tr>
+									<td><b>recipeId</b></td>
+									<td>text</td>
+									<td><span class="tag t">→ recipes</span></td>
+								</tr>
+								<tr>
+									<td><b>collectionId</b></td>
+									<td>text</td>
+									<td><span class="tag e">→ collections</span></td>
+								</tr>
+							</tbody>
+						</table>
+						<p class="mock-caption">
+							<b>Deferred.</b> The membership list for multi-group recipes.
+							First build: one group per recipe via
+							<code>recipes.collectionId</code>.
+						</p>
+					</div>
+					<div
+						class="mock"
+						style="
+							border-style: dashed;
+							box-shadow: 6px 6px 0 rgba(22, 19, 14, 0.25);
+							opacity: 0.75;
+						"
+					>
+						<p class="mock-title" style="font-size: 0.85rem">
+							meal_logs <span class="tag ghost">later</span>
+						</p>
+						<table style="box-shadow: none; border-width: 1px">
+							<tbody>
+								<tr>
+									<td><b>id</b></td>
+									<td>text</td>
+									<td><span class="tag ghost">pk</span></td>
+								</tr>
+								<tr>
+									<td><b>userId</b></td>
+									<td>text</td>
+									<td><span class="tag y">→ user</span></td>
+								</tr>
+								<tr>
+									<td><b>recipeId</b></td>
+									<td>text</td>
+									<td><span class="tag t">→ recipes</span></td>
+								</tr>
+								<tr>
+									<td>cookedAt</td>
+									<td>timestamp</td>
+									<td><span class="tag b">sort key</span></td>
+								</tr>
+							</tbody>
+						</table>
+						<p class="mock-caption">
+							<b>Deferred.</b> One row per cooked meal would power "recently
+							cooked" as newest-first. Not in the first build — clean append
+							later.
+						</p>
+					</div>
+				</div>
+			</section>
+
+			<section>
+				<h2>
+					Decisions <span class="dot">/</span> all settled — brief confirmed
+				</h2>
+
+				<div class="decision">
+					<h3>
+						<span class="num">1</span>How do recipes get onto the shelf?
+						<span class="tag b">decided</span>
+					</h3>
+					<p>
+						<b>Manual add now, import-ready.</b> The add flow (title + pick
+						collections) is structured so a URL-import field drops in later
+						without redesign. Import-from-URL stays a separate, later shape.
+					</p>
+				</div>
+
+				<div class="decision">
+					<h3>
+						<span class="num">2</span>What does a recipe tile show?
+						<span class="tag b">decided</span>
+					</h3>
+					<p>
+						<b>Photo with flat fallback.</b> Real food imagery leads when a
+						recipe has one; ingredient-color tiles cover the rest. Consequence:
+						<code>recipes.imageUrl</code> (nullable) is in the data model above.
+					</p>
+				</div>
+
+				<div class="decision">
+					<h3>
+						<span class="num">3</span>One group per recipe, or several?
+						<span class="tag b">decided</span>
+					</h3>
+					<p>
+						<b>2 tables — one group per recipe.</b> recipes + collections; a
+						recipe sits in one group via its <code>collectionId</code> column.
+						The join table (<code>recipe_collections</code>) and
+						<code>meal_logs</code> are deferred; both upgrade later without data
+						loss.
+					</p>
+				</div>
+
+				<div class="decision" style="box-shadow: 6px 6px 0 var(--basil)">
+					<h3>
+						<span class="num">4</span>Brief status
+						<span class="tag b">confirmed</span>
+					</h3>
+					<p>
+						<b>Confirmed by you on 2026-08-14.</b> Next step is the build
+						handoff below.
+					</p>
+				</div>
+			</section>
+
+			<section>
+				<h2>Next steps <span class="dot">/</span> build handoff</h2>
+				<div class="card">
+					<ul class="tight">
+						<li>
+							Write the Drizzle schema for the two live tables
+							(<code>recipes</code>, <code>collections</code>) +
+							<code>db:push</code>.
+						</li>
+						<li>
+							Rebuild <code>src/routes/(app)/dashboard.tsx</code> on real data:
+							collections query, tile grid, empty state, overflow collapse.
+						</li>
+						<li>Recipe detail route stub as tap destination.</li>
+						<li>
+							Update the stale surface brief (still describes the metro era) and
+							write DESIGN.md to lock the world.
+						</li>
+					</ul>
+				</div>
+			</section>
+		</div>
+	</body>
+</html>

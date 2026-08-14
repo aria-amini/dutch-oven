@@ -6,8 +6,8 @@ provided by Docker Compose (Postgres and MinIO).
 
 Google sign-in uses one shared dev OAuth client reused across apps (many
 localhost redirect URIs), stored in Bitwarden Secrets Manager — the one-time
-setup is documented in `.env.schema`. Production apps get dedicated
-credentials via `.env.production`.
+setup is documented in `.env.schema`. Production apps get dedicated credentials
+via `.env.production`.
 
 Error monitoring is wired through Sentry (`@sentry/tanstackstart-react`).
 

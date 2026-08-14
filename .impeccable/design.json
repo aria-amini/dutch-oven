@@ -1,0 +1,228 @@
+{
+	"schemaVersion": 2,
+	"generatedAt": "2026-08-14T08:25:00Z",
+	"title": "Design System: dutch-oven",
+	"extensions": {
+		"colorMeta": {
+			"butcher-paper": {
+				"role": "neutral",
+				"displayName": "Butcher Paper",
+				"canonical": "#fdf6ec",
+				"tonalRamp": [
+					"#e8dcc6",
+					"#efe4cf",
+					"#f5ecd9",
+					"#f9f1e2",
+					"#fdf6ec",
+					"#fef9f2",
+					"#fffbf7",
+					"#fffdfa"
+				]
+			},
+			"cast-iron": {
+				"role": "neutral",
+				"displayName": "Cast Iron",
+				"canonical": "#16130e",
+				"tonalRamp": [
+					"#16130e",
+					"#2a251c",
+					"#3e372b",
+					"#534a3b",
+					"#685e4c",
+					"#7d725f",
+					"#938873",
+					"#aa9e88"
+				]
+			},
+			"tomato": {
+				"role": "primary",
+				"displayName": "Tomato",
+				"canonical": "#ff4b26",
+				"tonalRamp": [
+					"#5c1404",
+					"#84200a",
+					"#ac2c12",
+					"#d43a1c",
+					"#ff4b26",
+					"#ff7254",
+					"#ff9582",
+					"#ffb8ae"
+				]
+			},
+			"yolk": {
+				"role": "secondary",
+				"displayName": "Yolk",
+				"canonical": "#ffc21c",
+				"tonalRamp": [
+					"#4d3400",
+					"#755000",
+					"#9e6d00",
+					"#c78b00",
+					"#ffc21c",
+					"#ffd154",
+					"#ffe08c",
+					"#ffefc4"
+				]
+			},
+			"basil": {
+				"role": "secondary",
+				"displayName": "Basil",
+				"canonical": "#2fa84f",
+				"tonalRamp": [
+					"#0d3a1c",
+					"#14562a",
+					"#1c7238",
+					"#2fa84f",
+					"#43bf67",
+					"#68d68b",
+					"#93e6b0",
+					"#bff5d2"
+				]
+			},
+			"eggplant": {
+				"role": "tertiary",
+				"displayName": "Eggplant",
+				"canonical": "#5b3df5",
+				"tonalRamp": [
+					"#1a0d66",
+					"#2a16a3",
+					"#3b26d9",
+					"#5b3df5",
+					"#7d64f8",
+					"#9e8bfa",
+					"#bfb2fc",
+					"#e0d9fe"
+				]
+			}
+		},
+		"typographyMeta": {
+			"display": {
+				"displayName": "Display",
+				"purpose": "The page's single giant headline; lowercase, steps down as content grows."
+			},
+			"label": {
+				"displayName": "Sticker Label",
+				"purpose": "Uppercase 13px chips on 2px-bordered sticker backgrounds, rotated -1deg."
+			}
+		},
+		"shadows": [
+			{
+				"name": "resting",
+				"value": "3px 3px 0 0 #16130e",
+				"purpose": "Tiles at rest."
+			},
+			{
+				"name": "raised",
+				"value": "5px 5px 0 0 #16130e",
+				"purpose": "Forms, headline sticker, hover target."
+			},
+			{
+				"name": "hover",
+				"value": "7px 7px 0 0 #16130e",
+				"purpose": "Interactive lift, paired with translate(-2px,-2px)."
+			}
+		],
+		"motion": [
+			{
+				"name": "ease-out-expo",
+				"value": "cubic-bezier(0.16, 1, 0.3, 1)",
+				"purpose": "Entrance and hover transitions; disabled under prefers-reduced-motion."
+			}
+		]
+	},
+	"components": [
+		{
+			"name": "Recipe Tile",
+			"kind": "card",
+			"refersTo": "tile",
+			"description": "The square unit of the shelf — flat ingredient color or a full-bleed photo with a cream title sticker.",
+			"html": "<a class=\"ds-tile\" href=\"#\"><span class=\"ds-tile-caption\">aug 12</span><span class=\"ds-tile-title\">miso butter pasta</span></a>",
+			"css": ".ds-tile { position: relative; display: block; width: 148px; height: 148px; background: #ff4b26; color: #16130e; border: 2px solid #16130e; box-shadow: 3px 3px 0 0 #16130e; text-decoration: none; transition: transform 0.2s, box-shadow 0.2s; } .ds-tile:hover { transform: translate(-2px, -2px); box-shadow: 5px 5px 0 0 #16130e; } .ds-tile:focus-visible { outline: 2px solid #5b3df5; outline-offset: 2px; } .ds-tile-caption { position: absolute; top: 10px; left: 12px; font-size: 13px; font-weight: 600; opacity: 0.7; } .ds-tile-title { position: absolute; right: 12px; bottom: 10px; left: 12px; font-size: 20px; font-weight: 800; line-height: 1.2; }"
+		},
+		{
+			"name": "Group Sticker",
+			"kind": "chip",
+			"refersTo": "tile-sticker",
+			"description": "The rotated basil label chip that names each shelf group.",
+			"html": "<span class=\"ds-sticker\">weeknight heroes</span>",
+			"css": ".ds-sticker { display: inline-block; background: #2fa84f; color: #16130e; border: 2px solid #16130e; padding: 2px 8px; font-size: 13px; font-weight: 700; text-transform: uppercase; transform: rotate(-1deg); }"
+		},
+		{
+			"name": "Add Tile",
+			"kind": "button",
+			"refersTo": "tile",
+			"description": "Dashed placeholder tile — 'not real yet' — expands inline into a form.",
+			"html": "<button class=\"ds-add-tile\" type=\"button\">+ recipe</button>",
+			"css": ".ds-add-tile { width: 148px; height: 148px; background: transparent; color: #16130e; border: 2px dashed #16130e; font-size: 13px; font-weight: 700; text-transform: uppercase; cursor: pointer; transition: background 0.2s; } .ds-add-tile:hover { background: #fffdf8; } .ds-add-tile:focus-visible { outline: 2px solid #5b3df5; outline-offset: 2px; }"
+		},
+		{
+			"name": "Primary Button",
+			"kind": "button",
+			"refersTo": "button-primary",
+			"description": "Basil save/confirm action with resting cast-iron shadow.",
+			"html": "<button class=\"ds-btn-primary\" type=\"button\">save to shelf</button>",
+			"css": ".ds-btn-primary { background: #2fa84f; color: #16130e; border: 2px solid #16130e; box-shadow: 3px 3px 0 0 #16130e; padding: 8px 16px; font-size: 13px; font-weight: 700; text-transform: uppercase; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; } .ds-btn-primary:hover { transform: translate(-2px, -2px); box-shadow: 5px 5px 0 0 #16130e; } .ds-btn-primary:focus-visible { outline: 2px solid #5b3df5; outline-offset: 2px; } .ds-btn-primary:disabled { opacity: 0.5; }"
+		},
+		{
+			"name": "Text Input",
+			"kind": "input",
+			"refersTo": "input-field",
+			"description": "Sharp-cornered paper field with cast-iron border; focus shifts, never glows.",
+			"html": "<input class=\"ds-input\" type=\"text\" placeholder=\"miso butter pasta\">",
+			"css": ".ds-input { background: #fdf6ec; color: #16130e; border: 2px solid #16130e; border-radius: 0; padding: 8px 12px; font-size: 14px; font-weight: 600; } .ds-input::placeholder { opacity: 0.5; } .ds-input:focus-visible { outline: 2px solid #5b3df5; outline-offset: 2px; }"
+		},
+		{
+			"name": "Rail Nav Item",
+			"kind": "nav",
+			"refersTo": "tile",
+			"description": "Left-rail square icon tile; active state is a yolk sticker.",
+			"html": "<nav><a class=\"ds-nav-item ds-nav-item-active\" href=\"#\">shelf</a> <a class=\"ds-nav-item\" href=\"#\">pantry</a></nav>",
+			"css": ".ds-nav-item { display: inline-flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 12px; border: 2px solid transparent; color: #16130e; font-size: 13px; font-weight: 700; text-transform: uppercase; text-decoration: none; } .ds-nav-item:hover { border-color: #16130e; background: #fffdf8; box-shadow: 3px 3px 0 0 #16130e; } .ds-nav-item-active { border-color: #16130e; background: #ffc21c; box-shadow: 3px 3px 0 0 #16130e; }"
+		}
+	],
+	"narrative": {
+		"northStar": "The Neobrutalist Kitchen",
+		"overview": "dutch-oven looks like a kitchen wall, not a dashboard: butcher-paper ground, cast-iron ink outlines, and tiles in the colors of ingredients — tomato, yolk, basil, eggplant. Everything is flat, square, and unapologetically bold. Labels are stickers: extrabold uppercase chips slapped on at a slight rotate. Rejected worlds: metro tiles on pure black, pantry-shelf, diner ticket-rail.",
+		"keyCharacteristics": [
+			"Butcher-paper cream ground, never white, never dark",
+			"Cast-iron ink 2px borders on every surface; zero radius, zero gradients",
+			"Hard offset shadows only — no blur, no glow",
+			"Ingredient brights carry meaning; black text on tomato/yolk/basil, white on eggplant",
+			"Stickers and dashed outline tiles for anything not yet real"
+		],
+		"rules": [
+			{
+				"name": "The Ingredient Rule",
+				"body": "Color comes from the kitchen, not a brand book. A tile is tomato, yolk, basil, or eggplant — never 'blue' or 'indigo'.",
+				"section": "colors"
+			},
+			{
+				"name": "The Tinted-Secondary Rule",
+				"body": "Secondary text on a colored tile is the tile's own ink at reduced opacity, never gray.",
+				"section": "colors"
+			},
+			{
+				"name": "The Lowercase Rule",
+				"body": "Display and tile titles are lowercase; labels are uppercase. No Title Case anywhere.",
+				"section": "typography"
+			},
+			{
+				"name": "The Cast-Iron Rule",
+				"body": "Every shadow is #16130e at 100% opacity with zero blur. A soft or colored shadow is a bug.",
+				"section": "elevation"
+			}
+		],
+		"dos": [
+			"Do put black text on tomato/yolk/basil and white on eggplant — nothing else pairs.",
+			"Do use the dashed border language for anything the user hasn't created yet.",
+			"Do keep tiles square and let content overflow to a '+N more' tile rather than scrolling a group.",
+			"Do rotate stickers a degree or two; the slight crookedness is the warmth."
+		],
+		"donts": [
+			"Don't use radius, gradients, blur, or soft shadows — the world is flat and hard.",
+			"Don't use gray borders or gray-on-color secondary text; borders are cast iron, secondary text is tinted ink.",
+			"Don't open a modal for add/rename flows — forms expand inline from dashed tiles.",
+			"Don't resurrect rejected worlds: metro-black, pantry-shelf, diner ticket-rail."
+		]
+	}
+}

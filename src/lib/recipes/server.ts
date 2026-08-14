@@ -1,0 +1,45 @@
+import { redirect } from '@tanstack/react-router'
+import { createServerFn } from '@tanstack/react-start'
+import { z } from 'zod'
+
+import { getCurrentSession } from '@/lib/auth/session'
+
+import {
+	createCollectionForUser,
+	createRecipeForUser,
+	getRecipeForUser,
+	listShelfForUser,
+} from './repository'
+
+async function requireUserId() {
+	const session = await getCurrentSession()
+	if (!session) throw redirect({ href: '/auth/login' })
+	return session.user.id
+}
+
+export const listShelf = createServerFn({ method: 'GET' }).handler(async () =>
+	listShelfForUser(await requireUserId()),
+)
+
+export const getRecipe = createServerFn({ method: 'GET' })
+	.validator(z.object({ id: z.string().min(1) }))
+	.handler(async ({ data }) => getRecipeForUser(await requireUserId(), data.id))
+
+export const createCollection = createServerFn({ method: 'POST' })
+	.validator(z.object({ name: z.string().trim().min(1).max(60) }))
+	.handler(async ({ data }) =>
+		createCollectionForUser(await requireUserId(), data.name),
+	)
+
+export const createRecipe = createServerFn({ method: 'POST' })
+	.validator(
+		z.object({
+			title: z.string().trim().min(1).max(120),
+			imageUrl: z.preprocess(
+				(value) => (value === '' ? undefined : value),
+				z.url().max(500).optional(),
+			),
+			collectionId: z.string().min(1).optional(),
+		}),
+	)
+	.handler(async ({ data }) => createRecipeForUser(await requireUserId(), data))
