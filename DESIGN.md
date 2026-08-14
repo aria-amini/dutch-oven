@@ -153,11 +153,13 @@ uppercase. Nothing in between — no Title Case anywhere.
 
 ## Layout
 
-The dashboard is a horizontal panorama behind a fixed left rail (~12rem,
-full-width rows, active = yolk fill). Groups of square tiles flow left to right
-on desktop (`--spacing-tile`, 16px gaps), stacking vertically on mobile with a
-top bar instead of the rail. A plain page title ("your recipes") leads; the
-tiles carry the page.
+App pages sit behind a fixed left rail (~12rem, full-width rows, active = yolk
+fill; mobile collapses to a top bar). Pages are top-aligned: a plain page title
+("your recipes") leads, with page-level tools (search) in the header row. Below,
+a row of group filter chips — `all` plus one sticker-style chip per collection —
+scopes the grid. The recipe grid is a single top-anchored flow of square tiles
+(`--spacing-tile`, 16px gaps), newest first, two columns on mobile. No caps, no
+overflow tiles, no horizontal scrolling.
 
 ## Elevation & Depth
 
@@ -193,21 +195,27 @@ content — are drawn dashed; once real, the border goes solid.
 - **Caption:** top-left, small semibold date in tinted ink.
 - **Hover:** lift + deeper shadow. Focus: eggplant 2px outline, offset 2px.
 
-### Group Label (sticker)
+### Group Chip (filter)
 
-- Basil background, 2px ink border, uppercase 13px, rotated -1deg. One per shelf
-  group.
+- Sticker-sized control in the shelf's filter row: uppercase 13px, 2px ink
+  border, transparent at rest; active = basil fill with resting shadow and the
+  signature -1deg rotate. An `edit` toggle switches chips into manage mode
+  (inline rename, two-tap delete).
 
 ### Add Tile (dashed)
 
 - **Shape:** tile-sized, 2px **dashed** ink border, transparent ground.
-- **Behavior:** expands in place into an inline form — never a modal.
+- **Behavior:** opens the add fork dialog (link vs. by hand) — it never becomes
+  a form itself.
 - **Meaning:** dashed = "not real yet". Same language as the empty-state hero.
 
-### Stat Tile
+### Fork Dialog
 
-- Solid cast-iron tile, yolk uppercase label, huge cream numeral. Reserved for
-  real counts.
+The one sanctioned modal: a single-question fork (e.g. add recipe → link vs. own
+hands). Card-cream panel, 2px ink border, hard shadow, flat ink dim behind it
+(no blur, no radius). Choices are wide, short rows — small ingredient-color icon
+square left, extrabold label + quiet sub-copy, arrow right — never giant filled
+tiles. Forms with more than one field get a page, not a dialog.
 
 ### Buttons & Inputs
 
@@ -242,7 +250,7 @@ content — are drawn dashed; once real, the border goes solid.
   hard.
 - **Don't** use gray borders or gray-on-color secondary text; borders are cast
   iron, secondary text is tinted ink.
-- **Don't** open a modal for add/rename flows — forms expand inline from dashed
-  tiles.
+- **Don't** open modals for forms — multi-field forms get their own page. The
+  single-question fork dialog is the only exception.
 - **Don't** resurrect rejected worlds: metro-black, pantry-shelf, diner
   ticket-rail.

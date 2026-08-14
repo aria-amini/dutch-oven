@@ -31,8 +31,13 @@ Vite+, Drizzle/Postgres, Better Auth, Tailwind v4, shadcn).
 
 ## Capabilities and Constraints
 
-Confirmed: recipe browsing/saving/cooking, meal logging, planning. Undecided:
-nutrition/macro detail depth, sharing/social features, import-from-URL.
+Confirmed: recipe browsing/saving/cooking, meal logging (one-tap byproduct of
+cooking, feeds cook-count ranking), import-from-URL (slot built, parser
+pending), books (collections) as organization + AI scope, a home "what's
+tonight" decision surface, groceries (list from picked recipes, later).
+Decision-first, not calendar-first: week planning deferred. Undecided:
+nutrition/macro detail depth, sharing/social features. Rejected scope: pantry
+tracking (built, then removed 2026-08-14).
 
 ## Brand Commitments
 
