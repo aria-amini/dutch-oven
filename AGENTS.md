@@ -5,7 +5,7 @@ Postgres, Better Auth, Tailwind v4, shadcn, and Varlock. Local services are
 provided by Docker Compose (Postgres and MinIO). The dev server runs as a
 pitchfork daemon (see `pitchfork.toml`) that auto-starts/stops when entering or
 leaving the directory; each jj workspace gets unique ports via
-`mise-tasks/setup` (run by `mise run bootstrap`; re-run anytime with
+`mise-tasks/setup.ts` (run by `mise run bootstrap`; re-run anytime with
 `mise run setup`).
 
 Google sign-in uses one shared dev OAuth client (type "Desktop app", so any

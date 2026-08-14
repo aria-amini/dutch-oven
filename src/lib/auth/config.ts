@@ -16,6 +16,8 @@ export function getAuth() {
 			allowedHosts: [
 				'127.0.0.1:*',
 				'localhost:*',
+				'*.localhost',
+				'*.lvh.ariaamini.com',
 				'dutch-oven-*.up.railway.app',
 				'app-dutch-oven-*.up.railway.app',
 			],
@@ -39,6 +41,10 @@ export function getAuth() {
 				}
 			: {}),
 		plugins: [
+			// Dev uses a shared "Desktop app" Google OAuth client, which accepts
+			// any loopback port without registration — so every app/workspace
+			// bounces through its own daemon (appOrigin is localhost:<port> in
+			// dev). In prod appOrigin is the real domain and the proxy no-ops.
 			oAuthProxy({
 				productionURL: appOrigin,
 				secret: env.OAUTH_PROXY_SECRET,

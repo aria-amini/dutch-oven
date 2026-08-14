@@ -9,7 +9,6 @@ export function getPostHogClient() {
 
 	if (!posthogClient) {
 		posthogClient = new PostHog(env.VITE_POSTHOG_PROJECT_TOKEN, {
-			...(env.VITE_POSTHOG_HOST ? { host: env.VITE_POSTHOG_HOST } : {}),
 			flushAt: 1,
 			flushInterval: 0,
 		})
