@@ -41,7 +41,7 @@ export function getAuth() {
 		plugins: [
 			oAuthProxy({
 				productionURL: appOrigin,
-				secret: env.BETTER_AUTH_SECRET,
+				secret: env.OAUTH_PROXY_SECRET,
 			}),
 			tanstackStartCookies(),
 		],

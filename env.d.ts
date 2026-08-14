@@ -15,12 +15,16 @@ export type CoercedEnvSchema = {
    * **APP_ENV**  
    * ![icon](data:image/svg+xml;utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20fill%3D%22%23808080%22%20d%3D%22M7.885%2010.23L12%203.463l4.116%206.769zm9.606%2011q-1.558%200-2.64-1.081t-1.082-2.64t1.082-2.649t2.64-1.09t2.649%201.09t1.09%202.649t-1.09%202.64t-2.649%201.082m-13.722-.5v-6.462h6.462v6.462z%22%2F%3E%3C%2Fsvg%3E)   
    */
-  APP_ENV: "development" | "preview" | "staging" | "production" | "test";
+  APP_ENV: "development" | "preview" | "production" | "test";
+  
+  /**
+   * **VITE_APP_ENV**  
+   * ![icon](data:image/svg+xml;utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cpath%20fill%3D%22%23808080%22%20d%3D%22M29%2022h-5a2.003%202.003%200%200%201-2-2v-6a2%202%200%200%201%202-2h5v2h-5v6h5ZM18%2012h-4V8h-2v14h6a2.003%202.003%200%200%200%202-2v-6a2%202%200%200%200-2-2m-4%208v-6h4v6Zm-6-8H3v2h5v2H4a2%202%200%200%200-2%202v2a2%202%200%200%200%202%202h6v-8a2%202%200%200%200-2-2m0%208H4v-2h4Z%22%2F%3E%3C%2Fsvg%3E)   
+   */
+  VITE_APP_ENV: string;
   
   /**
    * **APP_PORT**  
-   * Dev-server port; scripts/setup.ts regenerates a unique value per jj  
-   * workspace in .env.development.local.  
    * ![icon](data:image/svg+xml;utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20fill%3D%22%23808080%22%20d%3D%22M20.95%2022.375L18%2019.425v2.225h-2V16h5.65v2H19.4l2.95%202.95zM12%2022q-2.075%200-3.9-.788t-3.175-2.137T2.788%2015.9T2%2012t.788-3.9t2.137-3.175T8.1%202.788T12%202t3.9.788t3.175%202.137T21.213%208.1T22%2012q0%20.5-.05%201t-.15%201h-2.05q.125-.5.188-1T20%2012t-.062-1t-.188-1h-3.4q.075.5.113%201t.037%201t-.037%201t-.113%201h-2q.075-.5.113-1t.037-1t-.037-1t-.113-1h-4.7q-.075.5-.112%201T9.5%2012t.038%201t.112%201H13v2h-2.9q.3%201.075.775%202.063T12%2019.95q.5%200%201-.062t1-.113v2.05q-.5.05-1%20.113T12%2022m-7.75-8h3.4q-.075-.5-.112-1T7.5%2012t.038-1t.112-1h-3.4q-.125.5-.187%201T4%2012t.063%201t.187%201m.85-6h2.95q.225-.925.563-1.812T9.4%204.45q-1.375.45-2.475%201.363T5.1%208m4.3%2011.55q-.45-.85-.788-1.737T8.05%2016H5.1q.725%201.275%201.825%202.188T9.4%2019.55M10.1%208h3.8q-.3-1.075-.775-2.062T12%204.05q-.65.9-1.125%201.888T10.1%208m5.85%200h2.95q-.725-1.275-1.825-2.187T14.6%204.45q.45.85.788%201.738T15.95%208%22%2F%3E%3C%2Fsvg%3E)   
    */
   APP_PORT: number;
@@ -35,7 +39,13 @@ export type CoercedEnvSchema = {
    * **BETTER_AUTH_SECRET** 🔐 _sensitive_  
    * ![icon](data:image/svg+xml;utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cpath%20fill%3D%22%23808080%22%20d%3D%22M29%2022h-5a2.003%202.003%200%200%201-2-2v-6a2%202%200%200%201%202-2h5v2h-5v6h5ZM18%2012h-4V8h-2v14h6a2.003%202.003%200%200%200%202-2v-6a2%202%200%200%200-2-2m-4%208v-6h4v6Zm-6-8H3v2h5v2H4a2%202%200%200%200-2%202v2a2%202%200%200%200%202%202h6v-8a2%202%200%200%200-2-2m0%208H4v-2h4Z%22%2F%3E%3C%2Fsvg%3E)   
    */
-  BETTER_AUTH_SECRET: string;
+  BETTER_AUTH_SECRET?: string;
+  
+  /**
+   * **OAUTH_PROXY_SECRET** 🔐 _sensitive_  
+   * ![icon](data:image/svg+xml;utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cpath%20fill%3D%22%23808080%22%20d%3D%22M29%2022h-5a2.003%202.003%200%200%201-2-2v-6a2%202%200%200%201%202-2h5v2h-5v6h5ZM18%2012h-4V8h-2v14h6a2.003%202.003%200%200%200%202-2v-6a2%202%200%200%200-2-2m-4%208v-6h4v6Zm-6-8H3v2h5v2H4a2%202%200%200%200-2%202v2a2%202%200%200%200%202%202h6v-8a2%202%200%200%200-2-2m0%208H4v-2h4Z%22%2F%3E%3C%2Fsvg%3E)   
+   */
+  OAUTH_PROXY_SECRET?: string;
   
   /**
    * **DATABASE_URL** 🔐 _sensitive_  
@@ -45,11 +55,6 @@ export type CoercedEnvSchema = {
   
   /**
    * **GOOGLE_CLIENT_ID**  
-   * One shared Google OAuth client reused by all dev apps — add each app's  
-   * http://localhost:<port>/api/auth/callback/google redirect URI in the Google  
-   * console once. Values resolve from Bitwarden Secrets Manager and only need  
-   * BITWARDEN_ACCESS_TOKEN set in .env.development.local.  
-   * Prod apps override via .env.production with dedicated credentials.  
    * ![icon](data:image/svg+xml;utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cpath%20fill%3D%22%23808080%22%20d%3D%22M29%2022h-5a2.003%202.003%200%200%201-2-2v-6a2%202%200%200%201%202-2h5v2h-5v6h5ZM18%2012h-4V8h-2v14h6a2.003%202.003%200%200%200%202-2v-6a2%202%200%200%200-2-2m-4%208v-6h4v6Zm-6-8H3v2h5v2H4a2%202%200%200%200-2%202v2a2%202%200%200%200%202%202h6v-8a2%202%200%200%200-2-2m0%208H4v-2h4Z%22%2F%3E%3C%2Fsvg%3E)   
    */
   GOOGLE_CLIENT_ID?: string;
@@ -91,10 +96,16 @@ export type CoercedEnvSchema = {
   AWS_SECRET_ACCESS_KEY: string;
   
   /**
-   * **VITE_PUBLIC_POSTHOG_KEY**  
+   * **VITE_POSTHOG_PROJECT_TOKEN**  
    * ![icon](data:image/svg+xml;utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cpath%20fill%3D%22%23808080%22%20d%3D%22M29%2022h-5a2.003%202.003%200%200%201-2-2v-6a2%202%200%200%201%202-2h5v2h-5v6h5ZM18%2012h-4V8h-2v14h6a2.003%202.003%200%200%200%202-2v-6a2%202%200%200%200-2-2m-4%208v-6h4v6Zm-6-8H3v2h5v2H4a2%202%200%200%200-2%202v2a2%202%200%200%200%202%202h6v-8a2%202%200%200%200-2-2m0%208H4v-2h4Z%22%2F%3E%3C%2Fsvg%3E)   
    */
-  VITE_PUBLIC_POSTHOG_KEY?: string;
+  VITE_POSTHOG_PROJECT_TOKEN?: string;
+  
+  /**
+   * **VITE_POSTHOG_HOST**  
+   * ![icon](data:image/svg+xml;utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cpath%20fill%3D%22%23808080%22%20d%3D%22M29%2022h-5a2.003%202.003%200%200%201-2-2v-6a2%202%200%200%201%202-2h5v2h-5v6h5ZM18%2012h-4V8h-2v14h6a2.003%202.003%200%200%200%202-2v-6a2%202%200%200%200-2-2m-4%208v-6h4v6Zm-6-8H3v2h5v2H4a2%202%200%200%200-2%202v2a2%202%200%200%200%202%202h6v-8a2%202%200%200%200-2-2m0%208H4v-2h4Z%22%2F%3E%3C%2Fsvg%3E)   
+   */
+  VITE_POSTHOG_HOST?: string;
   
   /**
    * **VITE_PUBLIC_GTM_ID**  
@@ -116,11 +127,11 @@ export type CoercedEnvSchema = {
   
 };
 
-type _CoercedEnvSchema_fa29637c = CoercedEnvSchema;
+type _CoercedEnvSchema_6c24161d = CoercedEnvSchema;
 
 declare module 'varlock/env' {
-  export interface TypedEnvSchema extends Readonly<_CoercedEnvSchema_fa29637c> {}
-  export interface PublicTypedEnvSchema extends Readonly<Pick<_CoercedEnvSchema_fa29637c, 'APP_ENV' | 'APP_PORT' | 'BETTER_AUTH_URL' | 'GOOGLE_CLIENT_ID' | 'AWS_S3_BUCKET_NAME' | 'AWS_REGION' | 'AWS_ENDPOINT_URL' | 'AWS_ACCESS_KEY_ID' | 'VITE_PUBLIC_POSTHOG_KEY' | 'VITE_PUBLIC_GTM_ID' | 'VITE_PUBLIC_SENTRY_DSN'>> {}
+  export interface TypedEnvSchema extends Readonly<_CoercedEnvSchema_6c24161d> {}
+  export interface PublicTypedEnvSchema extends Readonly<Pick<_CoercedEnvSchema_6c24161d, 'APP_ENV' | 'VITE_APP_ENV' | 'APP_PORT' | 'BETTER_AUTH_URL' | 'GOOGLE_CLIENT_ID' | 'AWS_S3_BUCKET_NAME' | 'AWS_REGION' | 'AWS_ENDPOINT_URL' | 'AWS_ACCESS_KEY_ID' | 'VITE_POSTHOG_PROJECT_TOKEN' | 'VITE_POSTHOG_HOST' | 'VITE_PUBLIC_GTM_ID' | 'VITE_PUBLIC_SENTRY_DSN'>> {}
 }
 
 
@@ -130,11 +141,11 @@ export type EnvSchemaAsStrings = {
       : (CoercedEnvSchema[Property] extends boolean ? ('true' | 'false') : string)
 };
 
-type _EnvSchemaAsStrings_fa29637c = EnvSchemaAsStrings;
+type _EnvSchemaAsStrings_6c24161d = EnvSchemaAsStrings;
 declare global {
 
   // add types for global process.env
   namespace NodeJS {
-    interface ProcessEnv extends _EnvSchemaAsStrings_fa29637c {}
+    interface ProcessEnv extends _EnvSchemaAsStrings_6c24161d {}
   }
 }
