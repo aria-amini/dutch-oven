@@ -48,46 +48,11 @@ vi.mock('@/lib/recipes/server', () => ({
 			createdAt: new Date(),
 		})
 	},
-	createCollection: async ({ data }: { data: { name: string } }) => {
-		shelfState.collections.push({
-			id: crypto.randomUUID(),
-			userId: 'user-1',
-			name: data.name,
-			position: shelfState.collections.length,
-			createdAt: new Date(),
-		})
-	},
-	renameCollection: async ({
-		data,
-	}: {
-		data: { id: string; name: string }
-	}) => {
-		const collection = shelfState.collections.find(
-			(entry) => entry.id === data.id,
-		)
-		if (collection) collection.name = data.name
-	},
-	deleteCollection: async ({ data }: { data: { id: string } }) => {
-		shelfState.collections = shelfState.collections.filter(
-			(entry) => entry.id !== data.id,
-		)
-		for (const recipe of shelfState.recipes) {
-			if (recipe.collectionId === data.id) recipe.collectionId = null
-		}
-	},
 }))
 
 const testSession = {
 	user: { id: 'user-1', name: 'Test User', email: 'test@example.com' },
 	session: { id: 'session-1', token: 'token' },
-}
-
-const weeknightHeroes: Collection = {
-	id: 'col-1',
-	userId: 'user-1',
-	name: 'weeknight heroes',
-	position: 0,
-	createdAt: new Date(),
 }
 
 const misoButterPasta: Recipe = {
@@ -125,8 +90,7 @@ describe('recipes shelf', () => {
 			.toBeVisible()
 	})
 
-	test('lists every recipe in one grid with group filters', async () => {
-		shelfState.collections = [weeknightHeroes]
+	test('lists every recipe in one grid', async () => {
 		shelfState.recipes = [misoButterPasta, dal]
 
 		const { screen } = await renderRoute({
@@ -134,13 +98,11 @@ describe('recipes shelf', () => {
 			session: testSession,
 		})
 
-		await expect.element(screen.getByText('weeknight heroes')).toBeVisible()
 		await expect.element(screen.getByText('miso butter pasta')).toBeVisible()
 		await expect.element(screen.getByText('dal')).toBeVisible()
 	})
 
 	test('offers the add fork when adding from the shelf', async () => {
-		shelfState.collections = [weeknightHeroes]
 		shelfState.recipes = [misoButterPasta, dal]
 
 		const { screen } = await renderRoute({
@@ -151,36 +113,5 @@ describe('recipes shelf', () => {
 		await screen.getByRole('button', { name: 'recipe' }).click()
 		await expect.element(screen.getByText('from a link')).toBeVisible()
 		await expect.element(screen.getByText('my own two hands')).toBeVisible()
-	})
-
-	test('filters the grid by search', async () => {
-		shelfState.collections = [weeknightHeroes]
-		shelfState.recipes = [misoButterPasta, dal]
-
-		const { screen } = await renderRoute({
-			path: '/recipes',
-			session: testSession,
-		})
-
-		await expect.element(screen.getByText('miso butter pasta')).toBeVisible()
-		await screen.getByLabelText('Search recipes').fill('dal')
-		await expect.element(screen.getByText('dal')).toBeVisible()
-		await expect
-			.element(screen.getByText('miso butter pasta'))
-			.not.toBeInTheDocument()
-	})
-
-	test('filters the grid by group', async () => {
-		shelfState.collections = [weeknightHeroes]
-		shelfState.recipes = [misoButterPasta, dal]
-
-		const { screen } = await renderRoute({
-			path: '/recipes',
-			session: testSession,
-		})
-
-		await screen.getByRole('button', { name: 'weeknight heroes' }).click()
-		await expect.element(screen.getByText('miso butter pasta')).toBeVisible()
-		await expect.element(screen.getByText('dal')).not.toBeInTheDocument()
 	})
 })

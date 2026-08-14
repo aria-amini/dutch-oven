@@ -1,8 +1,14 @@
 import { ArrowLeft } from '@phosphor-icons/react'
-import { createFileRoute, Link, notFound } from '@tanstack/react-router'
+import {
+	createFileRoute,
+	Link,
+	notFound,
+	useRouter,
+} from '@tanstack/react-router'
+import { useState } from 'react'
 
 import { redirectUnauthenticatedUsers } from '@/lib/auth/functions'
-import { getRecipe } from '@/lib/recipes/server'
+import { getRecipe, updateRecipeContent } from '@/lib/recipes/server'
 
 export const Route = createFileRoute('/_app/recipes/$recipeId')({
 	beforeLoad: () => redirectUnauthenticatedUsers({ redirectTo: '/recipes' }),
@@ -22,6 +28,24 @@ const dateFormat = new Intl.DateTimeFormat('en', {
 
 function RecipeDetail() {
 	const recipe = Route.useLoaderData()
+	const router = useRouter()
+	const [editing, setEditing] = useState(false)
+	const [ingredients, setIngredients] = useState(recipe.ingredients.join('\n'))
+	const [steps, setSteps] = useState(recipe.steps.join('\n'))
+	const [pending, setPending] = useState(false)
+	const save = async () => {
+		setPending(true)
+		await updateRecipeContent({
+			data: {
+				id: recipe.id,
+				ingredients: ingredients.split('\n'),
+				steps: steps.split('\n'),
+			},
+		})
+		await router.invalidate()
+		setPending(false)
+		setEditing(false)
+	}
 	return (
 		<main className="bg-background text-foreground min-h-dvh p-6 md:p-10">
 			<Link
@@ -40,6 +64,16 @@ function RecipeDetail() {
 						saved {dateFormat.format(recipe.createdAt)}
 					</span>
 				</p>
+				<div className="mt-6">
+					<button
+						type="button"
+						className="border-foreground bg-background focus-visible:outline-kitchen-eggplant border-2 px-3 py-2 text-[13px] font-bold uppercase shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2"
+						onClick={() => setEditing(true)}
+						disabled={editing}
+					>
+						edit
+					</button>
+				</div>
 				{recipe.imageUrl ? (
 					<img
 						src={recipe.imageUrl}
@@ -47,10 +81,111 @@ function RecipeDetail() {
 						className="border-foreground mt-8 w-full border-2 object-cover shadow-md"
 					/>
 				) : null}
-				<p className="border-foreground mt-10 border-2 border-dashed p-4 text-sm font-semibold">
-					ingredients and steps land here — that page is its own shape. for now
-					this tile proves the shelf-to-recipe loop.
-				</p>
+				{editing ? (
+					<div className="mt-10 flex flex-col gap-3">
+						<label
+							className="text-[13px] font-bold uppercase"
+							htmlFor="edit-ingredients"
+						>
+							ingredients (one per line)
+						</label>
+						<textarea
+							id="edit-ingredients"
+							value={ingredients}
+							onChange={(event) => setIngredients(event.target.value)}
+							rows={6}
+							className="border-foreground bg-card focus-visible:outline-kitchen-eggplant resize-y border-2 p-3 font-semibold focus-visible:outline-2 focus-visible:outline-offset-2"
+						/>
+						<label
+							className="text-[13px] font-bold uppercase"
+							htmlFor="edit-steps"
+						>
+							steps (one per line)
+						</label>
+						<textarea
+							id="edit-steps"
+							value={steps}
+							onChange={(event) => setSteps(event.target.value)}
+							rows={7}
+							className="border-foreground bg-card focus-visible:outline-kitchen-eggplant resize-y border-2 p-3 font-semibold focus-visible:outline-2 focus-visible:outline-offset-2"
+						/>
+						<div className="flex gap-2">
+							<button
+								type="button"
+								disabled={pending}
+								onClick={save}
+								className="border-foreground bg-kitchen-basil border-2 px-4 py-2 text-[13px] font-bold uppercase shadow-sm disabled:opacity-50"
+							>
+								{pending ? 'saving…' : 'save'}
+							</button>
+							<button
+								type="button"
+								disabled={pending}
+								onClick={() => {
+									setIngredients(recipe.ingredients.join('\n'))
+									setSteps(recipe.steps.join('\n'))
+									setEditing(false)
+								}}
+								className="border-foreground bg-background border-2 px-4 py-2 text-[13px] font-bold uppercase"
+							>
+								cancel
+							</button>
+						</div>
+					</div>
+				) : null}
+				{!editing && (
+					<>
+						<section className="mt-10">
+							<h2 className="text-[13px] font-bold uppercase">
+								<span className="border-foreground bg-kitchen-tomato inline-block -rotate-1 border-2 px-2 py-0.5">
+									ingredients
+								</span>
+							</h2>
+							<ul className="border-foreground bg-card mt-4 border-2 shadow-md">
+								{recipe.ingredients.length ? (
+									recipe.ingredients.map((ingredient, index) => (
+										<li
+											key={`${ingredient}-${index}`}
+											className="border-foreground border-b-2 px-4 py-2.5 text-sm font-semibold last:border-b-0"
+										>
+											{ingredient}
+										</li>
+									))
+								) : (
+									<li className="border-foreground border-2 border-dashed p-4 text-sm font-semibold">
+										no ingredients yet
+									</li>
+								)}
+							</ul>
+						</section>
+						<section className="mt-10">
+							<h2 className="text-[13px] font-bold uppercase">
+								<span className="border-foreground bg-kitchen-eggplant inline-block rotate-1 border-2 px-2 py-0.5 text-white">
+									steps
+								</span>
+							</h2>
+							<ol className="border-foreground bg-card mt-4 border-2 shadow-md">
+								{recipe.steps.length ? (
+									recipe.steps.map((step, index) => (
+										<li
+											key={`${step}-${index}`}
+											className="border-foreground flex gap-3 border-b-2 px-4 py-3 last:border-b-0"
+										>
+											<span className="border-foreground bg-background grid size-6 shrink-0 place-items-center border-2 text-[11px] font-extrabold">
+												{index + 1}
+											</span>
+											<p className="text-sm font-semibold">{step}</p>
+										</li>
+									))
+								) : (
+									<li className="border-foreground border-2 border-dashed p-4 text-sm font-semibold">
+										no steps yet
+									</li>
+								)}
+							</ol>
+						</section>
+					</>
+				)}
 			</div>
 		</main>
 	)
