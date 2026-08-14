@@ -1,7 +1,17 @@
 import { and, asc, desc, eq, max } from 'drizzle-orm'
 
 import { db } from '@/db/connection'
-import { collections, recipes } from '@/db/schema'
+import {
+	collections,
+	recipeIngredients,
+	recipeSteps,
+	recipes,
+	type RecipeIngredient,
+} from '@/db/schema'
+
+type RecipeDatabase =
+	| typeof db
+	| Parameters<Parameters<typeof db.transaction>[0]>[0]
 
 export async function listShelfForUser(
 	userId: string,
@@ -31,7 +41,24 @@ export async function getRecipeForUser(
 		.select()
 		.from(recipes)
 		.where(and(eq(recipes.id, id), eq(recipes.userId, userId)))
-	return recipe ?? null
+	if (!recipe) return null
+	const [ingredients, steps] = await Promise.all([
+		database
+			.select({ text: recipeIngredients.text })
+			.from(recipeIngredients)
+			.where(eq(recipeIngredients.recipeId, recipe.id))
+			.orderBy(asc(recipeIngredients.position)),
+		database
+			.select({ text: recipeSteps.text })
+			.from(recipeSteps)
+			.where(eq(recipeSteps.recipeId, recipe.id))
+			.orderBy(asc(recipeSteps.position)),
+	])
+	return {
+		...recipe,
+		ingredients: ingredients.map((item) => item.text),
+		steps: steps.map((step) => step.text),
+	}
 }
 
 export async function createCollectionForUser(
@@ -88,6 +115,8 @@ export async function createRecipeForUser(
 		title: string
 		imageUrl?: string | undefined
 		collectionId?: string | undefined
+		ingredients?: string[] | RecipeIngredient[] | undefined
+		steps?: string[] | undefined
 	},
 	database: typeof db = db,
 ) {
@@ -114,5 +143,62 @@ export async function createRecipeForUser(
 			createdAt: new Date(),
 		})
 		.returning()
+	if (!recipe) return recipe
+	await insertRecipeContent(database, recipe.id, input.ingredients, input.steps)
 	return recipe
+}
+
+function contentLines(lines: string[] | RecipeIngredient[] | undefined) {
+	return (lines ?? [])
+		.map((line) => (typeof line === 'string' ? line : line.raw).trim())
+		.filter(Boolean)
+}
+
+async function insertRecipeContent(
+	database: RecipeDatabase,
+	recipeId: string,
+	ingredientLines: string[] | RecipeIngredient[] | undefined,
+	stepLines: string[] | undefined,
+) {
+	const ingredients = contentLines(ingredientLines)
+	const steps = contentLines(stepLines)
+	if (ingredients.length) {
+		await database.insert(recipeIngredients).values(
+			ingredients.map((text, position) => ({
+				id: crypto.randomUUID(),
+				recipeId,
+				position,
+				text,
+			})),
+		)
+	}
+	if (steps.length) {
+		await database.insert(recipeSteps).values(
+			steps.map((text, position) => ({
+				id: crypto.randomUUID(),
+				recipeId,
+				position,
+				text,
+			})),
+		)
+	}
+}
+
+export async function updateRecipeContentForUser(
+	userId: string,
+	id: string,
+	input: { ingredients: string[]; steps: string[] },
+	database: typeof db = db,
+) {
+	return database.transaction(async (tx) => {
+		const [recipe] = await tx
+			.select({ id: recipes.id })
+			.from(recipes)
+			.where(and(eq(recipes.id, id), eq(recipes.userId, userId)))
+		if (!recipe) return null
+		await tx.delete(recipeIngredients).where(eq(recipeIngredients.recipeId, id))
+		await tx.delete(recipeSteps).where(eq(recipeSteps.recipeId, id))
+		await insertRecipeContent(tx, id, input.ingredients, input.steps)
+		return recipe
+	})
 }

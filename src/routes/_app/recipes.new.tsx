@@ -70,6 +70,8 @@ function ManualForm({
 				const title = field(form, 'title')
 				const imageUrl = field(form, 'imageUrl')
 				const collectionId = field(form, 'collectionId')
+				const ingredients = field(form, 'ingredients')
+				const steps = field(form, 'steps')
 				if (!title) {
 					setError('give the recipe a name')
 					return
@@ -82,6 +84,8 @@ function ManualForm({
 							title,
 							...(imageUrl ? { imageUrl } : {}),
 							...(collectionId ? { collectionId } : {}),
+							ingredients: ingredients.split('\n'),
+							steps: steps.split('\n'),
 						},
 					})
 					await navigate({ to: '/recipes' })
@@ -119,6 +123,26 @@ function ManualForm({
 				placeholder="photo url (optional)"
 				aria-label="Photo URL"
 				className="border-foreground bg-background border-2 px-3 py-2 text-sm font-semibold placeholder:opacity-50"
+			/>
+			<label className="text-[13px] font-bold uppercase" htmlFor="ingredients">
+				ingredients (one per line)
+			</label>
+			<textarea
+				id="ingredients"
+				name="ingredients"
+				rows={5}
+				placeholder="200g pasta\n1 tbsp miso"
+				className="border-foreground bg-background focus-visible:outline-kitchen-eggplant resize-y border-2 px-3 py-2 text-sm font-semibold placeholder:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2"
+			/>
+			<label className="text-[13px] font-bold uppercase" htmlFor="steps">
+				steps (one per line)
+			</label>
+			<textarea
+				id="steps"
+				name="steps"
+				rows={6}
+				placeholder="boil the pasta\nstir in the miso"
+				className="border-foreground bg-background focus-visible:outline-kitchen-eggplant resize-y border-2 px-3 py-2 text-sm font-semibold placeholder:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2"
 			/>
 			{error ? (
 				<p role="alert" className="text-kitchen-tomato text-[13px] font-bold">

@@ -5,17 +5,17 @@ library that remembers what you cooked and helps you decide what's next.
 
 ## Now
 
-- [ ] Meal logging: `meal_logs` table, one-tap "cooked it" from start meal →
-      unlocks everything below
+- [ ] Wire logging: LogMealButton into recipe detail / start meal → unlocks
+      everything below
 - [ ] Shelf ranking: "new to the shelf" band (never cooked), then greatest hits
       by cook count
 - [ ] Home (`/home`): "tonight?" decision surface — simple rotation first, AI
       later, optionally scoped by book → pick → start meal
-- [ ] URL import parser (dialog slot exists, parser stubbed)
+- [ ] URL import: heuristic ingredient parsing (fractions, ranges, "to taste" →
+      structured quantity/unit/name; `raw` stays display truth)
 
 ## Next
 
-- [ ] Recipe detail page: ingredients + steps (its own shape)
 - [ ] Start meal: real cooking flow (steps, screen awake), log = byproduct
 - [ ] Books as AI scope: "what should I cook from weeknight heroes"
 
@@ -31,3 +31,9 @@ library that remembers what you cooked and helps you decide what's next.
 
 - Shelf: top-aligned grid, search, fork dialog add flow (link vs. own hands),
   `/recipes/new` name-first form, group rename/delete server fns
+- URL import: fetch ladder (browser headers → curl-cffi via uv), JSON-LD →
+  microdata → OG parse, dialog wired with pending/failure states
+- Recipe content: recipe_ingredients + recipe_steps tables, detail page with
+  ingredients/steps sections and edit mode, creation form fields
+- Meal logging spine: meal_logs table, meals module (logMeal, listCookCounts,
+  deleteMealLog), LogMealButton component (unwired)

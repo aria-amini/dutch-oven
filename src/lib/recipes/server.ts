@@ -11,9 +11,10 @@ import {
 	getRecipeForUser,
 	listShelfForUser,
 	renameCollectionForUser,
+	updateRecipeContentForUser,
 } from './repository'
 
-async function requireUserId() {
+export async function requireUserId() {
 	const session = await getCurrentSession()
 	if (!session) throw redirect({ href: '/auth/login' })
 	return session.user.id
@@ -59,6 +60,20 @@ export const createRecipe = createServerFn({ method: 'POST' })
 				z.url().max(500).optional(),
 			),
 			collectionId: z.string().min(1).optional(),
+			ingredients: z.array(z.string()).optional(),
+			steps: z.array(z.string()).optional(),
 		}),
 	)
 	.handler(async ({ data }) => createRecipeForUser(await requireUserId(), data))
+
+export const updateRecipeContent = createServerFn({ method: 'POST' })
+	.validator(
+		z.object({
+			id: z.string().min(1),
+			ingredients: z.array(z.string()),
+			steps: z.array(z.string()),
+		}),
+	)
+	.handler(async ({ data }) =>
+		updateRecipeContentForUser(await requireUserId(), data.id, data),
+	)

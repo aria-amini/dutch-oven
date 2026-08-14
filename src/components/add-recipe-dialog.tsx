@@ -9,6 +9,8 @@ import * as DialogPrimitive from '@radix-ui/react-dialog'
 import { useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 
+import { importRecipe } from '@/lib/import/server'
+
 function field(form: FormData, key: string) {
 	const value = form.get(key)
 	return typeof value === 'string' ? value.trim() : ''
@@ -91,7 +93,16 @@ export function AddRecipeDialog({ children }: { children: React.ReactNode }) {
 							</button>
 						</div>
 					) : (
-						<ImportStep onBack={() => setStep('choose')} />
+						<ImportStep
+							onBack={() => setStep('choose')}
+							onImported={(recipeId) => {
+								setOpen(false)
+								void navigate({
+									to: '/recipes/$recipeId',
+									params: { recipeId },
+								})
+							}}
+						/>
 					)}
 				</DialogPrimitive.Content>
 			</DialogPrimitive.Portal>
@@ -99,15 +110,35 @@ export function AddRecipeDialog({ children }: { children: React.ReactNode }) {
 	)
 }
 
-function ImportStep({ onBack }: { onBack: () => void }) {
-	const [note, setNote] = useState(false)
+function ImportStep({
+	onBack,
+	onImported,
+}: {
+	onBack: () => void
+	onImported: (recipeId: string) => void
+}) {
+	const [pending, setPending] = useState(false)
+	const [error, setError] = useState<string>()
 	return (
 		<form
 			className="flex flex-col gap-3"
-			onSubmit={(event) => {
+			onSubmit={async (event) => {
 				event.preventDefault()
-				if (!field(new FormData(event.currentTarget), 'url')) return
-				setNote(true)
+				const url = field(new FormData(event.currentTarget), 'url')
+				if (!url) return
+				setPending(true)
+				setError(undefined)
+				try {
+					const recipe = await importRecipe({ data: { url } })
+					onImported(recipe.id)
+				} catch (cause) {
+					setError(
+						cause instanceof Error
+							? cause.message
+							: "couldn't import that — try again",
+					)
+					setPending(false)
+				}
 			}}
 		>
 			<label className="border-foreground bg-background focus-within:outline-kitchen-eggplant flex items-center gap-2 border-2 px-3 py-2.5 focus-within:outline-2 focus-within:outline-offset-2">
@@ -116,17 +147,19 @@ function ImportStep({ onBack }: { onBack: () => void }) {
 				<input
 					name="url"
 					type="url"
+					required
 					placeholder="paste a recipe link"
-					onChange={() => setNote(false)}
+					onChange={() => setError(undefined)}
 					className="w-full bg-transparent text-sm font-semibold outline-none placeholder:opacity-50"
 				/>
 			</label>
 			<div className="flex items-center gap-3">
 				<button
 					type="submit"
-					className="border-foreground bg-kitchen-basil border-2 px-4 py-2 text-[13px] font-bold uppercase shadow-sm transition-transform hover:-translate-y-0.5"
+					disabled={pending}
+					className="border-foreground bg-kitchen-basil border-2 px-4 py-2 text-[13px] font-bold uppercase shadow-sm transition-transform hover:-translate-y-0.5 disabled:opacity-50"
 				>
-					import
+					{pending ? 'fetching…' : 'import'}
 				</button>
 				<button
 					type="button"
@@ -137,10 +170,15 @@ function ImportStep({ onBack }: { onBack: () => void }) {
 					back
 				</button>
 			</div>
-			{note ? (
+			{pending ? (
 				<output className="text-muted-foreground text-sm font-semibold">
-					import isn't wired up yet — pick "my own two hands" for now
+					grabbing the page — some sites make us knock twice
 				</output>
+			) : null}
+			{error ? (
+				<p role="alert" className="text-kitchen-tomato text-[13px] font-bold">
+					{error}
+				</p>
 			) : null}
 		</form>
 	)
