@@ -3,6 +3,7 @@
 src/vite-env.d.ts
 .output
 .nitro
+.vite
 .tanstack
 node_modules
 .DS_Store
@@ -13,3 +14,4 @@ e2e/.auth
 .pnpm-store
 .projects
 .fallow
+pitchfork.local.toml
