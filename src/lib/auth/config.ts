@@ -9,18 +9,21 @@ import { serverEnv as env } from '@/env.server'
 
 const appOrigin = new URL(env.BETTER_AUTH_URL).origin
 
+export const allowedHosts = [
+	'127.0.0.1:*',
+	'localhost:*',
+	'*.localhost',
+	'*.localhost:*',
+	'*.lvh.ariaamini.com',
+	'dutch-oven-*.up.railway.app',
+	'app-dutch-oven-*.up.railway.app',
+]
+
 export function getAuth() {
 	return betterAuth({
 		appName: 'dutch-oven',
 		baseURL: {
-			allowedHosts: [
-				'127.0.0.1:*',
-				'localhost:*',
-				'*.localhost',
-				'*.lvh.ariaamini.com',
-				'dutch-oven-*.up.railway.app',
-				'app-dutch-oven-*.up.railway.app',
-			],
+			allowedHosts,
 			protocol: 'auto',
 			fallback: appOrigin,
 		},
