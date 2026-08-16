@@ -76,7 +76,7 @@ const lint = {
 	},
 	overrides: [
 		{
-			files: ['scripts/**', '**/*.server.ts'],
+			files: ['scripts/**', 'mise-tasks/**', '**/*.server.ts'],
 			rules: {
 				'no-console': 'off',
 			},
@@ -107,7 +107,7 @@ export default defineConfig({
 		'*': 'vp check --fix',
 	},
 	root,
-	server: { host: '0.0.0.0', port: Number(process.env.APP_PORT ?? 3000) },
+	server: { host: 'localhost', port: Number(process.env.APP_PORT ?? 3000) },
 	resolve: {
 		tsconfigPaths: true,
 		dedupe: ['react', 'react-dom'],
