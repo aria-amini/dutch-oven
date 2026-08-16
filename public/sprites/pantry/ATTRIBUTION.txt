@@ -1,0 +1,16 @@
+Ingredient sprites in this directory are CC0 (public domain), sourced from the
+"CC0 Food Icons" collection curated by AntumDeluge on OpenGameArt:
+https://opengameart.org/content/cc0-food-icons
+
+Contributing sets used here:
+- 7Soul1 (32x32 food sprites)
+- OpenClipart Library (OCAL) food icons
+- Glitch (the game) food art, released as CC0 by Tiny Speck
+- thekingphoenix (32x32 food icons)
+- bluecarrot16 (24x24 LPC food)
+- Jetrel (32x32 food)
+- Dungeon Crawl Stone Soup food tiles
+- Wikimedia-derived pepper sprites
+
+All licensed Creative Commons Zero (CC0). No attribution required; this file
+exists so future maintainers know where replacements can be sourced.
