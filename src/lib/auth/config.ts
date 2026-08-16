@@ -1,11 +1,13 @@
 import { drizzleAdapter } from '@better-auth/drizzle-adapter'
 import { betterAuth } from 'better-auth'
-import { oAuthProxy } from 'better-auth/plugins'
+import { anonymous, oAuthProxy } from 'better-auth/plugins'
 import { tanstackStartCookies } from 'better-auth/tanstack-start'
 
 import { db } from '@/db/connection'
 import { account, session, user, verification } from '@/db/schema'
 import { serverEnv as env } from '@/env.server'
+
+import { moveGuestDataToNewUser } from './link-account'
 
 const appOrigin = new URL(env.BETTER_AUTH_URL).origin
 
@@ -51,6 +53,11 @@ export function getAuth() {
 			oAuthProxy({
 				productionURL: appOrigin,
 				secret: env.OAUTH_PROXY_SECRET,
+			}),
+			anonymous({
+				emailDomainName: new URL(env.BETTER_AUTH_URL).hostname,
+				generateName: () => 'guest cook',
+				onLinkAccount: moveGuestDataToNewUser,
 			}),
 			tanstackStartCookies(),
 		],

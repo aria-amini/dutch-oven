@@ -15,6 +15,7 @@ export const user = snakeCase.table(
 		name: text().notNull(),
 		email: text().notNull(),
 		emailVerified: boolean().default(false).notNull(),
+		isAnonymous: boolean().default(false).notNull(),
 		image: text(),
 		createdAt: timestamp({ withTimezone: true }).notNull(),
 		updatedAt: timestamp({ withTimezone: true }).notNull(),

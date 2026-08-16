@@ -1,11 +1,9 @@
 import { ArrowLeft } from '@phosphor-icons/react'
 import { createFileRoute, Link, notFound } from '@tanstack/react-router'
 
-import { redirectUnauthenticatedUsers } from '@/lib/auth/functions'
-import { getRecipe } from '@/lib/recipes/server'
+import { getRecipe, updateRecipeContent } from '@/lib/recipes/server'
 
 export const Route = createFileRoute('/_app/recipes/$recipeId')({
-	beforeLoad: () => redirectUnauthenticatedUsers({ redirectTo: '/recipes' }),
 	loader: async ({ params }) => {
 		const recipe = await getRecipe({ data: { id: params.recipeId } })
 		if (!recipe) throw notFound()

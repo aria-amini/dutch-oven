@@ -10,17 +10,11 @@ import { motion, useReducedMotion } from 'framer-motion'
 import { useMemo, useState } from 'react'
 
 import { AddRecipeDialog } from '@/components/add-recipe-dialog'
-import type { collections, recipes } from '@/db/schema'
-import { redirectUnauthenticatedUsers } from '@/lib/auth/functions'
-import {
-	createCollection,
-	deleteCollection,
-	listShelf,
-	renameCollection,
-} from '@/lib/recipes/server'
+import { SaveShelfNudge } from '@/components/save-shelf-nudge'
+import type { recipes } from '@/db/schema'
+import { listShelf } from '@/lib/recipes/server'
 
 export const Route = createFileRoute('/_app/recipes/')({
-	beforeLoad: () => redirectUnauthenticatedUsers({ redirectTo: '/recipes' }),
 	loader: () => listShelf(),
 	component: Shelf,
 })
