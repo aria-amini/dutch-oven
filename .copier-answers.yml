@@ -1,7 +1,11 @@
 # Changes here will be overwritten by Copier; do not edit manually
-_commit: v0.0.24
+_commit: v0.0.28
 _src_path: /home/aamini.linux/dotfiles
 app_name: dutch-oven
 google_auth: true
-posthog: true
+google_client_id: 226948588184-bb1fpk1qijd3hbdefae19ailjp06825t.apps.googleusercontent.com
+posthog: false
 sentry: true
+sentry_dsn: https://46d2bf1a5c16ada6bb8b94766e58b58d@o4507597857423360.ingest.us.sentry.io/4511922291081216
+sentry_org: aamini-stack
+sentry_project: dutch-oven

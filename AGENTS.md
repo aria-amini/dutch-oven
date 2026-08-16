@@ -9,12 +9,11 @@ leaving the directory; each jj workspace gets unique ports via
 `mise run setup`).
 
 Google sign-in uses one shared dev OAuth client (type "Desktop app", so any
-loopback port works) hardcoded in `.env.schema`. Deployed environments get
-dedicated credentials via `.env.deployed`.
+loopback port works) defined in `.env.development`. Deployed environments get
+dedicated credentials via `.env.preview` / `.env.production`, resolving secrets
+from Infisical.
 
 Error monitoring is wired through Sentry (`@sentry/tanstackstart-react`).
-
-Product analytics run through PostHog behind a `/api/ingest` proxy.
 
 ## Commands
 

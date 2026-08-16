@@ -39,9 +39,6 @@ importers:
       '@phosphor-icons/react':
         specifier: ^2.1.10
         version: 2.1.10(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      '@posthog/react':
-        specifier: ^1.10.3
-        version: 1.10.3(@types/react@19.2.18)(posthog-js@1.416.0)(react@19.2.8)
       '@radix-ui/react-dialog':
         specifier: ^1.1.19
         version: 1.1.23(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -90,9 +87,9 @@ importers:
       '@tanstack/router-plugin':
         specifier: 1.168.18
         version: 1.168.18(@tanstack/react-router@1.170.18(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(@voidzero-dev/vite-plus-core@0.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.12)(typescript@6.0.3)(yaml@2.9.0))(esbuild@0.28.2)(rolldown@1.2.4)
-      '@varlock/bitwarden-plugin':
-        specifier: ^2.0.0
-        version: 2.0.0(varlock@1.16.1)
+      '@varlock/infisical-plugin':
+        specifier: ^2.1.0
+        version: 2.1.0(varlock@1.16.1)
       '@vitejs/plugin-react':
         specifier: ^6.0.2
         version: 6.0.5(@rolldown/plugin-babel@0.2.3(@babel/core@7.29.7)(@babel/runtime@7.29.7)(@voidzero-dev/vite-plus-core@0.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.12)(typescript@6.0.3)(yaml@2.9.0))(rolldown@1.2.4))(@voidzero-dev/vite-plus-core@0.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.12)(typescript@6.0.3)(yaml@2.9.0))(babel-plugin-react-compiler@1.0.0)
@@ -120,12 +117,6 @@ importers:
       pg:
         specifier: ^8.22.0
         version: 8.23.0
-      posthog-js:
-        specifier: ^1.391.2
-        version: 1.416.0
-      posthog-node:
-        specifier: ^5.49.0
-        version: 5.49.0
       radix-ui:
         specifier: ^1.6.2
         version: 1.6.7(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -1574,25 +1565,6 @@ packages:
 
   '@polka/url@1.0.0-next.29':
     resolution: {integrity: sha512-wwQAWhWSuHaag8c4q/KN/vCoeOJYshAIvMQwD4GpSb3OiZklFfvAgmj0VCBBImRpuF/aFgIRzllXlVX93Jevww==}
-
-  '@posthog/browser-common@0.5.0':
-    resolution: {integrity: sha512-8DaxVZS1bQPbA514RePurLNbYjei3P4jhnC206DwVv5XThmZM3QdlsXenI2ujE3pLbgQ79hYn9o1Kda8I3WK/Q==}
-
-  '@posthog/core@1.48.0':
-    resolution: {integrity: sha512-ezKjVLw9y3Q235PUY+2hRr5DN9t6j2jF1mFAvnvhCCu/Ha6/qBv3zmVJBaHu9PnqqSNtx2St3ggN8Z3TTu/12A==}
-
-  '@posthog/react@1.10.3':
-    resolution: {integrity: sha512-Qu//fGQmVlX0B9kTA3LLg67e7AYLEmeuA0Bf1qSyUM0uUILcRQGjQezhNQPLYSTakOqvXEnl6fM2iQBF6Toxrw==}
-    peerDependencies:
-      '@types/react': '>=16.8.0'
-      posthog-js: '>=1.257.2'
-      react: '>=16.8.0'
-    peerDependenciesMeta:
-      '@types/react':
-        optional: true
-
-  '@posthog/types@1.404.0':
-    resolution: {integrity: sha512-/Y1zKv8SdwkK725SkmgT5QVYnXE7Fi23SPDCZ5Ybu27gTQub4yMTKWuUQekW+gkSKBZ0LyYCQK52mhyMMigMBw==}
 
   '@protobufjs/aspromise@1.1.2':
     resolution: {integrity: sha512-j+gKExEuLmKwvz3OgROXtrJ2UG2x8Ch2YZUxahh+s1F2HZ+wAceUNLkvy6zKCPVRkU++ZWQrdxsUeQXmcg4uoQ==}
@@ -3055,9 +3027,6 @@ packages:
   '@types/statuses@2.0.6':
     resolution: {integrity: sha512-xMAgYwceFhRA2zY+XbEA7mxYbA093wdiW8Vu6gZPGWy9cmOyU9XesH1tNcEWsKFd5Vzrqx5T3D38PWx1FIIXkA==}
 
-  '@types/trusted-types@2.0.7':
-    resolution: {integrity: sha512-ScaPdn1dQczgbl0QFTeTOmVHFULt394XJgOQNoyVhZ6r2vLnMLJfBPd53SB52T/3G36VI1/g2MZaX0cwDuXsfw==}
-
   '@types/validate-npm-package-name@4.0.2':
     resolution: {integrity: sha512-lrpDziQipxCEeK5kWxvljWYhUvOiB2A9izZd9B2AFarYAkqZshb4lPbRs7zKEic6eGtH8V/2qJW+dPp9OtF6bw==}
 
@@ -3181,11 +3150,11 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@varlock/bitwarden-plugin@2.0.0':
-    resolution: {integrity: sha512-ObZ2Z0a8NfGcJ3HGxXLahEk1XDcKFLaMD1uDZQpyD8LAh9HjjuFg/NU1o6cZgKMZDN5ZXZOjLTGme1jVSOc69Q==}
+  '@varlock/infisical-plugin@2.1.0':
+    resolution: {integrity: sha512-1muQg+Efnmx8/DZek/rflSfFudRhuQdNS4gd+yZ8HUIg7KIZeRYJ5KugPirlocWTYQuVm6mzhTlCuAKHr6PjKQ==}
     engines: {node: '>=22'}
     peerDependencies:
-      varlock: ^1.8.0
+      varlock: ^1.11.0
 
   '@varlock/vite-integration@1.4.0':
     resolution: {integrity: sha512-nHEJ9hIEa3aLU/l7DLP6OWWFXD2Y8NoWwA+D0ppDim2tLrHtMMOp19EAHvzFxbdzWw0PwN7Z6lHtGapPuEliGQ==}
@@ -3791,9 +3760,6 @@ packages:
     resolution: {integrity: sha512-ei8Aos7ja0weRpFzJnEA9UHJ/7XQmqglbRwnf2ATjcB9Wq874VKH9kfjjirM6UhU2/E5fFYadylyhFldcqSidQ==}
     engines: {node: '>=18'}
 
-  core-js@3.50.0:
-    resolution: {integrity: sha512-BRWgOLKkFeCgRudR6zrs8p9XJZcE14grzKMMssoYrk6krtuEZ7MTKPIY5RzOnqsEKIR9kst7wNzphttraT+Yqw==}
-
   core-util-is@1.0.3:
     resolution: {integrity: sha512-ZQBvi1DcpJ4GDqanjucZ2Hj3wEO5pZDS89BWbkcrvdxksJorwUDDZamX9ldFkp9aw2lmBDLgkObEA4DWNJ9FYQ==}
 
@@ -3952,9 +3918,6 @@ packages:
 
   dom-accessibility-api@0.5.16:
     resolution: {integrity: sha512-X7BJ2yElsnOJ30pZF4uIIDfBEVgF4XEBxL9Bxhy6dnrm5hkzqmsWHGTiHqRiITNhMyFLyAiWndIJP7Z1NTteDg==}
-
-  dompurify@3.4.13:
-    resolution: {integrity: sha512-2vmYIoqjze2d+kakP8S/nS5shfsl587kzwEjcGlTdiksUVgFHnFCsLYDVj/JNqJVOQZGSYBTmuycv0PodwmnMQ==}
 
   dot-case@3.0.4:
     resolution: {integrity: sha512-Kv5nKlh6yRrdrGvxeJ2e5y2eRUpkUosIW4A2AS38zwSz27zu7ufDwQPi5Jhs3XAlGNetl3bmnGhQsMtkKJnj3w==}
@@ -4333,9 +4296,6 @@ packages:
 
   fetchdts@0.1.7:
     resolution: {integrity: sha512-YoZjBdafyLIop9lSxXVI33oLD5kN31q4Td+CasofLLYeLXRFeOsuOw0Uo+XNRi9PZlbfdlN2GmRtm4tCEQ9/KA==}
-
-  fflate@0.4.9:
-    resolution: {integrity: sha512-zdxgIEddhfsyCaWpJ2SdXEP8ZMrKJ6+5jl4OupODcywU0IhRk6gdXuVGcPICyfx2H97hVK7xmJtRLPjkxAX8Vw==}
 
   fflate@0.8.3:
     resolution: {integrity: sha512-tbZNuJrLwGUp3zshBtdy4W+ORxZuIh8a5ilyIEQDC5rY1f3U20JMry0Ll3WBzU58EZKsEuJFXhb5gwv8CsPvgA==}
@@ -5374,29 +5334,9 @@ packages:
     resolution: {integrity: sha512-9ZhXKM/rw350N1ovuWHbGxnGh/SNJ4cnxHiM0rxE4VN41wsg8P8zWn9hv/buK00RP4WvlOyr/RBDiptyxVbkZQ==}
     engines: {node: '>=0.10.0'}
 
-  posthog-js@1.416.0:
-    resolution: {integrity: sha512-9Rd0tq2WTA1U07VucWuCMwlzr+YvODglyN4mOf61TVrxPeMA7KVBiOEAThqaIvAv2kHbZvwTjbd8Ww2oTs221w==}
-
-  posthog-node@5.49.0:
-    resolution: {integrity: sha512-w3vPYmiWIWw0XlRDeRH0TbeRKnHvlQcU7xDwDN7jNm6JpoFQDUyValGjBpQ+Qvv6gmYUaNM2XBSJeeqcB1FtCQ==}
-    engines: {node: ^20.20.0 || >=22.22.0}
-    peerDependencies:
-      rxjs: ^7.0.0
-    peerDependenciesMeta:
-      rxjs:
-        optional: true
-
   powershell-utils@0.1.0:
     resolution: {integrity: sha512-dM0jVuXJPsDN6DvRpea484tCUaMiXWjuCn++HGTqUWzGDjv5tZkEZldAJ/UMlqRYGFrD/etByo4/xOuC/snX2A==}
     engines: {node: '>=20'}
-
-  preact@10.29.8:
-    resolution: {integrity: sha512-ej2aVZ+vZ8WO7tvlQWRM9N63A0KzF9q4mWJfDUHgYaIofWY9hu74QdnQrjoPMmZi2/nZ5gN0bJCQF49xQqx09Q==}
-    peerDependencies:
-      preact-render-to-string: '>=5'
-    peerDependenciesMeta:
-      preact-render-to-string:
-        optional: true
 
   prettier@3.9.6:
     resolution: {integrity: sha512-OpN0zzVdiaiAhxpuuj5efpIS4sY9j7bY6uR5mnj5yPzGkdkjNKSJeUThPb60Jw29QuAZgA4o+/iB49kFiaBX6g==}
@@ -5453,9 +5393,6 @@ packages:
   qs@6.15.3:
     resolution: {integrity: sha512-O9gl3zCl5h5blw1KGUzQKhA5oUXSl8rwUIM5o0S3nCXMliSvy5Dzx7/DJcI+SwgICv+IneSZwhBh1oSyEHA71A==}
     engines: {node: '>=0.6'}
-
-  query-selector-shadow-dom@1.0.1:
-    resolution: {integrity: sha512-lT5yCqEBgfoMYpf3F2xQRK7zEr1rhIIZuceDK6+xRkJQ4NMbHTwXqk4NkwDwQMNqXgG9r9fyHnzwNVs6zV5KRw==}
 
   queue-microtask@1.2.3:
     resolution: {integrity: sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==}
@@ -6219,12 +6156,6 @@ packages:
         optional: true
       jsdom:
         optional: true
-
-  web-vitals@5.3.0:
-    resolution: {integrity: sha512-q6LWsLatGYZp5VGBIOvbTj6JBV2nOmC8KvWztXBmwJcfFAzhwKwbOxhUH306XY3CcaZDUlSmSuNPBsCn0bFu+g==}
-
-  web-vitals@6.0.0:
-    resolution: {integrity: sha512-Guaibvy/+uNtL6Bsu4jmMJGzuSl91oeRH5iO9pPRbYftnFUr3yqT1TUNX/OE4o9HexuEMU3Kb/Wg7iKhlffZUA==}
 
   webidl-conversions@3.0.1:
     resolution: {integrity: sha512-2JAn3z8AR6rjK8Sm8orRC0h/bcl/DqL7tRPdGZ4I1CjdF+EaMLmYxBHyXuKL849eucPFhvBoxMsflfOb8kxaeQ==}
@@ -7466,24 +7397,6 @@ snapshots:
       playwright: 1.62.1
 
   '@polka/url@1.0.0-next.29': {}
-
-  '@posthog/browser-common@0.5.0':
-    dependencies:
-      '@posthog/core': 1.48.0
-      '@posthog/types': 1.404.0
-
-  '@posthog/core@1.48.0':
-    dependencies:
-      '@posthog/types': 1.404.0
-
-  '@posthog/react@1.10.3(@types/react@19.2.18)(posthog-js@1.416.0)(react@19.2.8)':
-    dependencies:
-      posthog-js: 1.416.0
-      react: 19.2.8
-    optionalDependencies:
-      '@types/react': 19.2.18
-
-  '@posthog/types@1.404.0': {}
 
   '@protobufjs/aspromise@1.1.2': {}
 
@@ -9076,9 +8989,6 @@ snapshots:
 
   '@types/statuses@2.0.6': {}
 
-  '@types/trusted-types@2.0.7':
-    optional: true
-
   '@types/validate-npm-package-name@4.0.2': {}
 
   '@typescript/typescript-aix-ppc64@7.0.2':
@@ -9141,7 +9051,7 @@ snapshots:
   '@typescript/typescript-win32-x64@7.0.2':
     optional: true
 
-  '@varlock/bitwarden-plugin@2.0.0(varlock@1.16.1)':
+  '@varlock/infisical-plugin@2.1.0(varlock@1.16.1)':
     dependencies:
       varlock: 1.16.1
 
@@ -9662,8 +9572,6 @@ snapshots:
 
   cookie@1.1.1: {}
 
-  core-js@3.50.0: {}
-
   core-util-is@1.0.3: {}
 
   cors@2.8.6:
@@ -9780,10 +9688,6 @@ snapshots:
       - supports-color
 
   dom-accessibility-api@0.5.16: {}
-
-  dompurify@3.4.13:
-    optionalDependencies:
-      '@types/trusted-types': 2.0.7
 
   dot-case@3.0.4:
     dependencies:
@@ -10093,8 +9997,6 @@ snapshots:
       picomatch: 4.0.5
 
   fetchdts@0.1.7: {}
-
-  fflate@0.4.9: {}
 
   fflate@0.8.3: {}
 
@@ -11021,28 +10923,7 @@ snapshots:
     dependencies:
       xtend: 4.0.2
 
-  posthog-js@1.416.0:
-    dependencies:
-      '@posthog/browser-common': 0.5.0
-      '@posthog/core': 1.48.0
-      '@posthog/types': 1.404.0
-      core-js: 3.50.0
-      dompurify: 3.4.13
-      fflate: 0.4.9
-      preact: 10.29.8
-      query-selector-shadow-dom: 1.0.1
-      web-vitals: 5.3.0
-      web-vitals-soft-navs: web-vitals@6.0.0
-    transitivePeerDependencies:
-      - preact-render-to-string
-
-  posthog-node@5.49.0:
-    dependencies:
-      '@posthog/core': 1.48.0
-
   powershell-utils@0.1.0: {}
-
-  preact@10.29.8: {}
 
   prettier@3.9.6: {}
 
@@ -11112,8 +10993,6 @@ snapshots:
     dependencies:
       es-define-property: 1.0.1
       side-channel: 1.1.1
-
-  query-selector-shadow-dom@1.0.1: {}
 
   queue-microtask@1.2.3: {}
 
@@ -11947,10 +11826,6 @@ snapshots:
       '@vitest/ui': 4.1.9(vitest@4.1.9)
     transitivePeerDependencies:
       - msw
-
-  web-vitals@5.3.0: {}
-
-  web-vitals@6.0.0: {}
 
   webidl-conversions@3.0.1: {}
 

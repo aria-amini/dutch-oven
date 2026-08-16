@@ -20,7 +20,6 @@ import { Route as AppRecipesIndexRouteImport } from './routes/_app/recipes.index
 import { Route as AppRecipesRecipeIdRouteImport } from './routes/_app/recipes.$recipeId'
 import { Route as AppRecipesNewRouteImport } from './routes/_app/recipes.new'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth.$'
-import { Route as ApiIngestSplatRouteImport } from './routes/api/ingest.$'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -76,11 +75,6 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiIngestSplatRoute = ApiIngestSplatRouteImport.update({
-  id: '/api/ingest/$',
-  path: '/api/ingest/$',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -92,7 +86,6 @@ export interface FileRoutesByFullPath {
   '/recipes/$recipeId': typeof AppRecipesRecipeIdRoute
   '/recipes/new': typeof AppRecipesNewRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
-  '/api/ingest/$': typeof ApiIngestSplatRoute
   '/recipes/': typeof AppRecipesIndexRoute
 }
 export interface FileRoutesByTo {
@@ -105,7 +98,6 @@ export interface FileRoutesByTo {
   '/recipes/$recipeId': typeof AppRecipesRecipeIdRoute
   '/recipes/new': typeof AppRecipesNewRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
-  '/api/ingest/$': typeof ApiIngestSplatRoute
   '/recipes': typeof AppRecipesIndexRoute
 }
 export interface FileRoutesById {
@@ -120,7 +112,6 @@ export interface FileRoutesById {
   '/_app/recipes/$recipeId': typeof AppRecipesRecipeIdRoute
   '/_app/recipes/new': typeof AppRecipesNewRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
-  '/api/ingest/$': typeof ApiIngestSplatRoute
   '/_app/recipes/': typeof AppRecipesIndexRoute
 }
 export interface FileRouteTypes {
@@ -135,7 +126,6 @@ export interface FileRouteTypes {
     | '/recipes/$recipeId'
     | '/recipes/new'
     | '/api/auth/$'
-    | '/api/ingest/$'
     | '/recipes/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -148,7 +138,6 @@ export interface FileRouteTypes {
     | '/recipes/$recipeId'
     | '/recipes/new'
     | '/api/auth/$'
-    | '/api/ingest/$'
     | '/recipes'
   id:
     | '__root__'
@@ -162,7 +151,6 @@ export interface FileRouteTypes {
     | '/_app/recipes/$recipeId'
     | '/_app/recipes/new'
     | '/api/auth/$'
-    | '/api/ingest/$'
     | '/_app/recipes/'
   fileRoutesById: FileRoutesById
 }
@@ -172,7 +160,6 @@ export interface RootRouteChildren {
   AuthLoginRoute: typeof AuthLoginRoute
   AuthSignupRoute: typeof AuthSignupRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
-  ApiIngestSplatRoute: typeof ApiIngestSplatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -254,13 +241,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/ingest/$': {
-      id: '/api/ingest/$'
-      path: '/api/ingest/$'
-      fullPath: '/api/ingest/$'
-      preLoaderRoute: typeof ApiIngestSplatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
@@ -290,7 +270,6 @@ const rootRouteChildren: RootRouteChildren = {
   AuthLoginRoute: AuthLoginRoute,
   AuthSignupRoute: AuthSignupRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
-  ApiIngestSplatRoute: ApiIngestSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
