@@ -3,11 +3,9 @@ import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { motion, useReducedMotion } from 'framer-motion'
 import { useState } from 'react'
 
-import { redirectUnauthenticatedUsers } from '@/lib/auth/functions'
 import { createRecipe } from '@/lib/recipes/server'
 
 export const Route = createFileRoute('/_app/recipes/new')({
-	beforeLoad: () => redirectUnauthenticatedUsers({ redirectTo: '/recipes' }),
 	component: NewRecipe,
 })
 

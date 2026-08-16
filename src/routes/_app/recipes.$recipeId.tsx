@@ -7,11 +7,9 @@ import {
 } from '@tanstack/react-router'
 import { useState } from 'react'
 
-import { redirectUnauthenticatedUsers } from '@/lib/auth/functions'
 import { getRecipe, updateRecipeContent } from '@/lib/recipes/server'
 
 export const Route = createFileRoute('/_app/recipes/$recipeId')({
-	beforeLoad: () => redirectUnauthenticatedUsers({ redirectTo: '/recipes' }),
 	loader: async ({ params }) => {
 		const recipe = await getRecipe({ data: { id: params.recipeId } })
 		if (!recipe) throw notFound()

@@ -1,9 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 
-import { redirectUnauthenticatedUsers } from '@/lib/auth/functions'
-
 export const Route = createFileRoute('/_app/settings')({
-	beforeLoad: () => redirectUnauthenticatedUsers({ redirectTo: '/settings' }),
 	component: Settings,
 })
 

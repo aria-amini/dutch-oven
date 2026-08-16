@@ -61,6 +61,22 @@ pin), diner ticket-rail.
 - Entrance: one animated moment for the page (framer-motion, reduced-motion
   safe); filtering does not re-animate.
 
+## Guest mode (built 2026-08-16)
+
+No mandatory sign-in: the full app works anonymously. Better Auth `anonymous`
+plugin — first data server-fn call without a session silently creates an
+anonymous user (`requireUserId` in `src/lib/auth/session.ts`); signup/login
+links the guest account and `onLinkAccount` (`src/lib/auth/link-account.ts`)
+re-points recipes/collections/meal_logs to the real user before the anonymous
+row is deleted. Nudge pattern, both in the world's dashed "not real yet"
+language: a dashed `guest — save shelf` sticker in the rail above settings
+(hidden once signed in), and a dismissible dashed `nice shelf` strip above the
+grid once a guest has ≥3 recipes (dismissal in localStorage, key
+`dutch-oven.shelf-nudge-dismissed`). Profile shows a guest state with a signup
+CTA (no sign-out for guests — it would orphan the shelf); signup heading
+switches to "keep your shelf" for guests. Landing `/` makes "open the shelf" the
+primary CTA, sign-in the quiet one.
+
 ## Data model (built)
 
 `recipes` (id, userId, collectionId?, title, imageUrl?, createdAt) +

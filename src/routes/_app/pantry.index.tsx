@@ -9,7 +9,6 @@ import { useState } from 'react'
 import { z } from 'zod'
 
 import type { PantryLocation, pantryItems } from '@/db/schema'
-import { redirectUnauthenticatedUsers } from '@/lib/auth/functions'
 import {
 	deletePantryItem,
 	listPantry,
@@ -24,7 +23,6 @@ export const Route = createFileRoute('/_app/pantry/')({
 			.catch('fridge'),
 		item: z.string().optional(),
 	}),
-	beforeLoad: () => redirectUnauthenticatedUsers({ redirectTo: '/pantry' }),
 	loader: () => listPantry(),
 	component: Pantry,
 })

@@ -5,7 +5,6 @@ import { z } from 'zod'
 
 import { IngredientCombobox } from '@/components/ingredient-combobox'
 import type { PantryLocation } from '@/db/schema'
-import { redirectUnauthenticatedUsers } from '@/lib/auth/functions'
 import { createPantryItem } from '@/lib/pantry/server'
 import { resolveSpriteSrc } from '@/lib/pantry/sprites'
 
@@ -15,7 +14,6 @@ export const Route = createFileRoute('/_app/pantry/new')({
 			.enum(['fridge', 'freezer', 'pantry-shelf', 'spice-rack'])
 			.catch('fridge'),
 	}),
-	beforeLoad: () => redirectUnauthenticatedUsers({ redirectTo: '/pantry' }),
 	component: NewPantryItem,
 })
 

@@ -3,12 +3,11 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { motion, useReducedMotion } from 'framer-motion'
 
 import { AddRecipeDialog } from '@/components/add-recipe-dialog'
+import { SaveShelfNudge } from '@/components/save-shelf-nudge'
 import type { recipes } from '@/db/schema'
-import { redirectUnauthenticatedUsers } from '@/lib/auth/functions'
 import { listShelf } from '@/lib/recipes/server'
 
 export const Route = createFileRoute('/_app/recipes/')({
-	beforeLoad: () => redirectUnauthenticatedUsers({ redirectTo: '/recipes' }),
 	loader: () => listShelf(),
 	component: Shelf,
 })
@@ -80,6 +79,7 @@ function Shelf() {
 				<h1 className="text-4xl font-extrabold tracking-tight md:text-5xl">
 					your recipes
 				</h1>
+				<SaveShelfNudge recipeCount={userRecipes.length} />
 				<div className="grid grid-cols-2 gap-4 md:auto-rows-[var(--spacing-tile)] md:grid-cols-[repeat(auto-fill,var(--spacing-tile))]">
 					<AddRecipeDialog>
 						<button

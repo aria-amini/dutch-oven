@@ -1,20 +1,13 @@
-import { redirect } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { z } from 'zod'
 
-import { getCurrentSession } from '@/lib/auth/session'
+import { requireUserId } from '@/lib/auth/session'
 
 import {
 	deleteMealLogForUser,
 	listCookCountsForUser,
 	logMealForUser,
 } from './repository'
-
-async function requireUserId() {
-	const session = await getCurrentSession()
-	if (!session) throw redirect({ href: '/auth/login' })
-	return session.user.id
-}
 
 export const logMeal = createServerFn({ method: 'POST' })
 	.validator(

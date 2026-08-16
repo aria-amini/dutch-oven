@@ -1,8 +1,7 @@
-import { redirect } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { z } from 'zod'
 
-import { getCurrentSession } from '@/lib/auth/session'
+import { requireUserId } from '@/lib/auth/session'
 
 import {
 	createCollectionForUser,
@@ -14,11 +13,7 @@ import {
 	updateRecipeContentForUser,
 } from './repository'
 
-export async function requireUserId() {
-	const session = await getCurrentSession()
-	if (!session) throw redirect({ href: '/auth/login' })
-	return session.user.id
-}
+export { requireUserId }
 
 export const listShelf = createServerFn({ method: 'GET' }).handler(async () =>
 	listShelfForUser(await requireUserId()),
