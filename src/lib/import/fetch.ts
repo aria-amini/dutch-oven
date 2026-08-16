@@ -1,13 +1,21 @@
 import { execFile } from 'node:child_process'
 import { lookup } from 'node:dns/promises'
+import { mkdtemp, writeFile } from 'node:fs/promises'
 import { isIP } from 'node:net'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import type { ReadableStream } from 'node:stream/web'
 import { promisify } from 'node:util'
 
-import { parseRecipe } from './parse'
+import { Agent, fetch } from 'undici'
+
+import importFetchScript from '../../../scripts/import-fetch.py?raw'
+import { parseRecipe, type ImportedRecipe } from './parse'
 
 const execFileAsync = promisify(execFile)
 
 const MAX_REDIRECTS = 5
+const MAX_HTML_BYTES = 4 * 1024 * 1024
 
 const BROWSER_HEADERS = {
 	'user-agent':
@@ -91,6 +99,10 @@ function expandIpv6(ip: string): Hextets {
 	]
 }
 
+function embeddedIpv4(hextets: Hextets) {
+	return `${hextets[6] >> 8}.${hextets[6] & 0xff}.${hextets[7] >> 8}.${hextets[7] & 0xff}`
+}
+
 function isPrivateIp(ip: string) {
 	const version = isIP(ip)
 	if (version === 4) return isPrivateIpv4(ip)
@@ -111,19 +123,24 @@ function isPrivateIp(ip: string) {
 				`${hextets[1] >> 8}.${hextets[1] & 0xff}.${hextets[2] >> 8}.${hextets[2] & 0xff}`,
 			)
 		if (first === 0x64 && hextets[1] === 0xff9b)
-			return isPrivateIpv4(
-				`${hextets[6] >> 8}.${hextets[6] & 0xff}.${hextets[7] >> 8}.${hextets[7] & 0xff}`,
-			)
-		const mapped = lower.match(
-			/^(?:::ffff:|(?:0+:){5}ffff:)(\d+\.\d+\.\d+\.\d+)$/,
-		)
-		if (mapped?.[1]) return isPrivateIpv4(mapped[1])
+			return isPrivateIpv4(embeddedIpv4(hextets))
+		const leadingZero = hextets.slice(0, 5).every((hextet) => hextet === 0)
+		if (leadingZero && hextets[5] === 0xffff)
+			return isPrivateIpv4(embeddedIpv4(hextets))
+		if (leadingZero && hextets[5] === 0)
+			return isPrivateIpv4(embeddedIpv4(hextets))
 		return false
 	}
 	return true
 }
 
-async function assertPublicHttpUrl(raw: string) {
+type PinnedTarget = {
+	url: URL
+	hostname: string
+	address: string
+}
+
+async function assertPublicHttpUrl(raw: string): Promise<PinnedTarget> {
 	const url = new URL(raw)
 	if (url.protocol !== 'http:' && url.protocol !== 'https:')
 		throw new Error(`unsupported scheme: ${url.protocol}`)
@@ -131,57 +148,146 @@ async function assertPublicHttpUrl(raw: string) {
 	if (!hostname) throw new Error('missing hostname')
 	if (isIP(hostname)) {
 		if (isPrivateIp(hostname)) throw new Error(`private address: ${hostname}`)
-		return url
+		return { url, hostname, address: hostname }
 	}
 	const addresses = await lookup(hostname, { all: true })
 	if (addresses.length === 0) throw new Error(`unresolvable host: ${hostname}`)
 	for (const { address } of addresses)
 		if (isPrivateIp(address)) throw new Error(`private address: ${hostname}`)
-	return url
+	const address = addresses[0]?.address
+	if (!address) throw new Error(`unresolvable host: ${hostname}`)
+	return { url, hostname, address }
+}
+
+// Pins the connection to the address validated above; without this, a second
+// DNS resolution at connect time could race back to a private address (DNS
+// rebinding). The hostname stays in the URL so Host/SNI are untouched.
+function pinnedDispatcher(target: PinnedTarget) {
+	return new Agent({
+		connect: {
+			lookup(hostname, _options, callback) {
+				const address = hostname === target.hostname ? target.address : ''
+				if (!address || isPrivateIp(address)) {
+					callback(new Error(`refusing connection to ${hostname}`), '', 4)
+					return
+				}
+				callback(null, address, isIP(address))
+			},
+		},
+	})
+}
+
+async function readHtmlBody(response: { body: ReadableStream | null }) {
+	if (!response.body) return ''
+	const reader = response.body.getReader()
+	const chunks: Uint8Array[] = []
+	let received = 0
+	for (;;) {
+		const { done, value } = await reader.read()
+		if (done) break
+		received += value.byteLength
+		if (received > MAX_HTML_BYTES) {
+			await reader.cancel()
+			return null
+		}
+		chunks.push(value)
+	}
+	const bytes = new Uint8Array(received)
+	let offset = 0
+	for (const chunk of chunks) {
+		bytes.set(chunk, offset)
+		offset += chunk.byteLength
+	}
+	return new TextDecoder().decode(bytes)
 }
 
 async function fetchPlain(rawUrl: string) {
 	let url = rawUrl
 	for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
 		const target = await assertPublicHttpUrl(url)
-		const response = await fetch(target, {
-			headers: BROWSER_HEADERS,
-			redirect: 'manual',
-			signal: AbortSignal.timeout(15_000),
-		})
-		if (response.status >= 300 && response.status < 400) {
-			const location = response.headers.get('location')
-			if (!location) return null
-			url = new URL(location, target).toString()
-			continue
+		const dispatcher = pinnedDispatcher(target)
+		try {
+			const response = await fetch(target.url, {
+				headers: BROWSER_HEADERS,
+				redirect: 'manual',
+				signal: AbortSignal.timeout(15_000),
+				dispatcher,
+			})
+			if (response.status >= 300 && response.status < 400) {
+				const location = response.headers.get('location')
+				await response.body?.cancel()
+				if (!location) return null
+				url = new URL(location, target.url).toString()
+				continue
+			}
+			const contentType = response.headers.get('content-type') ?? ''
+			if (!/text\/html|application\/xhtml\+xml/i.test(contentType)) {
+				await response.body?.cancel()
+				return null
+			}
+			const html = await readHtmlBody(response)
+			if (html === null) return null
+			if (isWalled(response.status, html)) return null
+			if (!response.ok) return null
+			return { html, url: target.url.toString() }
+		} finally {
+			await dispatcher.close()
 		}
-		const html = await response.text()
-		if (isWalled(response.status, html)) return null
-		if (!response.ok) return null
-		return html
 	}
 	return null
+}
+
+// The script is inlined into the server bundle (?raw) and materialized to a
+// temp file so the impersonated tier works identically in dev and deploys;
+// it requires uv on PATH (see scripts/import-fetch.py).
+let importScriptPath: Promise<string> | undefined
+
+function resolveImportScript() {
+	importScriptPath ??= (async () => {
+		const dir = await mkdtemp(join(tmpdir(), 'dutch-oven-import-'))
+		const path = join(dir, 'import-fetch.py')
+		await writeFile(path, importFetchScript)
+		return path
+	})()
+	return importScriptPath
 }
 
 async function fetchImpersonated(url: string) {
 	try {
 		const { stdout } = await execFileAsync(
 			'uv',
-			['run', '--with', 'curl-cffi', 'scripts/import-fetch.py', url],
+			['run', '--with', 'curl-cffi', await resolveImportScript(), url],
 			{ maxBuffer: 16 * 1024 * 1024, timeout: 60_000 },
 		)
 		return stdout.length > 0 ? stdout : null
-	} catch {
+	} catch (error) {
+		console.warn(
+			'impersonated recipe fetch failed (requires uv on PATH):',
+			error instanceof Error ? error.message : error,
+		)
 		return null
 	}
 }
 
-export async function fetchRecipeHtml(url: string) {
+export type FetchedRecipePage = {
+	html: string
+	recipe: ImportedRecipe | null
+}
+
+export async function fetchRecipeHtml(
+	rawUrl: string,
+): Promise<FetchedRecipePage | null> {
+	await assertPublicHttpUrl(rawUrl)
 	try {
-		const html = await fetchPlain(url)
-		if (html && parseRecipe(html)) return html
+		const page = await fetchPlain(rawUrl)
+		if (page) {
+			const recipe = parseRecipe(page.html, page.url)
+			if (recipe) return { html: page.html, recipe }
+		}
 	} catch {
-		// fall through to the impersonated tier
+		// transport failure — fall through to the impersonated tier
 	}
-	return fetchImpersonated(url)
+	const html = await fetchImpersonated(rawUrl)
+	if (!html) return null
+	return { html, recipe: parseRecipe(html, rawUrl) }
 }

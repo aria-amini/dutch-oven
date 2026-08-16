@@ -9,7 +9,9 @@ import { serverEnv as env } from '@/env.server'
 
 import { moveGuestDataToNewUser } from './link-account'
 
-const appOrigin = new URL(env.BETTER_AUTH_URL).origin
+const appUrl = new URL(env.BETTER_AUTH_URL)
+const appOrigin = appUrl.origin
+const appHostname = appUrl.hostname
 
 export const allowedHosts = [
 	'127.0.0.1:*',
@@ -55,7 +57,7 @@ export function getAuth() {
 				secret: env.OAUTH_PROXY_SECRET,
 			}),
 			anonymous({
-				emailDomainName: new URL(env.BETTER_AUTH_URL).hostname,
+				emailDomainName: appHostname,
 				generateName: () => 'guest cook',
 				onLinkAccount: moveGuestDataToNewUser,
 			}),

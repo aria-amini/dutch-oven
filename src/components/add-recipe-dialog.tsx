@@ -6,8 +6,8 @@ import {
 	X,
 } from '@phosphor-icons/react'
 import * as DialogPrimitive from '@radix-ui/react-dialog'
-import { useNavigate } from '@tanstack/react-router'
-import { useState } from 'react'
+import { useNavigate, useRouter } from '@tanstack/react-router'
+import { useEffect, useRef, useState } from 'react'
 
 import { importRecipe } from '@/lib/import/server'
 
@@ -18,6 +18,7 @@ function field(form: FormData, key: string) {
 
 export function AddRecipeDialog({ children }: { children: React.ReactNode }) {
 	const navigate = useNavigate()
+	const router = useRouter()
 	const [open, setOpen] = useState(false)
 	const [step, setStep] = useState<'choose' | 'import'>('choose')
 	return (
@@ -96,6 +97,7 @@ export function AddRecipeDialog({ children }: { children: React.ReactNode }) {
 						<ImportStep
 							onBack={() => setStep('choose')}
 							onImported={(recipeId) => {
+								void router.invalidate()
 								setOpen(false)
 								void navigate({
 									to: '/recipes/$recipeId',
@@ -119,6 +121,13 @@ function ImportStep({
 }) {
 	const [pending, setPending] = useState(false)
 	const [error, setError] = useState<string>()
+	const active = useRef(true)
+	useEffect(() => {
+		active.current = true
+		return () => {
+			active.current = false
+		}
+	}, [])
 	return (
 		<form
 			className="flex flex-col gap-3"
@@ -130,8 +139,10 @@ function ImportStep({
 				setError(undefined)
 				try {
 					const recipe = await importRecipe({ data: { url } })
+					if (!active.current) return
 					onImported(recipe.id)
 				} catch (cause) {
+					if (!active.current) return
 					setError(
 						cause instanceof Error
 							? cause.message

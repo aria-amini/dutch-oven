@@ -1,7 +1,7 @@
 import { createServerFn } from '@tanstack/react-start'
 import { z } from 'zod'
 
-import { requireUserId } from '@/lib/auth/session'
+import { getCurrentSession, requireUserId } from '@/lib/auth/session'
 
 import {
 	deleteMealLogForUser,
@@ -25,7 +25,11 @@ export const logMeal = createServerFn({ method: 'POST' })
 	)
 
 export const listCookCounts = createServerFn({ method: 'GET' }).handler(
-	async () => listCookCountsForUser(await requireUserId()),
+	async () => {
+		const session = await getCurrentSession()
+		if (!session) return []
+		return listCookCountsForUser(session.user.id)
+	},
 )
 
 export const deleteMealLog = createServerFn({ method: 'POST' })

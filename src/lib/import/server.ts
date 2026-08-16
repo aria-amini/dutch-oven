@@ -1,21 +1,26 @@
 import { createServerFn } from '@tanstack/react-start'
+import { getRequestIP } from '@tanstack/react-start/server'
 import { z } from 'zod'
 
 import { createRecipeForUser } from '@/lib/recipes/repository'
 import { requireUserId } from '@/lib/recipes/server'
 
 import { fetchRecipeHtml } from './fetch'
-import { parseRecipe } from './parse'
+import { rateLimit, withImportSlot } from './rate-limit'
 
 export const importRecipe = createServerFn({ method: 'POST' })
 	.validator(z.object({ url: z.url({ protocol: /^https?$/ }).max(2000) }))
 	.handler(async ({ data }) => {
 		const userId = await requireUserId()
-		const html = await fetchRecipeHtml(data.url)
-		if (!html) throw new Error("that site won't let us in — try another link")
-		const parsed = parseRecipe(html)
-		if (!parsed) throw new Error("couldn't find a recipe on that page")
-		const recipe = await createRecipeForUser(userId, parsed)
-		if (!recipe) throw new Error("couldn't save that — try again")
-		return recipe
+		const ip = getRequestIP({ xForwardedFor: true }) ?? 'unknown'
+		rateLimit(`user:${userId}`, 10)
+		rateLimit(`ip:${ip}`, 20)
+		return withImportSlot(async () => {
+			const page = await fetchRecipeHtml(data.url)
+			if (!page) throw new Error("that site won't let us in — try another link")
+			if (!page.recipe) throw new Error("couldn't find a recipe on that page")
+			const recipe = await createRecipeForUser(userId, page.recipe)
+			if (!recipe) throw new Error("couldn't save that — try again")
+			return recipe
+		})
 	})

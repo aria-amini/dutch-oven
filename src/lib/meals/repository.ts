@@ -39,7 +39,7 @@ export async function listCookCountsForUser(
 		.innerJoin(recipes, eq(mealLogs.recipeId, recipes.id))
 		.where(and(eq(mealLogs.userId, userId), eq(recipes.userId, userId)))
 		.groupBy(mealLogs.recipeId)
-		.orderBy(desc(cookCount))
+		.orderBy(desc(cookCount), desc(lastCookedAt))
 }
 
 export async function deleteMealLogForUser(

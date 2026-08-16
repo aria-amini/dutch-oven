@@ -1,10 +1,15 @@
-import { foreignKey, index, text, timestamp } from 'drizzle-orm/pg-core'
-import { pgTable } from 'drizzle-orm/pg-core'
+import {
+	foreignKey,
+	index,
+	snakeCase,
+	text,
+	timestamp,
+} from 'drizzle-orm/pg-core'
 
 import { user } from './auth'
 import { recipes } from './recipes'
 
-export const mealLogs = pgTable(
+export const mealLogs = snakeCase.table(
 	'meal_logs',
 	{
 		id: text().primaryKey(),
@@ -13,7 +18,7 @@ export const mealLogs = pgTable(
 		cookedAt: timestamp({ withTimezone: true }).notNull(),
 	},
 	(table) => [
-		index('meal_logs_user_id_index').on(table.userId),
+		index('meal_logs_user_id_index').on(table.userId, table.cookedAt),
 		index('meal_logs_recipe_id_index').on(table.recipeId),
 		foreignKey({
 			columns: [table.userId],

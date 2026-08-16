@@ -132,6 +132,9 @@ importers:
       tailwind-merge:
         specifier: ^3.6.0
         version: 3.6.0
+      undici:
+        specifier: ^8.10.0
+        version: 8.10.0
       varlock:
         specifier: ^1.14.1
         version: 1.16.1

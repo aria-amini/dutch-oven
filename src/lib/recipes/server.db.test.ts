@@ -123,6 +123,12 @@ describe('recipe shelf', () => {
 				db,
 			),
 		).resolves.toBeNull()
+		await expect(
+			getRecipeForUser(userId, recipe.id, db),
+		).resolves.toMatchObject({
+			ingredients: ['tomatoes'],
+			steps: ['toast', 'serve'],
+		})
 	})
 
 	test('rejects collections owned by another user', async ({ db }) => {

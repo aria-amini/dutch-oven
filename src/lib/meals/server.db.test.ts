@@ -6,6 +6,7 @@ import {
 } from '@tests/support/fixtures/db'
 
 import { user } from '@/db/schema'
+import { moveGuestDataToNewUser } from '@/lib/auth/link-account'
 import { createRecipeForUser } from '@/lib/recipes/repository'
 
 import {
@@ -74,5 +75,32 @@ describe('meal logs', () => {
 		await expect(
 			logMealForUser(userId, recipe.id, new Date(), db),
 		).rejects.toThrow('recipe not found')
+	})
+
+	test('moves guest cook history to the linked account', async ({ db }) => {
+		const guestId = await seedUser(db)
+		const userId = await seedUser(db)
+		const pasta = await createRecipeForUser(guestId, { title: 'pasta' }, db)
+		const soup = await createRecipeForUser(guestId, { title: 'soup' }, db)
+		if (!pasta || !soup) throw new Error('failed to create test recipes')
+		const first = new Date('2026-08-01T18:00:00.000Z')
+		const second = new Date('2026-08-02T18:00:00.000Z')
+
+		await logMealForUser(guestId, pasta.id, first, db)
+		await logMealForUser(guestId, soup.id, second, db)
+
+		await moveGuestDataToNewUser(
+			{
+				anonymousUser: { user: { id: guestId } },
+				newUser: { user: { id: userId } },
+			},
+			db,
+		)
+
+		expect(await listCookCountsForUser(userId, db)).toEqual([
+			{ recipeId: soup.id, count: 1, lastCookedAt: second },
+			{ recipeId: pasta.id, count: 1, lastCookedAt: first },
+		])
+		expect(await listCookCountsForUser(guestId, db)).toEqual([])
 	})
 })

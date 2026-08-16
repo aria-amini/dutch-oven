@@ -120,32 +120,34 @@ export async function createRecipeForUser(
 	},
 	database: typeof db = db,
 ) {
-	if (input.collectionId) {
-		const [owned] = await database
-			.select({ id: collections.id })
-			.from(collections)
-			.where(
-				and(
-					eq(collections.id, input.collectionId),
-					eq(collections.userId, userId),
-				),
-			)
-		if (!owned) throw new Error('collection not found')
-	}
-	const [recipe] = await database
-		.insert(recipes)
-		.values({
-			id: crypto.randomUUID(),
-			userId,
-			collectionId: input.collectionId ?? null,
-			title: input.title,
-			imageUrl: input.imageUrl ?? null,
-			createdAt: new Date(),
-		})
-		.returning()
-	if (!recipe) return recipe
-	await insertRecipeContent(database, recipe.id, input.ingredients, input.steps)
-	return recipe
+	return database.transaction(async (tx) => {
+		if (input.collectionId) {
+			const [owned] = await tx
+				.select({ id: collections.id })
+				.from(collections)
+				.where(
+					and(
+						eq(collections.id, input.collectionId),
+						eq(collections.userId, userId),
+					),
+				)
+			if (!owned) throw new Error('collection not found')
+		}
+		const [recipe] = await tx
+			.insert(recipes)
+			.values({
+				id: crypto.randomUUID(),
+				userId,
+				collectionId: input.collectionId ?? null,
+				title: input.title,
+				imageUrl: input.imageUrl ?? null,
+				createdAt: new Date(),
+			})
+			.returning()
+		if (!recipe) return recipe
+		await insertRecipeContent(tx, recipe.id, input.ingredients, input.steps)
+		return recipe
+	})
 }
 
 function contentLines(lines: string[] | RecipeIngredient[] | undefined) {

@@ -2,6 +2,7 @@ import {
 	foreignKey,
 	index,
 	integer,
+	snakeCase,
 	text,
 	timestamp,
 } from 'drizzle-orm/pg-core'
@@ -9,8 +10,8 @@ import { pgTable } from 'drizzle-orm/pg-core'
 
 import { user } from './auth'
 
-// `raw` is the display truth — structured fields are populated later by
-// heuristic parsing and must never rewrite `raw`.
+// `raw` is the display truth — quantity/unit/name/note are populated later by
+// heuristic parsing, are parse-time only, and are currently not persisted.
 export type RecipeIngredient = {
 	raw: string
 	quantity?: number | null
@@ -64,7 +65,7 @@ export const recipes = pgTable(
 	],
 )
 
-export const recipeIngredients = pgTable(
+export const recipeIngredients = snakeCase.table(
 	'recipe_ingredients',
 	{
 		id: text().primaryKey(),
@@ -82,7 +83,7 @@ export const recipeIngredients = pgTable(
 	],
 )
 
-export const recipeSteps = pgTable(
+export const recipeSteps = snakeCase.table(
 	'recipe_steps',
 	{
 		id: text().primaryKey(),

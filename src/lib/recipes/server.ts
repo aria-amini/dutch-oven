@@ -15,6 +15,10 @@ import {
 
 export { requireUserId }
 
+const contentLines = z
+	.array(z.string())
+	.transform((lines) => lines.map((line) => line.trim()).filter(Boolean))
+
 export const listShelf = createServerFn({ method: 'GET' }).handler(async () =>
 	listShelfForUser(await requireUserId()),
 )
@@ -55,8 +59,8 @@ export const createRecipe = createServerFn({ method: 'POST' })
 				z.url().max(500).optional(),
 			),
 			collectionId: z.string().min(1).optional(),
-			ingredients: z.array(z.string()).optional(),
-			steps: z.array(z.string()).optional(),
+			ingredients: contentLines.optional(),
+			steps: contentLines.optional(),
 		}),
 	)
 	.handler(async ({ data }) => createRecipeForUser(await requireUserId(), data))
@@ -65,8 +69,8 @@ export const updateRecipeContent = createServerFn({ method: 'POST' })
 	.validator(
 		z.object({
 			id: z.string().min(1),
-			ingredients: z.array(z.string()),
-			steps: z.array(z.string()),
+			ingredients: contentLines,
+			steps: contentLines,
 		}),
 	)
 	.handler(async ({ data }) =>

@@ -91,6 +91,21 @@ const OG_ONLY_PAGE = `
 </head><body></body></html>
 `
 
+const JSON_LD_WITH_OG_IMAGE_PAGE = `
+<html><head>
+<meta property="og:image" content="https://example.com/og-stew.jpg" />
+<script type="application/ld+json">
+{
+	"@context": "https://schema.org",
+	"@type": "Recipe",
+	"name": "Og Image Stew",
+	"recipeIngredient": ["1 onion"],
+	"recipeInstructions": ["Cook it low and slow."]
+}
+</script>
+</head><body></body></html>
+`
+
 const WALLED_PAGE = `<html><head><title>Just a moment...</title></head><body>challenge-platform</body></html>`
 
 describe('parseRecipe', () => {
@@ -144,6 +159,12 @@ describe('parseRecipe', () => {
 			'Soften the onion.',
 			'Add beans and simmer.',
 		])
+	})
+
+	test('fills a missing JSON-LD image from og:image', () => {
+		const recipe = parseRecipe(JSON_LD_WITH_OG_IMAGE_PAGE)
+		expect(recipe?.title).toBe('Og Image Stew')
+		expect(recipe?.imageUrl).toBe('https://example.com/og-stew.jpg')
 	})
 
 	test('fails honestly when only OpenGraph tags exist', () => {

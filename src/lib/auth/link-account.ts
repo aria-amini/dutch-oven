@@ -10,15 +10,15 @@ interface LinkAccountParams {
 
 // better-auth deletes the anonymous user row on link, so guest data must be
 // re-pointed at the real account first or the shelf vanishes at signup.
-export async function moveGuestDataToNewUser({
-	anonymousUser,
-	newUser,
-}: LinkAccountParams) {
+export async function moveGuestDataToNewUser(
+	{ anonymousUser, newUser }: LinkAccountParams,
+	database: typeof db = db,
+) {
 	const fromId = anonymousUser.user.id
 	const toId = newUser.user.id
 	if (fromId === toId) return
 
-	await db.transaction(async (tx) => {
+	await database.transaction(async (tx) => {
 		for (const table of [recipes, collections, mealLogs]) {
 			await tx
 				.update(table)

@@ -33,16 +33,19 @@ function RecipeDetail() {
 	const [pending, setPending] = useState(false)
 	const save = async () => {
 		setPending(true)
-		await updateRecipeContent({
-			data: {
-				id: recipe.id,
-				ingredients: ingredients.split('\n'),
-				steps: steps.split('\n'),
-			},
-		})
-		await router.invalidate()
-		setPending(false)
-		setEditing(false)
+		try {
+			await updateRecipeContent({
+				data: {
+					id: recipe.id,
+					ingredients: ingredients.split('\n'),
+					steps: steps.split('\n'),
+				},
+			})
+			await router.invalidate()
+			setEditing(false)
+		} finally {
+			setPending(false)
+		}
 	}
 	return (
 		<main className="bg-background text-foreground min-h-dvh p-6 md:p-10">
