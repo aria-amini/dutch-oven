@@ -10,6 +10,7 @@ import { promisify } from 'node:util'
 import { Agent, fetch } from 'undici'
 
 import importFetchScript from '../../../scripts/import-fetch.py?raw'
+import importFetchLock from '../../../scripts/import-fetch.py.lock?raw'
 import { parseRecipe, type ImportedRecipe } from './parse'
 
 const execFileAsync = promisify(execFile)
@@ -103,7 +104,7 @@ function embeddedIpv4(hextets: Hextets) {
 	return `${hextets[6] >> 8}.${hextets[6] & 0xff}.${hextets[7] >> 8}.${hextets[7] & 0xff}`
 }
 
-function isPrivateIp(ip: string) {
+export function isPrivateIp(ip: string) {
 	const version = isIP(ip)
 	if (version === 4) return isPrivateIpv4(ip)
 	if (version === 6) {
@@ -247,16 +248,21 @@ function resolveImportScript() {
 		const dir = await mkdtemp(join(tmpdir(), 'dutch-oven-import-'))
 		const path = join(dir, 'import-fetch.py')
 		await writeFile(path, importFetchScript)
+		await writeFile(`${path}.lock`, importFetchLock)
 		return path
 	})()
-	return importScriptPath
+	const pending = importScriptPath
+	pending.catch(() => {
+		if (importScriptPath === pending) importScriptPath = undefined
+	})
+	return pending
 }
 
 async function fetchImpersonated(url: string) {
 	try {
 		const { stdout } = await execFileAsync(
 			'uv',
-			['run', '--with', 'curl-cffi', await resolveImportScript(), url],
+			['run', '--locked', await resolveImportScript(), url],
 			{ maxBuffer: 16 * 1024 * 1024, timeout: 60_000 },
 		)
 		return stdout.length > 0 ? stdout : null

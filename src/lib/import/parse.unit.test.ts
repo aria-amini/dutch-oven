@@ -67,6 +67,20 @@ const TOP_LEVEL_ARRAY_PAGE = `
 </head><body></body></html>
 `
 
+const SINGLE_STEP_OBJECT_PAGE = `
+<html><head>
+<script type="application/ld+json">
+{
+	"@context": "https://schema.org",
+	"@type": "Recipe",
+	"name": "One Step Wonder",
+	"recipeIngredient": ["1 cup rice"],
+	"recipeInstructions": {"@type": "HowToStep", "text": "Cook the rice."}
+}
+</script>
+</head><body></body></html>
+`
+
 const MICRODATA_PAGE = `
 <html><body>
 <div itemscope itemtype="https://schema.org/Recipe">
@@ -145,6 +159,12 @@ describe('parseRecipe', () => {
 		const recipe = parseRecipe(TOP_LEVEL_ARRAY_PAGE)
 		expect(recipe?.title).toBe('Dal')
 		expect(recipe?.steps).toEqual(['Simmer the lentils.', 'Season and serve.'])
+	})
+
+	test('handles a standalone HowToStep object as instructions', () => {
+		const recipe = parseRecipe(SINGLE_STEP_OBJECT_PAGE)
+		expect(recipe?.title).toBe('One Step Wonder')
+		expect(recipe?.steps).toEqual(['Cook the rice.'])
 	})
 
 	test('falls back to microdata when JSON-LD is absent', () => {

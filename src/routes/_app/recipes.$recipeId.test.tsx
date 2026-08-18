@@ -16,6 +16,11 @@ const recipeState: { recipe: Recipe | null } = vi.hoisted(() => ({
 	recipe: null,
 }))
 
+const updateCalls = vi.hoisted(() => {
+	const calls: { ingredients: string[]; steps: string[] }[] = []
+	return { calls }
+})
+
 vi.mock('@/lib/recipes/server', () => ({
 	listShelf: () => Promise.resolve({ recipes: [], collections: [] }),
 	getRecipe: () => Promise.resolve(recipeState.recipe),
@@ -24,9 +29,12 @@ vi.mock('@/lib/recipes/server', () => ({
 	}: {
 		data: { ingredients: string[]; steps: string[] }
 	}) => {
+		const ingredients = data.ingredients.filter(Boolean)
+		const steps = data.steps.filter(Boolean)
+		updateCalls.calls.push({ ingredients, steps })
 		if (recipeState.recipe) {
-			recipeState.recipe.ingredients = data.ingredients.filter(Boolean)
-			recipeState.recipe.steps = data.steps.filter(Boolean)
+			recipeState.recipe.ingredients = ingredients
+			recipeState.recipe.steps = steps
 		}
 	},
 }))
@@ -38,6 +46,7 @@ const session = {
 
 describe('recipe detail', () => {
 	beforeEach(() => {
+		updateCalls.calls.length = 0
 		recipeState.recipe = {
 			id: 'recipe-1',
 			userId: 'user-1',
@@ -93,13 +102,9 @@ describe('recipe detail', () => {
 
 		await expect.element(screen.getByText('2 tbsp butter')).toBeVisible()
 		await expect.element(screen.getByText('stir in the butter')).toBeVisible()
-		expect(recipeState.recipe.ingredients).toEqual([
-			'200g pasta',
-			'2 tbsp butter',
-		])
-		expect(recipeState.recipe.steps).toEqual([
-			'boil the pasta',
-			'stir in the butter',
-		])
+		expect(updateCalls.calls.at(-1)).toEqual({
+			ingredients: ['200g pasta', '2 tbsp butter'],
+			steps: ['boil the pasta', 'stir in the butter'],
+		})
 	})
 })

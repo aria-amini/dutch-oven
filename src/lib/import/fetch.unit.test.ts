@@ -1,6 +1,46 @@
 import { describe, expect, test } from 'vite-plus/test'
 
-import { isWalled } from './fetch'
+import { isPrivateIp, isWalled } from './fetch'
+
+describe('isPrivateIp', () => {
+	test.each([
+		// private / non-public IPv4
+		['127.0.0.1', true],
+		['10.0.0.1', true],
+		['192.168.1.1', true],
+		['172.16.0.1', true],
+		['169.254.0.1', true],
+		['100.64.0.1', true],
+		['0.1.2.3', true],
+		['224.0.0.1', true],
+		// hex-encoded loopback (not parseable as IPv4 → refused)
+		['0x7f.0.0.1', true],
+		['0x7f000001', true],
+		// loopback, unspecified, ULA, link-local IPv6
+		['::1', true],
+		['::', true],
+		['fc00::1', true],
+		['fd12::1', true],
+		['fe80::1', true],
+		// IPv4-mapped IPv6
+		['::ffff:127.0.0.1', true],
+		['::ffff:7f00:1', true],
+		['::ffff:8.8.8.8', false],
+		// 6to4
+		['2002:7f00:1::', true],
+		['2002:808:808::', false],
+		// NAT64
+		['64:ff9b::7f00:1', true],
+		['64:ff9b::808:808', false],
+		// public addresses
+		['8.8.8.8', false],
+		['1.1.1.1', false],
+		['2606:4700:4700::1111', false],
+		['2001:4860:4860::8888', false],
+	])('%s → %s', (ip, expected) => {
+		expect(isPrivateIp(ip)).toBe(expected)
+	})
+})
 
 describe('isWalled', () => {
 	test('treats 401 and 403 as walled regardless of body', () => {

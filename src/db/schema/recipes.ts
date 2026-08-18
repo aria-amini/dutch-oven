@@ -6,7 +6,6 @@ import {
 	text,
 	timestamp,
 } from 'drizzle-orm/pg-core'
-import { pgTable } from 'drizzle-orm/pg-core'
 
 import { user } from './auth'
 
@@ -20,7 +19,7 @@ export type RecipeIngredient = {
 	note?: string | null
 }
 
-export const collections = pgTable(
+export const collections = snakeCase.table(
 	'collections',
 	{
 		id: text().primaryKey(),
@@ -39,7 +38,7 @@ export const collections = pgTable(
 	],
 )
 
-export const recipes = pgTable(
+export const recipes = snakeCase.table(
 	'recipes',
 	{
 		id: text().primaryKey(),

@@ -28,7 +28,7 @@
 		"db:push": "varlock run -- drizzle-kit push",
 		"db:generate": "varlock run -- drizzle-kit generate",
 		"db:migrate": "varlock run -- tsx scripts/migrate.ts",
-		"import:fetch": "uv run --with curl-cffi scripts/import-fetch.py",
+		"import:fetch": "uv run --locked scripts/import-fetch.py",
 		"prepare": "vp config --hooks-only",
 		"update-pnpm": "corepack use pnpm@11",
 		"dead-code": "fallow dead-code"

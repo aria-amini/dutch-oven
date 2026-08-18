@@ -171,9 +171,13 @@ function instructionSteps(value: unknown): string[] {
 			.split(/\r?\n/)
 			.map((line) => stripTags(line))
 			.filter(Boolean)
-	if (!Array.isArray(value)) return []
+	const entries = Array.isArray(value)
+		? value
+		: howToStep.safeParse(value).success
+			? [value]
+			: []
 	const steps: string[] = []
-	for (const entry of value) {
+	for (const entry of entries) {
 		if (typeof entry === 'string') {
 			const step = stripTags(entry)
 			if (step) steps.push(step)
