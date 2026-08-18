@@ -22,6 +22,13 @@ describe('isPrivateIp', () => {
 		['fc00::1', true],
 		['fd12::1', true],
 		['fe80::1', true],
+		// multicast (ff00::/8) and documentation (2001:db8::/32)
+		['ff0e::1', true],
+		['ff02::1', true],
+		['2001:db8::1', true],
+		// deprecated IPv4-compatible IPv6
+		['::127.0.0.1', true],
+		['::8.8.8.8', false],
 		// IPv4-mapped IPv6
 		['::ffff:127.0.0.1', true],
 		['::ffff:7f00:1', true],

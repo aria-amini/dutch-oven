@@ -36,6 +36,7 @@ def pinned_address(hostname: str, port: int | None) -> str:
             or ip.is_multicast
             or ip.is_reserved
             or ip.is_unspecified
+            or not ip.is_global
         ):
             raise SystemExit(f"refusing private address for {hostname}")
     return str(infos[0][4][0])

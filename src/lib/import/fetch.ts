@@ -117,6 +117,8 @@ export function isPrivateIp(ip: string) {
 			return true
 		const hextets = expandIpv6(lower)
 		const first = hextets[0]
+		if (first >= 0xff00) return true
+		if (first === 0x2001 && hextets[1] === 0x0db8) return true
 		if (first >= 0xfc00 && first <= 0xfdff) return true
 		if (first >= 0xfe80 && first <= 0xfeff) return true
 		if (first === 0x2002)

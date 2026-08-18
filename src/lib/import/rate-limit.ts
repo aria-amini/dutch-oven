@@ -1,5 +1,8 @@
 type Bucket = { windowStart: number; count: number }
 
+// All limiter state is process-local: buckets, inFlight, and inFlightByUser
+// do not enforce a global limit across horizontally scaled instances. This
+// assumes a single-instance deployment (railway.toml runs numReplicas = 1).
 const MAX_BUCKETS = 5_000
 const buckets = new Map<string, Bucket>()
 
@@ -11,12 +14,12 @@ export function rateLimit(key: string, limit: number, windowMs = 60_000) {
 	if (!bucket || now - bucket.windowStart >= windowMs) {
 		if (buckets.size >= MAX_BUCKETS) {
 			let oldest: string | undefined
+			let oldestStart = Number.POSITIVE_INFINITY
 			for (const [name, entry] of buckets)
-				if (
-					oldest === undefined ||
-					entry.windowStart < buckets.get(oldest)!.windowStart
-				)
+				if (entry.windowStart < oldestStart) {
 					oldest = name
+					oldestStart = entry.windowStart
+				}
 			if (oldest !== undefined) buckets.delete(oldest)
 		}
 		buckets.set(key, { windowStart: now, count: 1 })
