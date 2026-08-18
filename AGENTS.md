@@ -15,6 +15,8 @@ from Infisical.
 
 Error monitoring is wired through Sentry (`@sentry/tanstackstart-react`).
 
+Product analytics run through PostHog behind a `/api/ingest` proxy.
+
 ## Commands
 
 - `vp dev` — start development (usually managed by pitchfork instead)
