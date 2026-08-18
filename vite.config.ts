@@ -132,8 +132,8 @@ export default defineConfig({
 		svgr({ include: '**/*.svg', svgrOptions: { exportType: 'default' } }),
 		varlockVitePlugin({ ssrInjectMode: 'resolved-env' }),
 		sentryTanstackStart({
-			org: 'dutch-oven',
-			project: 'javascript-tanstackstart-react',
+			org: 'aamini-stack',
+			project: 'dutch-oven',
 			authToken: process.env.SENTRY_AUTH_TOKEN ?? '',
 			telemetry: Boolean(process.env.SENTRY_AUTH_TOKEN),
 			silent: !process.env.CI,

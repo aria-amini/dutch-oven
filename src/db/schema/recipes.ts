@@ -2,14 +2,24 @@ import {
 	foreignKey,
 	index,
 	integer,
+	snakeCase,
 	text,
 	timestamp,
 } from 'drizzle-orm/pg-core'
-import { pgTable } from 'drizzle-orm/pg-core'
 
 import { user } from './auth'
 
-export const collections = pgTable(
+// `raw` is the display truth — quantity/unit/name/note are populated later by
+// heuristic parsing, are parse-time only, and are currently not persisted.
+export type RecipeIngredient = {
+	raw: string
+	quantity?: number | null
+	unit?: string | null
+	name?: string | null
+	note?: string | null
+}
+
+export const collections = snakeCase.table(
 	'collections',
 	{
 		id: text().primaryKey(),
@@ -28,7 +38,7 @@ export const collections = pgTable(
 	],
 )
 
-export const recipes = pgTable(
+export const recipes = snakeCase.table(
 	'recipes',
 	{
 		id: text().primaryKey(),
@@ -51,5 +61,41 @@ export const recipes = pgTable(
 			foreignColumns: [collections.id],
 			name: 'recipes_collection_id_fk',
 		}).onDelete('set null'),
+	],
+)
+
+export const recipeIngredients = snakeCase.table(
+	'recipe_ingredients',
+	{
+		id: text().primaryKey(),
+		recipeId: text().notNull(),
+		position: integer().notNull(),
+		text: text().notNull(),
+	},
+	(table) => [
+		index('recipe_ingredients_recipe_id_index').on(table.recipeId),
+		foreignKey({
+			columns: [table.recipeId],
+			foreignColumns: [recipes.id],
+			name: 'recipe_ingredients_recipe_id_fk',
+		}).onDelete('cascade'),
+	],
+)
+
+export const recipeSteps = snakeCase.table(
+	'recipe_steps',
+	{
+		id: text().primaryKey(),
+		recipeId: text().notNull(),
+		position: integer().notNull(),
+		text: text().notNull(),
+	},
+	(table) => [
+		index('recipe_steps_recipe_id_index').on(table.recipeId),
+		foreignKey({
+			columns: [table.recipeId],
+			foreignColumns: [recipes.id],
+			name: 'recipe_steps_recipe_id_fk',
+		}).onDelete('cascade'),
 	],
 )

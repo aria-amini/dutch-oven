@@ -3,12 +3,9 @@ import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { motion, useReducedMotion } from 'framer-motion'
 import { useState } from 'react'
 
-import { redirectUnauthenticatedUsers } from '@/lib/auth/functions'
-import { createRecipe, listShelf } from '@/lib/recipes/server'
+import { createRecipe } from '@/lib/recipes/server'
 
 export const Route = createFileRoute('/_app/recipes/new')({
-	beforeLoad: () => redirectUnauthenticatedUsers({ redirectTo: '/recipes' }),
-	loader: () => listShelf(),
 	component: NewRecipe,
 })
 
@@ -20,7 +17,6 @@ function field(form: FormData, key: string) {
 }
 
 function NewRecipe() {
-	const { collections } = Route.useLoaderData()
 	const reduce = useReducedMotion()
 	const enter = reduce
 		? {}
@@ -47,17 +43,13 @@ function NewRecipe() {
 						what's it called?
 					</h1>
 				</div>
-				<ManualForm collections={collections} />
+				<ManualForm />
 			</motion.div>
 		</main>
 	)
 }
 
-function ManualForm({
-	collections,
-}: {
-	collections: { id: string; name: string }[]
-}) {
+function ManualForm() {
 	const navigate = useNavigate()
 	const [error, setError] = useState<string>()
 	const [pending, setPending] = useState(false)
@@ -69,7 +61,8 @@ function ManualForm({
 				const form = new FormData(event.currentTarget)
 				const title = field(form, 'title')
 				const imageUrl = field(form, 'imageUrl')
-				const collectionId = field(form, 'collectionId')
+				const ingredients = field(form, 'ingredients')
+				const steps = field(form, 'steps')
 				if (!title) {
 					setError('give the recipe a name')
 					return
@@ -81,7 +74,8 @@ function ManualForm({
 						data: {
 							title,
 							...(imageUrl ? { imageUrl } : {}),
-							...(collectionId ? { collectionId } : {}),
+							ingredients: ingredients.split('\n'),
+							steps: steps.split('\n'),
 						},
 					})
 					await navigate({ to: '/recipes' })
@@ -100,18 +94,6 @@ function ManualForm({
 				aria-label="Recipe name"
 				className="border-foreground bg-background border-2 px-3 py-3 text-lg font-bold placeholder:opacity-50"
 			/>
-			<select
-				name="collectionId"
-				aria-label="Group"
-				className="border-foreground bg-background border-2 px-3 py-2 text-sm font-semibold"
-			>
-				<option value="">no group</option>
-				{collections.map((collection) => (
-					<option key={collection.id} value={collection.id}>
-						{collection.name}
-					</option>
-				))}
-			</select>
 			<input
 				name="imageUrl"
 				type="url"
@@ -119,6 +101,26 @@ function ManualForm({
 				placeholder="photo url (optional)"
 				aria-label="Photo URL"
 				className="border-foreground bg-background border-2 px-3 py-2 text-sm font-semibold placeholder:opacity-50"
+			/>
+			<label className="text-[13px] font-bold uppercase" htmlFor="ingredients">
+				ingredients (one per line)
+			</label>
+			<textarea
+				id="ingredients"
+				name="ingredients"
+				rows={5}
+				placeholder="200g pasta\n1 tbsp miso"
+				className="border-foreground bg-background focus-visible:outline-kitchen-eggplant resize-y border-2 px-3 py-2 text-sm font-semibold placeholder:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2"
+			/>
+			<label className="text-[13px] font-bold uppercase" htmlFor="steps">
+				steps (one per line)
+			</label>
+			<textarea
+				id="steps"
+				name="steps"
+				rows={6}
+				placeholder="boil the pasta\nstir in the miso"
+				className="border-foreground bg-background focus-visible:outline-kitchen-eggplant resize-y border-2 px-3 py-2 text-sm font-semibold placeholder:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2"
 			/>
 			{error ? (
 				<p role="alert" className="text-kitchen-tomato text-[13px] font-bold">

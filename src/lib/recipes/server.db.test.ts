@@ -12,6 +12,7 @@ import {
 	createRecipeForUser,
 	getRecipeForUser,
 	listShelfForUser,
+	updateRecipeContentForUser,
 } from './repository'
 
 async function seedUser(db: Database) {
@@ -70,6 +71,64 @@ describe('recipe shelf', () => {
 		expect(other.recipes).toHaveLength(0)
 		expect(other.collections).toHaveLength(0)
 		expect(await getRecipeForUser('user-2', 'missing', db)).toBeNull()
+	})
+
+	test('creates and reads recipe content in order', async ({ db }) => {
+		const userId = await seedUser(db)
+		const recipe = await createRecipeForUser(
+			userId,
+			{
+				title: 'dal',
+				ingredients: [' lentils ', '', 'salt'],
+				steps: [' simmer ', 'serve'],
+			},
+			db,
+		)
+		if (!recipe) throw new Error('recipe was not created')
+
+		await expect(
+			getRecipeForUser(userId, recipe.id, db),
+		).resolves.toMatchObject({
+			ingredients: ['lentils', 'salt'],
+			steps: ['simmer', 'serve'],
+		})
+	})
+
+	test('replaces recipe content and checks ownership', async ({ db }) => {
+		const userId = await seedUser(db)
+		const recipe = await createRecipeForUser(
+			userId,
+			{ title: 'dal', ingredients: ['lentils'], steps: ['simmer'] },
+			db,
+		)
+		if (!recipe) throw new Error('recipe was not created')
+
+		await updateRecipeContentForUser(
+			userId,
+			recipe.id,
+			{ ingredients: ['tomatoes'], steps: ['toast', '', 'serve'] },
+			db,
+		)
+		await expect(
+			getRecipeForUser(userId, recipe.id, db),
+		).resolves.toMatchObject({
+			ingredients: ['tomatoes'],
+			steps: ['toast', 'serve'],
+		})
+		await expect(
+			updateRecipeContentForUser(
+				'user-2',
+				recipe.id,
+				{ ingredients: [], steps: [] },
+				db,
+			),
+		).resolves.toBeNull()
+		await expect(
+			getRecipeForUser(userId, recipe.id, db),
+		).resolves.toMatchObject({
+			ingredients: ['tomatoes'],
+			steps: ['toast', 'serve'],
+		})
 	})
 
 	test('rejects collections owned by another user', async ({ db }) => {

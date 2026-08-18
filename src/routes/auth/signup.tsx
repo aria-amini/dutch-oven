@@ -15,6 +15,8 @@ export const Route = createFileRoute('/auth/signup')({
 })
 function Signup() {
 	const navigate = useNavigate()
+	const session = authClient.useSession()
+	const isGuest = Boolean(session.data?.user.isAnonymous)
 	const [name, setName] = useState('')
 	const [email, setEmail] = useState('')
 	const [password, setPassword] = useState('')
@@ -28,7 +30,15 @@ function Signup() {
 		<main className="grid min-h-dvh place-items-center p-6">
 			<Card className="w-full max-w-md">
 				<CardContent className="space-y-6 pt-6">
-					<h1 className="text-3xl font-bold">Create account</h1>
+					<h1 className="text-3xl font-bold">
+						{isGuest ? 'Keep your shelf' : 'Create account'}
+					</h1>
+					{isGuest ? (
+						<p className="text-muted-foreground text-sm">
+							Your guest recipes come with you — this just makes them yours on
+							any device.
+						</p>
+					) : null}
 					<GoogleAuthButton fallbackRedirect="/recipes" className="w-full" />
 					<form onSubmit={submit} className="space-y-4">
 						<Input
