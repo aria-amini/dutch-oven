@@ -55,5 +55,6 @@ bootstrap). Local development points at the docker services via
 - **GitHub** — source control
 - **Railway** — hosting and Postgres
 - **Cloudflare** — DNS/CDN
+- **PostHog** — product analytics
 - **Sentry** — error monitoring
 - **Infisical** — secrets manager
