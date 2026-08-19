@@ -137,6 +137,7 @@ export default defineConfig({
 			authToken: process.env.SENTRY_AUTH_TOKEN ?? '',
 			telemetry: Boolean(process.env.SENTRY_AUTH_TOKEN),
 			silent: !process.env.CI,
+			tunnelRoute: true,
 		}),
 	],
 	fmt,
