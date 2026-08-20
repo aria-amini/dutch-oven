@@ -14,6 +14,7 @@ import {
 	listPantry,
 	setPantryItemQuantity,
 } from '@/lib/pantry/server'
+import { resolveSpriteSrc } from '@/lib/pantry/sprites'
 
 export const Route = createFileRoute('/_app/pantry/')({
 	validateSearch: z.object({
@@ -31,19 +32,32 @@ type PantryItem = typeof pantryItems.$inferSelect
 const locations: {
 	id: PantryLocation
 	label: string
+	icon: string
 	tabClass: string
 }[] = [
-	{ id: 'fridge', label: 'fridge', tabClass: 'bg-kitchen-eggplant text-white' },
-	{ id: 'freezer', label: 'freezer', tabClass: 'bg-kitchen-basil text-black' },
+	{
+		id: 'fridge',
+		label: 'fridge',
+		icon: '/sprites/pantry/milk.png',
+		tabClass: 'bg-farm-tab-blue',
+	},
+	{
+		id: 'freezer',
+		label: 'freezer',
+		icon: '/sprites/pantry/ice-cube.png',
+		tabClass: 'bg-farm-tab-slate',
+	},
 	{
 		id: 'pantry-shelf',
 		label: 'pantry shelf',
-		tabClass: 'bg-kitchen-yolk text-black',
+		icon: '/sprites/pantry/wheat.png',
+		tabClass: 'bg-farm-tab-orange',
 	},
 	{
 		id: 'spice-rack',
 		label: 'spice rack',
-		tabClass: 'bg-kitchen-tomato text-black',
+		icon: '/sprites/pantry/salt.png',
+		tabClass: 'bg-farm-tab-green',
 	},
 ]
 
@@ -64,22 +78,28 @@ function Pantry() {
 	const emptySlots = slotCount - locationItems.length - 1
 
 	return (
-		<main className="flex-1">
-			<div className="mx-auto flex max-w-6xl flex-col gap-5 p-6 md:p-10">
+		<main className="bg-farm-parchment text-farm-ink min-h-dvh flex-1">
+			<div className="mx-auto flex max-w-6xl flex-col gap-5 p-5 md:p-8">
 				<header className="relative pr-14">
-					<h1 className="text-4xl font-extrabold tracking-tight md:text-5xl">
+					<p className="font-mono text-4xl font-extrabold tracking-tight lowercase md:text-5xl">
+						dutch-oven
+					</p>
+					<h1 className="mt-1 font-mono text-xl font-semibold md:text-2xl">
 						what&apos;s in your pantry?
 					</h1>
 					<Link
 						to="/home"
 						aria-label="Back to home"
-						className="border-foreground bg-card hover:bg-kitchen-yolk focus-visible:outline-kitchen-eggplant absolute top-0 right-0 flex size-10 items-center justify-center border-2 shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2"
+						className="border-farm-oak-dark bg-farm-parchment-light text-farm-ink shadow-farm-sm hover:bg-farm-gold focus-visible:outline-farm-oak-dark absolute top-0 right-0 flex size-10 items-center justify-center rounded-[4px] border-2 focus-visible:outline-2 focus-visible:outline-offset-2"
 					>
 						<X size={18} weight="bold" aria-hidden />
 					</Link>
 				</header>
 
-				<nav aria-label="Locations" className="flex gap-2 overflow-x-auto">
+				<nav
+					aria-label="Locations"
+					className="-mb-0.5 flex gap-2 overflow-x-auto"
+				>
 					{locations.map((location) => {
 						const active = location.id === activeLocation?.id
 						return (
@@ -88,12 +108,19 @@ function Pantry() {
 								to="/pantry"
 								search={{ loc: location.id }}
 								aria-current={active ? 'true' : undefined}
-								className={`focus-visible:outline-kitchen-eggplant shrink-0 border-2 px-4 py-2 text-[13px] font-bold tracking-wide uppercase transition-transform focus-visible:outline-2 focus-visible:outline-offset-2 ${
+								className={`flex shrink-0 items-center gap-2 rounded-t-[6px] border-2 border-b-0 px-4 pt-2.5 pb-3 text-[13px] font-bold tracking-wide uppercase transition-transform ${
 									active
-										? `border-foreground ${location.tabClass} shadow-sm`
-										: 'border-foreground/30 hover:border-foreground hover:-translate-y-0.5 hover:shadow-sm'
-								}`}
+										? `border-farm-oak-dark ${location.tabClass} text-farm-ink shadow-farm-sm relative z-10 -translate-y-0.5`
+										: 'border-farm-oak bg-farm-parchment-deep text-farm-ink-soft hover:text-farm-ink hover:-translate-y-0.5'
+								} focus-visible:outline-farm-oak-dark focus-visible:outline-2 focus-visible:outline-offset-2`}
 							>
+								<span className="border-farm-oak-dark/60 bg-farm-parchment-light flex size-7 items-center justify-center rounded-[3px] border">
+									<img
+										src={location.icon}
+										alt=""
+										className="size-6 [image-rendering:pixelated]"
+									/>
+								</span>
 								{location.label}
 							</Link>
 						)
@@ -103,8 +130,9 @@ function Pantry() {
 				<div className="flex flex-col gap-4 lg:flex-row lg:items-start">
 					<section
 						aria-label={`${activeLocation?.label} inventory`}
-						className="border-foreground bg-card flex-1 border-2 p-3 shadow-md md:p-4"
+						className="border-farm-oak-dark bg-farm-parchment-light shadow-farm-md relative flex-1 rounded-[6px] border-2 p-3 md:p-4"
 					>
+						<Rivets />
 						<div className="grid grid-cols-4 gap-2 md:grid-cols-8">
 							{locationItems.map((item) => (
 								<Slot
@@ -118,7 +146,7 @@ function Pantry() {
 								to="/pantry/new"
 								search={{ loc: activeLocation?.id ?? 'fridge' }}
 								aria-label="Add an ingredient"
-								className="border-foreground/40 hover:border-foreground hover:text-foreground text-foreground/50 focus-visible:outline-kitchen-eggplant flex aspect-square items-center justify-center border-2 border-dashed transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
+								className="border-farm-oak bg-farm-parchment-deep shadow-farm-inset text-farm-ink-soft hover:text-farm-ink hover:border-farm-gold focus-visible:outline-farm-oak-dark flex aspect-square items-center justify-center rounded-[4px] border-2 border-dashed focus-visible:outline-2 focus-visible:outline-offset-2"
 							>
 								<Plus size={22} weight="bold" aria-hidden />
 							</Link>
@@ -126,7 +154,7 @@ function Pantry() {
 								<div
 									key={index}
 									aria-hidden
-									className="border-foreground/15 aspect-square border-2 border-dashed"
+									className="border-farm-oak/40 bg-farm-parchment-deep shadow-farm-inset aspect-square rounded-[4px] border"
 								/>
 							))}
 						</div>
@@ -146,12 +174,13 @@ function Pantry() {
 						to="/pantry"
 						search={{ loc: activeLocation?.id ?? 'fridge' }}
 						aria-label="Close details"
-						className="bg-foreground/40 absolute inset-0 block"
+						className="bg-farm-ink/50 absolute inset-0 block"
 					/>
 					<div className="absolute inset-x-0 bottom-0">
 						<DetailPanel
 							item={selected}
 							locationLabel={activeLocation?.label ?? ''}
+							rounded="top"
 						/>
 					</div>
 				</div>
@@ -175,16 +204,19 @@ function Slot({
 			search={{ loc: location, item: item.id }}
 			aria-label={`${item.name}, quantity ${item.quantity}`}
 			aria-current={selected ? 'true' : undefined}
-			className={`focus-visible:outline-kitchen-eggplant relative flex aspect-square items-center justify-center border-2 p-1 transition-transform focus-visible:outline-2 focus-visible:outline-offset-2 ${
+			className={`group focus-visible:outline-farm-oak-dark relative flex aspect-square items-center justify-center rounded-[4px] border-2 transition-transform focus-visible:outline-2 focus-visible:outline-offset-2 ${
 				selected
-					? 'border-foreground bg-kitchen-yolk shadow-sm'
-					: 'border-foreground bg-card hover:-translate-y-0.5 hover:shadow-sm'
+					? 'border-farm-gold bg-farm-parchment shadow-farm-sm z-10 -translate-y-0.5'
+					: 'border-farm-oak bg-farm-parchment-deep shadow-farm-inset hover:bg-farm-parchment hover:shadow-farm-sm hover:-translate-y-0.5'
 			}`}
 		>
-			<span className="text-center text-[11px] leading-tight font-bold break-all lowercase">
-				{item.name}
-			</span>
-			<span className="bg-foreground text-background absolute right-0.5 bottom-0.5 px-1 font-mono text-[11px] leading-4 font-bold">
+			<img
+				src={resolveSpriteSrc(item.name, item.spriteKey)}
+				alt=""
+				loading="lazy"
+				className="size-3/4 [image-rendering:pixelated] group-hover:scale-105"
+			/>
+			<span className="bg-farm-oak-dark text-farm-parchment-light absolute right-0.5 bottom-0.5 rounded-[3px] px-1 font-mono text-[11px] leading-4 font-bold">
 				{item.quantity}
 			</span>
 		</Link>
@@ -195,10 +227,12 @@ function DetailPanel({
 	item,
 	locationLabel,
 	className = '',
+	rounded = 'all',
 }: {
 	item: PantryItem | null
 	locationLabel: string
 	className?: string
+	rounded?: 'all' | 'top'
 }) {
 	const router = useRouter()
 	const navigate = useNavigate()
@@ -228,14 +262,23 @@ function DetailPanel({
 		}
 	}
 
+	const radius = rounded === 'top' ? 'rounded-t-[6px]' : 'rounded-[6px]'
 	return (
 		<aside
 			aria-label="Item details"
-			className={`border-foreground bg-card border-2 p-5 shadow-md ${className}`}
+			className={`border-farm-oak-dark bg-farm-parchment-light shadow-farm-md relative border-2 p-5 ${radius} ${className}`}
 		>
+			<Rivets />
 			{item ? (
 				<div className="flex flex-col items-center gap-4">
-					<h2 className="text-2xl font-extrabold tracking-tight lowercase">
+					<div className="border-farm-oak bg-farm-parchment-deep shadow-farm-inset flex size-32 items-center justify-center rounded-[4px] border-2">
+						<img
+							src={resolveSpriteSrc(item.name, item.spriteKey)}
+							alt=""
+							className="size-24 [image-rendering:pixelated]"
+						/>
+					</div>
+					<h2 className="font-mono text-2xl font-bold lowercase">
 						{item.name}
 					</h2>
 					<div className="flex items-center gap-3">
@@ -244,7 +287,7 @@ function DetailPanel({
 							aria-label="Decrease quantity"
 							disabled={pending || item.quantity <= 1}
 							onClick={() => changeQuantity(item.id, item.quantity - 1)}
-							className="border-foreground bg-background hover:bg-kitchen-yolk focus-visible:outline-kitchen-eggplant flex size-9 items-center justify-center border-2 shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-40"
+							className="border-farm-oak-dark bg-farm-parchment text-farm-ink shadow-farm-sm hover:bg-farm-gold focus-visible:outline-farm-oak-dark flex size-9 items-center justify-center rounded-[4px] border-2 focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-40"
 						>
 							<Minus size={16} weight="bold" aria-hidden />
 						</button>
@@ -256,19 +299,19 @@ function DetailPanel({
 							aria-label="Increase quantity"
 							disabled={pending}
 							onClick={() => changeQuantity(item.id, item.quantity + 1)}
-							className="border-foreground bg-background hover:bg-kitchen-yolk focus-visible:outline-kitchen-eggplant flex size-9 items-center justify-center border-2 shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-40"
+							className="border-farm-oak-dark bg-farm-parchment text-farm-ink shadow-farm-sm hover:bg-farm-gold focus-visible:outline-farm-oak-dark flex size-9 items-center justify-center rounded-[4px] border-2 focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-40"
 						>
 							<Plus size={16} weight="bold" aria-hidden />
 						</button>
 					</div>
-					<dl className="text-muted-foreground border-foreground/20 w-full border-t pt-3 font-mono text-[13px]">
+					<dl className="text-farm-ink-soft border-farm-oak/40 w-full border-t pt-3 font-mono text-[13px]">
 						<div className="flex justify-between py-0.5">
 							<dt>lives in</dt>
-							<dd className="text-foreground font-semibold">{locationLabel}</dd>
+							<dd className="text-farm-ink font-semibold">{locationLabel}</dd>
 						</div>
 						<div className="flex justify-between py-0.5">
 							<dt>stashed</dt>
-							<dd className="text-foreground font-semibold">
+							<dd className="text-farm-ink font-semibold">
 								{dateFormat.format(item.createdAt)}
 							</dd>
 						</div>
@@ -277,16 +320,36 @@ function DetailPanel({
 						type="button"
 						disabled={pending}
 						onClick={() => remove(item.id, item.location)}
-						className="text-kitchen-tomato focus-visible:outline-kitchen-eggplant mt-1 font-mono text-[13px] font-bold underline underline-offset-4 focus-visible:outline-2 disabled:opacity-40"
+						className="text-farm-ink-soft hover:text-kitchen-tomato focus-visible:outline-farm-oak-dark mt-1 font-mono text-[13px] underline underline-offset-4 focus-visible:outline-2 disabled:opacity-40"
 					>
 						use it up — remove from pantry
 					</button>
 				</div>
 			) : (
-				<p className="text-muted-foreground py-8 text-center font-mono text-[13px]">
-					pick a slot to see what&apos;s inside
-				</p>
+				<div className="flex flex-col items-center gap-3 py-8 text-center">
+					<img
+						src="/sprites/pantry/fallback-other.png"
+						alt=""
+						className="size-16 opacity-60 [image-rendering:pixelated]"
+					/>
+					<p className="text-farm-ink-soft font-mono text-[13px]">
+						pick a slot to see what&apos;s inside
+					</p>
+				</div>
 			)}
 		</aside>
+	)
+}
+
+function Rivets() {
+	const rivet =
+		'bg-farm-oak border-farm-oak-dark absolute size-2 rounded-full border shadow-farm-sm'
+	return (
+		<>
+			<span aria-hidden className={`${rivet} top-1.5 left-1.5`} />
+			<span aria-hidden className={`${rivet} top-1.5 right-1.5`} />
+			<span aria-hidden className={`${rivet} bottom-1.5 left-1.5`} />
+			<span aria-hidden className={`${rivet} right-1.5 bottom-1.5`} />
+		</>
 	)
 }

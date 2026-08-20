@@ -1,73 +1,33 @@
 /* oxlint-disable jsx-a11y/no-noninteractive-element-to-interactive-role, jsx-a11y/prefer-tag-over-role --
    APG combobox popup: listbox/option roles on ul/li are the correct pattern;
-   a native datalist cannot style or fully control the suggestion list. */
+   native datalist/select cannot render sprite-rich options. */
 import { useId, useRef, useState } from 'react'
 
-const ingredients = [
-	'apple',
-	'avocado',
-	'bacon',
-	'banana',
-	'bell pepper',
-	'black pepper',
-	'blueberries',
-	'bread',
-	'broccoli',
-	'butter',
-	'carrot',
-	'cheese',
-	'cherry',
-	'chicken',
-	'chili pepper',
-	'chocolate',
-	'cinnamon',
-	'coffee',
-	'corn',
-	'cucumber',
-	'egg',
-	'eggplant',
-	'fish',
-	'flour',
-	'garlic',
-	'grapes',
-	'honey',
-	'jalapeno',
-	'kale',
-	'lemon',
-	'lettuce',
-	'mango',
-	'meat',
-	'milk',
-	'mushroom',
-	'mustard',
-	'nuts',
-	'olive oil',
-	'olives',
-	'onion',
-	'orange',
-	'peach',
-	'pear',
-	'peas',
-	'pineapple',
-	'potato',
-	'radish',
-	'rice',
-	'salmon',
-	'salt',
-	'sausage',
-	'steak',
-	'strawberry',
-	'tomato',
-	'watermelon',
-	'wheat',
-	'zucchini',
-]
+import { pantrySprites } from '@/lib/pantry/sprites'
 
-function suggest(query: string): string[] {
+type Suggestion = {
+	key: string
+	label: string
+	src: string
+}
+
+const catalog: Suggestion[] = pantrySprites.map((entry) => ({
+	key: entry.key,
+	label: entry.key.replaceAll('-', ' '),
+	src: `/sprites/pantry/${entry.key}.png`,
+}))
+
+function suggest(query: string): Suggestion[] {
 	const normalized = query.trim().toLowerCase()
 	if (!normalized) return []
-	return ingredients
-		.filter((ingredient) => ingredient.startsWith(normalized))
+	return catalog
+		.filter((entry) => {
+			const sprite = pantrySprites.find((s) => s.key === entry.key)
+			return (
+				entry.label.startsWith(normalized) ||
+				sprite?.aliases.some((alias) => alias.includes(normalized))
+			)
+		})
 		.slice(0, 6)
 }
 
@@ -86,10 +46,10 @@ export function IngredientCombobox({
 	const [activeIndex, setActiveIndex] = useState(-1)
 	const suggestions = suggest(value)
 	const expanded =
-		open && suggestions.length > 0 && value.trim() !== suggestions[0]
+		open && suggestions.length > 0 && value.trim() !== suggestions[0]?.label
 
-	function pick(suggestion: string) {
-		onChange(suggestion)
+	function pick(suggestion: Suggestion) {
+		onChange(suggestion.label)
 		setOpen(false)
 		setActiveIndex(-1)
 	}
@@ -107,7 +67,7 @@ export function IngredientCombobox({
 				aria-controls={listboxId}
 				aria-activedescendant={
 					expanded && activeIndex >= 0
-						? `${listboxId}-${activeIndex}`
+						? `${listboxId}-${suggestions[activeIndex]?.key}`
 						: undefined
 				}
 				aria-autocomplete="list"
@@ -141,19 +101,19 @@ export function IngredientCombobox({
 						setActiveIndex(-1)
 					}
 				}}
-				className="border-foreground bg-background focus-visible:outline-kitchen-eggplant w-full border-2 px-3 py-3 text-lg font-bold placeholder:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2"
+				className="border-farm-oak-dark bg-farm-parchment text-farm-ink focus-visible:outline-farm-oak-dark w-full rounded-[4px] border-2 px-3 py-3 text-lg font-bold placeholder:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2"
 			/>
 			{expanded ? (
 				<ul
 					id={listboxId}
 					role="listbox"
 					aria-label="Ingredient suggestions"
-					className="border-foreground bg-card absolute inset-x-0 top-full z-10 mt-1.5 border-2 shadow-md"
+					className="border-farm-oak-dark bg-farm-parchment-light shadow-farm-md absolute inset-x-0 top-full z-10 mt-1.5 overflow-hidden rounded-[4px] border-2"
 				>
 					{suggestions.map((suggestion, index) => (
 						<li
-							key={suggestion}
-							id={`${listboxId}-${index}`}
+							key={suggestion.key}
+							id={`${listboxId}-${suggestion.key}`}
 							role="option"
 							aria-selected={index === activeIndex}
 							onMouseDown={(event) => {
@@ -162,11 +122,20 @@ export function IngredientCombobox({
 								pick(suggestion)
 							}}
 							onMouseEnter={() => setActiveIndex(index)}
-							className={`cursor-pointer px-3 py-2 font-semibold ${
-								index === activeIndex ? 'bg-kitchen-yolk' : ''
+							className={`flex cursor-pointer items-center gap-3 px-3 py-2 font-semibold ${
+								index === activeIndex
+									? 'bg-farm-gold text-farm-ink'
+									: 'text-farm-ink'
 							}`}
 						>
-							{suggestion}
+							<span className="border-farm-oak/50 bg-farm-parchment-deep flex size-8 shrink-0 items-center justify-center rounded-[3px] border">
+								<img
+									src={suggestion.src}
+									alt=""
+									className="size-6 [image-rendering:pixelated]"
+								/>
+							</span>
+							{suggestion.label}
 						</li>
 					))}
 				</ul>

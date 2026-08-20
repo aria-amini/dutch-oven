@@ -45,7 +45,7 @@ export function AppNav() {
 	return (
 		<nav
 			aria-label="Primary"
-			className="border-foreground/20 bg-background sticky top-0 z-10 flex items-center gap-1 overflow-x-auto border-b px-3 py-2 md:h-dvh md:w-48 md:shrink-0 md:flex-col md:items-stretch md:gap-1.5 md:overflow-visible md:border-r md:border-b-0 md:py-6"
+			className="border-farm-oak bg-farm-parchment text-farm-ink sticky top-0 z-10 flex items-center gap-1 overflow-x-auto border-b-2 px-3 py-2 md:h-dvh md:w-48 md:shrink-0 md:flex-col md:items-stretch md:gap-2 md:overflow-visible md:border-r-2 md:border-b-0 md:px-3 md:py-6"
 		>
 			<Link
 				to="/"
@@ -124,12 +124,12 @@ function NavItem({
 	disabled?: boolean
 	bottom?: boolean
 }) {
-	const className = `flex items-center gap-2.5 border-2 px-2.5 py-2 text-[13px] font-bold tracking-wide uppercase md:w-full ${
+	const className = `flex items-center gap-2.5 rounded-[4px] border-2 px-2.5 py-2 text-[13px] font-bold tracking-wide uppercase md:w-full ${
 		bottom ? 'md:mt-auto ' : ''
 	}${
 		active
-			? 'border-foreground bg-kitchen-yolk shadow-sm'
-			: 'hover:border-foreground hover:bg-card hover:shadow-sm focus-visible:border-foreground border-transparent'
+			? 'border-farm-oak-dark bg-farm-gold text-farm-ink shadow-farm-sm'
+			: 'border-farm-oak bg-farm-parchment-light text-farm-ink hover:-translate-y-px hover:shadow-farm-sm'
 	} ${disabled ? 'opacity-35' : ''}`
 	const content = (
 		<>
@@ -152,7 +152,7 @@ function NavItem({
 		<Link
 			to={to}
 			aria-current={active ? 'page' : undefined}
-			className={`${className} focus-visible:outline-kitchen-eggplant focus-visible:outline-2 focus-visible:outline-offset-2`}
+			className={`${className} focus-visible:outline-farm-oak-dark focus-visible:outline-2 focus-visible:outline-offset-2`}
 		>
 			{content}
 		</Link>

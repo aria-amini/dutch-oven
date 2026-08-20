@@ -35,6 +35,23 @@
 	--kitchen-eggplant: #5b3df5;
 	--kitchen-cream: #fdf6ec;
 
+	--farm-parchment: #f2e5c4;
+	--farm-parchment-light: #f8edd4;
+	--farm-parchment-deep: #e3d0a1;
+	--farm-oak: #8a5a2e;
+	--farm-oak-dark: #5f3d1c;
+	--farm-ink: #3f2a12;
+	--farm-ink-soft: #7a6444;
+	--farm-gold: #d9a441;
+	--farm-tab-green: #7d9b4a;
+	--farm-tab-orange: #cf8438;
+	--farm-tab-blue: #6f93b8;
+	--farm-tab-slate: #5b7ba3;
+
+	--farm-shadow-sm: 0 1px 3px rgb(63 42 18 / 0.28);
+	--farm-shadow-md: 0 3px 8px rgb(63 42 18 / 0.32);
+	--farm-shadow-inset: inset 0 2px 4px rgb(63 42 18 / 0.22);
+
 	--success: #2fa84f;
 	--success-foreground: #16130e;
 	--success-tint: #d8eedd;
@@ -99,6 +116,23 @@
 	--kitchen-eggplant: #5b3df5;
 	--kitchen-cream: #fdf6ec;
 
+	--farm-parchment: #f2e5c4;
+	--farm-parchment-light: #f8edd4;
+	--farm-parchment-deep: #e3d0a1;
+	--farm-oak: #8a5a2e;
+	--farm-oak-dark: #5f3d1c;
+	--farm-ink: #3f2a12;
+	--farm-ink-soft: #7a6444;
+	--farm-gold: #d9a441;
+	--farm-tab-green: #7d9b4a;
+	--farm-tab-orange: #cf8438;
+	--farm-tab-blue: #6f93b8;
+	--farm-tab-slate: #5b7ba3;
+
+	--farm-shadow-sm: 0 1px 3px rgb(63 42 18 / 0.28);
+	--farm-shadow-md: 0 3px 8px rgb(63 42 18 / 0.32);
+	--farm-shadow-inset: inset 0 2px 4px rgb(63 42 18 / 0.22);
+
 	--success: #2fa84f;
 	--success-foreground: #16130e;
 	--success-tint: #d8eedd;
@@ -160,6 +194,23 @@
 	--color-kitchen-basil: var(--kitchen-basil);
 	--color-kitchen-eggplant: var(--kitchen-eggplant);
 	--color-kitchen-cream: var(--kitchen-cream);
+
+	--color-farm-parchment: var(--farm-parchment);
+	--color-farm-parchment-light: var(--farm-parchment-light);
+	--color-farm-parchment-deep: var(--farm-parchment-deep);
+	--color-farm-oak: var(--farm-oak);
+	--color-farm-oak-dark: var(--farm-oak-dark);
+	--color-farm-ink: var(--farm-ink);
+	--color-farm-ink-soft: var(--farm-ink-soft);
+	--color-farm-gold: var(--farm-gold);
+	--color-farm-tab-green: var(--farm-tab-green);
+	--color-farm-tab-orange: var(--farm-tab-orange);
+	--color-farm-tab-blue: var(--farm-tab-blue);
+	--color-farm-tab-slate: var(--farm-tab-slate);
+
+	--shadow-farm-sm: var(--farm-shadow-sm);
+	--shadow-farm-md: var(--farm-shadow-md);
+	--shadow-farm-inset: var(--farm-shadow-inset);
 
 	--spacing-tile: clamp(8.5rem, 16vh, 10.5rem);
 
