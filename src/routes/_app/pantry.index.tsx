@@ -14,6 +14,7 @@ import {
 	listPantry,
 	setPantryItemQuantity,
 } from '@/lib/pantry/server'
+import { cn } from '@/lib/utils/ui'
 
 export const Route = createFileRoute('/_app/pantry/')({
 	validateSearch: z.object({
@@ -88,11 +89,12 @@ function Pantry() {
 								to="/pantry"
 								search={{ loc: location.id }}
 								aria-current={active ? 'true' : undefined}
-								className={`focus-visible:outline-kitchen-eggplant shrink-0 border-2 px-4 py-2 text-[13px] font-bold tracking-wide uppercase transition-transform focus-visible:outline-2 focus-visible:outline-offset-2 ${
+								className={cn(
+									'focus-visible:outline-kitchen-eggplant shrink-0 border-2 px-4 py-2 text-[13px] font-bold tracking-wide uppercase transition-transform focus-visible:outline-2 focus-visible:outline-offset-2',
 									active
-										? `border-foreground ${location.tabClass} shadow-sm`
-										: 'border-foreground/30 hover:border-foreground hover:-translate-y-0.5 hover:shadow-sm'
-								}`}
+										? cn('border-foreground shadow-sm', location.tabClass)
+										: 'border-foreground/30 hover:border-foreground hover:-translate-y-0.5 hover:shadow-sm',
+								)}
 							>
 								{location.label}
 							</Link>
@@ -175,11 +177,12 @@ function Slot({
 			search={{ loc: location, item: item.id }}
 			aria-label={`${item.name}, quantity ${item.quantity}`}
 			aria-current={selected ? 'true' : undefined}
-			className={`focus-visible:outline-kitchen-eggplant relative flex aspect-square items-center justify-center border-2 p-1 transition-transform focus-visible:outline-2 focus-visible:outline-offset-2 ${
+			className={cn(
+				'focus-visible:outline-kitchen-eggplant relative flex aspect-square items-center justify-center border-2 p-1 transition-transform focus-visible:outline-2 focus-visible:outline-offset-2',
 				selected
 					? 'border-foreground bg-kitchen-yolk shadow-sm'
-					: 'border-foreground bg-card hover:-translate-y-0.5 hover:shadow-sm'
-			}`}
+					: 'border-foreground bg-card hover:-translate-y-0.5 hover:shadow-sm',
+			)}
 		>
 			<span className="text-center text-[11px] leading-tight font-bold break-all lowercase">
 				{item.name}
@@ -231,7 +234,10 @@ function DetailPanel({
 	return (
 		<aside
 			aria-label="Item details"
-			className={`border-foreground bg-card border-2 p-5 shadow-md ${className}`}
+			className={cn(
+				'border-foreground bg-card border-2 p-5 shadow-md',
+				className,
+			)}
 		>
 			{item ? (
 				<div className="flex flex-col items-center gap-4">
