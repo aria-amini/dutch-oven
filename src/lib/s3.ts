@@ -5,9 +5,11 @@ import {
 } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { createServerFn } from '@tanstack/react-start'
+import { getRequestHeaders } from '@tanstack/react-start/server'
 import { z } from 'zod'
 
 import { serverEnv as env } from '@/env.server'
+import { getAuth } from '@/lib/auth/config'
 
 function getStorageClient() {
 	return new S3Client({
@@ -40,6 +42,15 @@ export const getAvatarUrl = createServerFn({ method: 'GET' })
 export const getAvatarUploadUrl = createServerFn({ method: 'POST' })
 	.validator(z.object({ key: z.string().min(1).max(200) }))
 	.handler(async ({ data }) => {
+		const session = await getAuth().api.getSession({
+			headers: getRequestHeaders(),
+		})
+		if (!session || session.user.isAnonymous) {
+			throw new Error('Sign in to upload an avatar')
+		}
+		if (!data.key.startsWith(`avatars/${session.user.id}-`)) {
+			throw new Error('Invalid avatar key')
+		}
 		const command = new PutObjectCommand({
 			Bucket: env.AWS_S3_BUCKET_NAME,
 			Key: data.key,

@@ -1,14 +1,18 @@
 import {
+	CarrotIcon,
 	CookingPotIcon,
 	FingerprintIcon,
 	GearIcon,
 	HouseIcon,
 	SignOutIcon,
 	SquaresFourIcon,
+	UserIcon,
 } from '@phosphor-icons/react'
 import { Link, useNavigate, useRouterState } from '@tanstack/react-router'
+import { useState } from 'react'
 
 import { authClient } from '@/lib/auth/client'
+import { cn } from '@/lib/utils/ui'
 
 const navItems = [
 	{ label: 'home', icon: HouseIcon, to: '/' as const, match: ['/'] },
@@ -18,13 +22,18 @@ const navItems = [
 		to: '/recipes' as const,
 		match: ['/recipes'],
 	},
+	{
+		label: 'pantry',
+		icon: CarrotIcon,
+		to: '/pantry' as const,
+		match: ['/pantry'],
+	},
 	{ label: 'start meal', icon: CookingPotIcon, disabled: true },
 	{
 		label: 'settings',
 		icon: GearIcon,
 		to: '/settings' as const,
 		match: ['/settings', '/profile'],
-		bottom: true,
 	},
 ]
 
@@ -32,9 +41,6 @@ export function AppNav() {
 	const pathname = useRouterState({
 		select: (state) => state.location.pathname,
 	})
-	const session = authClient.useSession()
-	const user = session.data?.user
-	const isGuest = Boolean(user?.isAnonymous)
 	return (
 		<nav
 			aria-label="Primary"
@@ -50,7 +56,6 @@ export function AppNav() {
 				<NavItem
 					key={item.label}
 					{...item}
-					bottom={'bottom' in item && item.bottom && !user}
 					active={
 						'match' in item &&
 						item.match?.some(
@@ -60,45 +65,92 @@ export function AppNav() {
 					}
 				/>
 			))}
-			{isGuest ? <GuestSticker /> : null}
-			{user && !isGuest ? <AccountControls name={user.name} /> : null}
+			<AccountSection />
 		</nav>
 	)
 }
 
-function AccountControls({ name }: { name: string }) {
+function AccountSection() {
+	const session = authClient.useSession()
 	const navigate = useNavigate()
+	const [signingOut, setSigningOut] = useState(false)
+	const user = session.data?.user
+
 	const signOut = async () => {
-		await authClient.signOut()
-		await navigate({ to: '/' })
+		setSigningOut(true)
+		try {
+			await authClient.signOut()
+			await navigate({ to: '/' })
+		} finally {
+			setSigningOut(false)
+		}
 	}
+
+	const baseClassName =
+		'order-first flex items-center gap-2.5 border-2 px-2.5 py-2 text-[13px] font-bold tracking-wide uppercase md:order-none md:mt-auto md:w-full'
+
+	if (session.isPending) {
+		return (
+			<div
+				aria-hidden
+				className={cn(baseClassName, 'animate-pulse border-transparent')}
+			>
+				<UserIcon size={18} />
+				account
+			</div>
+		)
+	}
+
+	if (!user) {
+		return (
+			<Link
+				to="/auth/login"
+				className={cn(
+					baseClassName,
+					'hover:bg-card hover:border-foreground focus-visible:outline-kitchen-eggplant border-transparent hover:shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2',
+				)}
+			>
+				<UserIcon size={18} aria-hidden />
+				sign in
+			</Link>
+		)
+	}
+
+	if (user.isAnonymous) {
+		return (
+			<Link
+				to="/auth/signup"
+				className={cn(
+					baseClassName,
+					'border-foreground hover:bg-card focus-visible:outline-kitchen-eggplant border-dashed hover:shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2',
+				)}
+			>
+				<FingerprintIcon size={18} aria-hidden />
+				guest — save shelf
+			</Link>
+		)
+	}
+
 	return (
-		<div className="order-first flex items-center gap-2.5 px-2.5 py-2 md:order-none md:mt-auto md:w-full">
-			<span className="text-muted-foreground min-w-0 flex-1 truncate text-[13px] font-bold tracking-wide uppercase">
-				{name}
-			</span>
+		<div className={cn(baseClassName, 'border-transparent')}>
+			<Link
+				to="/profile"
+				title="Profile"
+				className="text-muted-foreground hover:text-foreground focus-visible:outline-kitchen-eggplant min-w-0 flex-1 truncate focus-visible:outline-2 focus-visible:outline-offset-2"
+			>
+				{user.name}
+			</Link>
 			<button
 				type="button"
 				onClick={signOut}
+				disabled={signingOut}
 				aria-label="Sign out"
 				title="Sign out"
-				className="border-foreground hover:bg-card focus-visible:outline-kitchen-eggplant border-2 p-1.5 transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2"
+				className="border-foreground hover:bg-card focus-visible:outline-kitchen-eggplant border-2 p-1.5 transition-transform not-disabled:hover:-translate-x-0.5 not-disabled:hover:-translate-y-0.5 not-disabled:hover:shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50"
 			>
 				<SignOutIcon size={16} weight="bold" aria-hidden />
 			</button>
 		</div>
-	)
-}
-
-function GuestSticker() {
-	return (
-		<Link
-			to="/auth/signup"
-			className="border-foreground hover:bg-card focus-visible:outline-kitchen-eggplant order-first flex items-center gap-2.5 border-2 border-dashed px-2.5 py-2 text-[13px] font-bold tracking-wide uppercase hover:shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 md:order-none md:mt-auto md:w-full"
-		>
-			<FingerprintIcon size={18} aria-hidden />
-			guest — save shelf
-		</Link>
 	)
 }
 
@@ -108,22 +160,20 @@ function NavItem({
 	to,
 	active,
 	disabled,
-	bottom,
 }: {
 	label: string
 	icon: typeof HouseIcon
-	to?: '/' | '/recipes' | '/settings'
+	to?: '/' | '/recipes' | '/pantry' | '/settings'
 	active?: boolean
 	disabled?: boolean
-	bottom?: boolean
 }) {
-	const className = `flex items-center gap-2.5 border-2 px-2.5 py-2 text-[13px] font-bold tracking-wide uppercase md:w-full ${
-		bottom ? 'md:mt-auto ' : ''
-	}${
+	const className = cn(
+		'flex items-center gap-2.5 border-2 px-2.5 py-2 text-[13px] font-bold tracking-wide uppercase md:w-full',
 		active
 			? 'border-foreground bg-kitchen-yolk shadow-sm'
-			: 'hover:border-foreground hover:bg-card hover:shadow-sm focus-visible:border-foreground border-transparent'
-	} ${disabled ? 'opacity-35' : ''}`
+			: 'hover:border-foreground hover:bg-card hover:shadow-sm focus-visible:border-foreground border-transparent',
+		disabled && 'opacity-35',
+	)
 	const content = (
 		<>
 			<Icon size={18} weight={active ? 'fill' : 'regular'} aria-hidden />
@@ -145,7 +195,10 @@ function NavItem({
 		<Link
 			to={to}
 			aria-current={active ? 'page' : undefined}
-			className={`${className} focus-visible:outline-kitchen-eggplant focus-visible:outline-2 focus-visible:outline-offset-2`}
+			className={cn(
+				className,
+				'focus-visible:outline-kitchen-eggplant focus-visible:outline-2 focus-visible:outline-offset-2',
+			)}
 		>
 			{content}
 		</Link>
