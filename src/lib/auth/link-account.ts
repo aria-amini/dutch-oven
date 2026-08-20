@@ -1,7 +1,7 @@
 import { eq } from 'drizzle-orm'
 
 import { db } from '@/db/connection'
-import { collections, mealLogs, recipes } from '@/db/schema'
+import { collections, mealLogs, pantryItems, recipes } from '@/db/schema'
 
 interface LinkAccountParams {
 	anonymousUser: { user: { id: string } }
@@ -19,7 +19,7 @@ export async function moveGuestDataToNewUser(
 	if (fromId === toId) return
 
 	await database.transaction(async (tx) => {
-		for (const table of [recipes, collections, mealLogs]) {
+		for (const table of [recipes, collections, mealLogs, pantryItems]) {
 			await tx
 				.update(table)
 				.set({ userId: toId })
