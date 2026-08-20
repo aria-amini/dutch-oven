@@ -6,6 +6,7 @@ import { z } from 'zod'
 import { IngredientCombobox } from '@/components/ingredient-combobox'
 import type { PantryLocation } from '@/db/schema'
 import { createPantryItem } from '@/lib/pantry/server'
+import { cn } from '@/lib/utils/ui'
 
 export const Route = createFileRoute('/_app/pantry/new')({
 	validateSearch: z.object({
@@ -108,11 +109,12 @@ function NewPantryItem() {
 									type="button"
 									aria-pressed={location === option.id}
 									onClick={() => setLocation(option.id)}
-									className={`focus-visible:outline-kitchen-eggplant border-2 px-2 py-3 text-[13px] font-bold tracking-wide uppercase focus-visible:outline-2 focus-visible:outline-offset-2 ${
+									className={cn(
+										'focus-visible:outline-kitchen-eggplant border-2 px-2 py-3 text-[13px] font-bold tracking-wide uppercase focus-visible:outline-2 focus-visible:outline-offset-2',
 										location === option.id
 											? 'border-foreground bg-kitchen-yolk shadow-sm'
-											: 'border-foreground/30 hover:border-foreground hover:shadow-sm'
-									}`}
+											: 'border-foreground/30 hover:border-foreground hover:shadow-sm',
+									)}
 								>
 									{option.label}
 								</button>

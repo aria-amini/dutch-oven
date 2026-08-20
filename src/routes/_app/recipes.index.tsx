@@ -6,6 +6,7 @@ import { AddRecipeDialog } from '@/components/add-recipe-dialog'
 import { SaveShelfNudge } from '@/components/save-shelf-nudge'
 import type { recipes } from '@/db/schema'
 import { listShelf } from '@/lib/recipes/server'
+import { cn } from '@/lib/utils/ui'
 
 export const Route = createFileRoute('/_app/recipes/')({
 	loader: () => listShelf(),
@@ -108,7 +109,10 @@ function RecipeTile({ recipe, color }: { recipe: Recipe; color: TileColor }) {
 		<Link
 			to="/recipes/$recipeId"
 			params={{ recipeId: recipe.id }}
-			className={`border-foreground focus-visible:outline-kitchen-eggplant relative block aspect-square overflow-hidden border-2 shadow-sm transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 md:aspect-auto ${recipe.imageUrl ? 'bg-card text-black' : tileColors[color]}`}
+			className={cn(
+				'border-foreground focus-visible:outline-kitchen-eggplant relative block aspect-square overflow-hidden border-2 shadow-sm transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 md:aspect-auto',
+				recipe.imageUrl ? 'bg-card text-black' : tileColors[color],
+			)}
 		>
 			{recipe.imageUrl ? (
 				<img
@@ -119,12 +123,21 @@ function RecipeTile({ recipe, color }: { recipe: Recipe; color: TileColor }) {
 				/>
 			) : null}
 			<p
-				className={`absolute top-2.5 left-3 text-[13px] leading-5 font-semibold ${recipe.imageUrl ? 'border-foreground bg-kitchen-cream border-2 px-1.5' : 'opacity-70'}`}
+				className={cn(
+					'absolute top-2.5 left-3 text-[13px] leading-5 font-semibold',
+					recipe.imageUrl
+						? 'border-foreground bg-kitchen-cream border-2 px-1.5'
+						: 'opacity-70',
+				)}
 			>
 				{dateFormat.format(recipe.createdAt)}
 			</p>
 			<h3
-				className={`absolute right-3 bottom-2.5 left-3 text-xl leading-tight font-extrabold ${recipe.imageUrl ? 'border-foreground bg-kitchen-cream right-auto border-2 px-2 py-1' : ''}`}
+				className={cn(
+					'absolute right-3 bottom-2.5 left-3 text-xl leading-tight font-extrabold',
+					recipe.imageUrl &&
+						'border-foreground bg-kitchen-cream right-auto border-2 px-2 py-1',
+				)}
 			>
 				{recipe.title}
 			</h3>

@@ -3,6 +3,8 @@
    a native datalist cannot style or fully control the suggestion list. */
 import { useId, useRef, useState } from 'react'
 
+import { cn } from '@/lib/utils/ui'
+
 const ingredients = [
 	'apple',
 	'avocado',
@@ -162,9 +164,10 @@ export function IngredientCombobox({
 								pick(suggestion)
 							}}
 							onMouseEnter={() => setActiveIndex(index)}
-							className={`cursor-pointer px-3 py-2 font-semibold ${
-								index === activeIndex ? 'bg-kitchen-yolk' : ''
-							}`}
+							className={cn(
+								'cursor-pointer px-3 py-2 font-semibold',
+								index === activeIndex && 'bg-kitchen-yolk',
+							)}
 						>
 							{suggestion}
 						</li>
