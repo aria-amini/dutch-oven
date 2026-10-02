@@ -4,9 +4,8 @@ This is a full-stack TanStack Start application using React 19, Vite+, Drizzle,
 Postgres, Better Auth, Tailwind v4, shadcn, and Varlock. Local services are
 provided by Docker Compose (Postgres and MinIO). The dev server runs as a
 pitchfork daemon (see `pitchfork.toml`) that auto-starts/stops when entering or
-leaving the directory; each jj workspace gets unique ports via
-`mise-tasks/setup.ts` (run by `mise run bootstrap`; re-run anytime with
-`mise run setup`).
+leaving the directory; each jj workspace gets unique ports from
+`scripts/setup.ts`, which bootstrap runs; re-run it anytime.
 
 Google sign-in uses one shared dev OAuth client (type "Desktop app", so any
 loopback port works) defined in `.env.development`. Deployed environments get

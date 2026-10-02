@@ -1,6 +1,6 @@
 # Changes here will be overwritten by Copier; do not edit manually
-_commit: v0.0.29
-_src_path: /home/aamini.linux/dotfiles
+_commit: v0.0.33
+_src_path: gh:aria-amini/tanstack-template
 app_name: dutch-oven
 google_auth: true
 google_client_id: 226948588184-bb1fpk1qijd3hbdefae19ailjp06825t.apps.googleusercontent.com

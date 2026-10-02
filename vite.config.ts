@@ -52,7 +52,10 @@ const lint = {
 		'node',
 		'promise',
 	],
-	jsPlugins: [{ name: 'eslint-js', specifier: 'oxlint-plugin-eslint' }],
+	jsPlugins: [
+		{ name: 'eslint-js', specifier: 'oxlint-plugin-eslint' },
+		'@shadcn/lint',
+	],
 	categories: {},
 	options: {
 		typeAware: true,
@@ -65,6 +68,34 @@ const lint = {
 			'error',
 			{ assertionStyle: 'never' },
 		],
+		'shadcn/require-static-classes': 'error',
+		'shadcn/no-raw-colors': 'error',
+		// The theme declares these utilities in @theme inline, but the rule
+		// cannot resolve values declared that way, so they are allow-listed
+		// by name.
+		'shadcn/no-unknown-classes': [
+			'error',
+			{
+				allow: ['text-2xs', 'leading-display'],
+			},
+		],
+		'shadcn/no-arbitrary-values': [
+			'error',
+			{
+				allow: ['layout', 'text-[15px]'],
+			},
+		],
+		'shadcn/no-inline-styles': 'error',
+		'shadcn/no-restyle': [
+			'error',
+			{
+				allow: ['layout'],
+				contracts: [
+					{ pattern: '^Card$', allow: ['layout', 'spacing', 'color'] },
+					{ pattern: '^Button$', allow: ['layout'] },
+				],
+			},
+		],
 		'eslint-js/no-restricted-syntax': [
 			'error',
 			{
@@ -76,7 +107,15 @@ const lint = {
 	},
 	overrides: [
 		{
-			files: ['scripts/**', 'mise-tasks/**', '**/*.server.ts'],
+			files: ['src/components/ui/**'],
+			rules: {
+				'shadcn/require-static-classes': 'off',
+				'shadcn/no-restyle': 'off',
+				'shadcn/no-arbitrary-values': 'off',
+			},
+		},
+		{
+			files: ['scripts/**', '**/*.server.ts'],
 			rules: {
 				'no-console': 'off',
 			},

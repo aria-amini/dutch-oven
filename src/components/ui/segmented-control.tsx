@@ -25,10 +25,19 @@ export function SegmentedControl<T extends string>({
 }: SegmentedControlProps<T>) {
 	return (
 		<div
-			className={cn('bg-muted grid w-full rounded-md p-1 gap-1', className)}
-			style={{
-				gridTemplateColumns: `repeat(${options.length}, minmax(0, 1fr))`,
-			}}
+			className={cn(
+				'bg-muted grid w-full grid-cols-(--segments) rounded-md p-1 gap-1',
+				className,
+			)}
+			style={
+				// SAFETY: dynamic track count flows to CSS through a custom
+				// property, which the no-inline-styles rule permits; React's
+				// style type just cannot express custom property keys.
+				// oxlint-disable-next-line typescript/consistent-type-assertions
+				{
+					'--segments': `repeat(${options.length}, minmax(0, 1fr))`,
+				} as React.CSSProperties
+			}
 		>
 			{options.map((option) => {
 				const isSelected = value === option.value
