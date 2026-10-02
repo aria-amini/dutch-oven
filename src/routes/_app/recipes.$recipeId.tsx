@@ -51,16 +51,16 @@ function RecipeDetail() {
 		<main className="bg-background text-foreground min-h-dvh p-6 md:p-10">
 			<Link
 				to="/recipes"
-				className="border-foreground bg-card focus-visible:outline-kitchen-eggplant inline-flex items-center gap-2 border-2 px-3 py-2 text-[13px] font-bold uppercase shadow-sm transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2"
+				className="border-foreground bg-card focus-visible:outline-kitchen-eggplant inline-flex items-center gap-2 border-2 px-3 py-2 text-xs font-bold uppercase shadow-sm transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2"
 			>
 				<ArrowLeft weight="bold" aria-hidden />
 				shelf
 			</Link>
 			<div className="mt-10 max-w-2xl">
-				<h1 className="text-5xl leading-[0.95] font-extrabold tracking-tight md:text-7xl">
+				<h1 className="leading-display text-5xl font-extrabold tracking-tight md:text-7xl">
 					{recipe.title}
 				</h1>
-				<p className="mt-4 text-[13px] font-bold uppercase">
+				<p className="mt-4 text-xs font-bold uppercase">
 					<span className="border-foreground bg-kitchen-basil inline-block -rotate-1 border-2 px-2 py-0.5">
 						saved {dateFormat.format(recipe.createdAt)}
 					</span>
@@ -68,7 +68,7 @@ function RecipeDetail() {
 				<div className="mt-6">
 					<button
 						type="button"
-						className="border-foreground bg-background focus-visible:outline-kitchen-eggplant border-2 px-3 py-2 text-[13px] font-bold uppercase shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2"
+						className="border-foreground bg-background focus-visible:outline-kitchen-eggplant border-2 px-3 py-2 text-xs font-bold uppercase shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2"
 						onClick={() => setEditing(true)}
 						disabled={editing}
 					>
@@ -85,7 +85,7 @@ function RecipeDetail() {
 				{editing ? (
 					<div className="mt-10 flex flex-col gap-3">
 						<label
-							className="text-[13px] font-bold uppercase"
+							className="text-xs font-bold uppercase"
 							htmlFor="edit-ingredients"
 						>
 							ingredients (one per line)
@@ -97,10 +97,7 @@ function RecipeDetail() {
 							rows={6}
 							className="border-foreground bg-card focus-visible:outline-kitchen-eggplant resize-y border-2 p-3 font-semibold focus-visible:outline-2 focus-visible:outline-offset-2"
 						/>
-						<label
-							className="text-[13px] font-bold uppercase"
-							htmlFor="edit-steps"
-						>
+						<label className="text-xs font-bold uppercase" htmlFor="edit-steps">
 							steps (one per line)
 						</label>
 						<textarea
@@ -115,7 +112,7 @@ function RecipeDetail() {
 								type="button"
 								disabled={pending}
 								onClick={save}
-								className="border-foreground bg-kitchen-basil border-2 px-4 py-2 text-[13px] font-bold uppercase shadow-sm disabled:opacity-50"
+								className="border-foreground bg-kitchen-basil border-2 px-4 py-2 text-xs font-bold uppercase shadow-sm disabled:opacity-50"
 							>
 								{pending ? 'saving…' : 'save'}
 							</button>
@@ -127,7 +124,7 @@ function RecipeDetail() {
 									setSteps(recipe.steps.join('\n'))
 									setEditing(false)
 								}}
-								className="border-foreground bg-background border-2 px-4 py-2 text-[13px] font-bold uppercase"
+								className="border-foreground bg-background border-2 px-4 py-2 text-xs font-bold uppercase"
 							>
 								cancel
 							</button>
@@ -137,7 +134,7 @@ function RecipeDetail() {
 				{!editing && (
 					<>
 						<section className="mt-10">
-							<h2 className="text-[13px] font-bold uppercase">
+							<h2 className="text-xs font-bold uppercase">
 								<span className="border-foreground bg-kitchen-tomato inline-block -rotate-1 border-2 px-2 py-0.5">
 									ingredients
 								</span>
@@ -160,7 +157,7 @@ function RecipeDetail() {
 							</ul>
 						</section>
 						<section className="mt-10">
-							<h2 className="text-[13px] font-bold uppercase">
+							<h2 className="text-xs font-bold uppercase">
 								<span className="border-foreground bg-kitchen-eggplant inline-block rotate-1 border-2 px-2 py-0.5 text-white">
 									steps
 								</span>
@@ -172,7 +169,7 @@ function RecipeDetail() {
 											key={`${step}-${index}`}
 											className="border-foreground flex gap-3 border-b-2 px-4 py-3 last:border-b-0"
 										>
-											<span className="border-foreground bg-background grid size-6 shrink-0 place-items-center border-2 text-[11px] font-extrabold">
+											<span className="border-foreground bg-background text-2xs grid size-6 shrink-0 place-items-center border-2 font-extrabold">
 												{index + 1}
 											</span>
 											<p className="text-sm font-semibold">{step}</p>

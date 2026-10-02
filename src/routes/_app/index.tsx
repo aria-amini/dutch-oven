@@ -7,7 +7,7 @@ export const Route = createFileRoute('/_app/')({
 function Home() {
 	return (
 		<main className="flex-1 p-6 md:p-10">
-			<h1 className="text-6xl leading-[0.95] font-extrabold tracking-tight md:text-8xl">
+			<h1 className="leading-display text-6xl font-extrabold tracking-tight md:text-8xl">
 				good{' '}
 				<span className="border-foreground bg-kitchen-yolk inline-block -rotate-1 border-2 px-4 shadow-md">
 					day

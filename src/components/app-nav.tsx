@@ -74,7 +74,7 @@ function AccountControls({ name }: { name: string }) {
 	}
 	return (
 		<div className="order-first flex items-center gap-2.5 px-2.5 py-2 md:order-none md:mt-auto md:w-full">
-			<span className="text-muted-foreground min-w-0 flex-1 truncate text-[13px] font-bold tracking-wide uppercase">
+			<span className="text-muted-foreground min-w-0 flex-1 truncate text-xs font-bold tracking-wide uppercase">
 				{name}
 			</span>
 			<button
@@ -94,7 +94,7 @@ function GuestSticker() {
 	return (
 		<Link
 			to="/auth/signup"
-			className="border-foreground hover:bg-card focus-visible:outline-kitchen-eggplant order-first flex items-center gap-2.5 border-2 border-dashed px-2.5 py-2 text-[13px] font-bold tracking-wide uppercase hover:shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 md:order-none md:mt-auto md:w-full"
+			className="border-foreground hover:bg-card focus-visible:outline-kitchen-eggplant order-first flex items-center gap-2.5 border-2 border-dashed px-2.5 py-2 text-xs font-bold tracking-wide uppercase hover:shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 md:order-none md:mt-auto md:w-full"
 		>
 			<FingerprintIcon size={18} aria-hidden />
 			guest — save shelf
@@ -117,7 +117,7 @@ function NavItem({
 	disabled?: boolean
 	bottom?: boolean
 }) {
-	const className = `flex items-center gap-2.5 border-2 px-2.5 py-2 text-[13px] font-bold tracking-wide uppercase md:w-full ${
+	const className = `flex items-center gap-2.5 border-2 px-2.5 py-2 text-xs font-bold tracking-wide uppercase md:w-full ${
 		bottom ? 'md:mt-auto ' : ''
 	}${
 		active

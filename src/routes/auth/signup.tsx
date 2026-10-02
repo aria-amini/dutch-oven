@@ -28,8 +28,8 @@ function Signup() {
 	}
 	return (
 		<main className="grid min-h-dvh place-items-center p-6">
-			<Card className="w-full max-w-md">
-				<CardContent className="space-y-6 pt-6">
+			<Card className="w-full max-w-md space-y-6 pt-6">
+				<CardContent>
 					<h1 className="text-3xl font-bold">
 						{isGuest ? 'Keep your shelf' : 'Create account'}
 					</h1>

@@ -35,7 +35,7 @@ export function LogMealButton({ recipeId }: { recipeId: string }) {
 						setPending(false)
 					}
 				}}
-				className="border-foreground bg-kitchen-basil focus-visible:outline-kitchen-eggplant inline-flex items-center justify-center gap-1.5 border-2 px-4 py-2 text-[13px] font-extrabold uppercase shadow-sm transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-70"
+				className="border-foreground bg-kitchen-basil focus-visible:outline-kitchen-eggplant inline-flex items-center justify-center gap-1.5 border-2 px-4 py-2 text-xs font-extrabold uppercase shadow-sm transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-70"
 			>
 				{logged ? (
 					<>
@@ -49,10 +49,7 @@ export function LogMealButton({ recipeId }: { recipeId: string }) {
 				)}
 			</button>
 			{error ? (
-				<span
-					role="alert"
-					className="text-kitchen-tomato text-[13px] font-bold"
-				>
+				<span role="alert" className="text-kitchen-tomato text-xs font-bold">
 					couldn't log that — try again
 				</span>
 			) : null}

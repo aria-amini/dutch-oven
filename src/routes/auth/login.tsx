@@ -33,8 +33,8 @@ function Login() {
 	}
 	return (
 		<main className="grid min-h-dvh place-items-center p-6">
-			<Card className="w-full max-w-md">
-				<CardContent className="space-y-6 pt-6">
+			<Card className="w-full max-w-md space-y-6 pt-6">
+				<CardContent>
 					<h1 className="text-3xl font-bold">Sign in</h1>
 					<GoogleAuthButton fallbackRedirect="/recipes" className="w-full" />
 					<form onSubmit={submit} className="space-y-4">
