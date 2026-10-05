@@ -30,7 +30,7 @@ export function SaveShelfNudge({ recipeCount }: { recipeCount: number }) {
 
 	return (
 		<div className="border-foreground relative flex flex-col gap-3 border-2 border-dashed p-4 sm:flex-row sm:items-center">
-			<span className="border-foreground bg-kitchen-yolk inline-block w-fit -rotate-1 border-2 px-2 py-0.5 text-[13px] leading-5 font-bold uppercase">
+			<span className="border-foreground bg-kitchen-yolk inline-block w-fit -rotate-1 border-2 px-2 py-0.5 text-xs leading-5 font-bold uppercase">
 				nice shelf
 			</span>
 			<p className="flex-1 text-sm font-semibold">
@@ -39,7 +39,7 @@ export function SaveShelfNudge({ recipeCount }: { recipeCount: number }) {
 			</p>
 			<Link
 				to="/auth/signup"
-				className="border-foreground bg-kitchen-basil focus-visible:outline-kitchen-eggplant w-fit border-2 px-4 py-2 text-[13px] font-bold uppercase shadow-sm transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2"
+				className="border-foreground bg-kitchen-basil focus-visible:outline-kitchen-eggplant w-fit border-2 px-4 py-2 text-xs font-bold uppercase shadow-sm transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2"
 			>
 				keep my shelf
 			</Link>

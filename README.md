@@ -48,7 +48,9 @@ required per environment. Deployed environments (`.env.preview`,
 `.env.production`) resolve secrets from Infisical — set `INFISICAL_CLIENT_ID`
 and `INFISICAL_CLIENT_SECRET` in `.env.local` (gitignored, prompted on first
 bootstrap). Local development points at the docker services via
-`.env.development.local`, regenerated per jj workspace by `mise-tasks/setup.ts`.
+`.env.workspace.local`, regenerated per jj workspace by `scripts/setup.ts`. The
+same file sets `BASE_URL` to the workspace's Pitchfork proxy for local E2E
+tests.
 
 ## Services
 

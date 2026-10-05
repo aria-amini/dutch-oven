@@ -6,6 +6,7 @@ import { AddRecipeDialog } from '@/components/add-recipe-dialog'
 import { SaveShelfNudge } from '@/components/save-shelf-nudge'
 import type { recipes } from '@/db/schema'
 import { listShelf } from '@/lib/recipes/server'
+import { cn } from '@/lib/utils/ui'
 
 export const Route = createFileRoute('/_app/recipes/')({
 	loader: () => listShelf(),
@@ -56,7 +57,7 @@ function Shelf() {
 							type="button"
 							className="border-foreground bg-kitchen-tomato focus-visible:outline-kitchen-eggplant relative block aspect-square w-full max-w-md border-2 text-left text-black shadow-md transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-2 focus-visible:outline-offset-2 md:aspect-auto md:h-[calc(var(--spacing-tile)*2+16px)] md:w-[calc(var(--spacing-tile)*2+16px)]"
 						>
-							<span className="border-foreground bg-kitchen-yolk absolute top-3 left-4 inline-block border-2 px-2 py-0.5 text-[13px] leading-5 font-bold uppercase">
+							<span className="border-foreground bg-kitchen-yolk absolute top-3 left-4 inline-block border-2 px-2 py-0.5 text-xs leading-5 font-bold uppercase">
 								no recipes yet
 							</span>
 							<span className="absolute right-4 bottom-3 left-4 text-3xl leading-none font-extrabold md:text-4xl">
@@ -84,7 +85,7 @@ function Shelf() {
 					<AddRecipeDialog>
 						<button
 							type="button"
-							className="border-foreground text-foreground focus-visible:outline-kitchen-eggplant hover:bg-card relative flex aspect-square flex-col items-center justify-center gap-2 border-2 border-dashed text-[13px] font-bold uppercase transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 md:aspect-auto"
+							className="border-foreground text-foreground focus-visible:outline-kitchen-eggplant hover:bg-card relative flex aspect-square flex-col items-center justify-center gap-2 border-2 border-dashed text-xs font-bold uppercase transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 md:aspect-auto"
 						>
 							<Plus weight="bold" className="size-6" aria-hidden />
 							recipe
@@ -108,7 +109,10 @@ function RecipeTile({ recipe, color }: { recipe: Recipe; color: TileColor }) {
 		<Link
 			to="/recipes/$recipeId"
 			params={{ recipeId: recipe.id }}
-			className={`border-foreground focus-visible:outline-kitchen-eggplant relative block aspect-square overflow-hidden border-2 shadow-sm transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 md:aspect-auto ${recipe.imageUrl ? 'bg-card text-black' : tileColors[color]}`}
+			className={cn(
+				'border-foreground focus-visible:outline-kitchen-eggplant relative block aspect-square overflow-hidden border-2 shadow-sm transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 md:aspect-auto',
+				recipe.imageUrl ? 'bg-card text-black' : tileColors[color],
+			)}
 		>
 			{recipe.imageUrl ? (
 				<img
@@ -119,12 +123,21 @@ function RecipeTile({ recipe, color }: { recipe: Recipe; color: TileColor }) {
 				/>
 			) : null}
 			<p
-				className={`absolute top-2.5 left-3 text-[13px] leading-5 font-semibold ${recipe.imageUrl ? 'border-foreground bg-kitchen-cream border-2 px-1.5' : 'opacity-70'}`}
+				className={cn(
+					'absolute top-2.5 left-3 text-xs leading-5 font-semibold',
+					recipe.imageUrl
+						? 'border-foreground bg-kitchen-cream border-2 px-1.5'
+						: 'opacity-70',
+				)}
 			>
 				{dateFormat.format(recipe.createdAt)}
 			</p>
 			<h3
-				className={`absolute right-3 bottom-2.5 left-3 text-xl leading-tight font-extrabold ${recipe.imageUrl ? 'border-foreground bg-kitchen-cream right-auto border-2 px-2 py-1' : ''}`}
+				className={cn(
+					'absolute right-3 bottom-2.5 left-3 text-xl leading-tight font-extrabold',
+					recipe.imageUrl &&
+						'border-foreground bg-kitchen-cream right-auto border-2 px-2 py-1',
+				)}
 			>
 				{recipe.title}
 			</h3>
