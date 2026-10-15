@@ -21,6 +21,7 @@ function Input(
 }
 
 const ForwardedInput = React.forwardRef(Input)
+
 ForwardedInput.displayName = 'Input'
 
 export { ForwardedInput as Input }

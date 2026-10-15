@@ -18,6 +18,7 @@ const recipeState: { recipe: Recipe | null } = vi.hoisted(() => ({
 
 const updateCalls = vi.hoisted(() => {
 	const calls: { ingredients: string[]; steps: string[] }[] = []
+
 	return { calls }
 })
 
@@ -32,6 +33,7 @@ vi.mock('@/lib/recipes/server', () => ({
 		const ingredients = data.ingredients.filter(Boolean)
 		const steps = data.steps.filter(Boolean)
 		updateCalls.calls.push({ ingredients, steps })
+
 		if (recipeState.recipe) {
 			recipeState.recipe.ingredients = ingredients
 			recipeState.recipe.steps = steps
@@ -63,6 +65,7 @@ describe('recipe detail', () => {
 		if (!recipeState.recipe) throw new Error('recipe was not seeded')
 		recipeState.recipe.ingredients = ['200g pasta', '1 tbsp miso']
 		recipeState.recipe.steps = ['boil the pasta', 'stir in the miso']
+
 		const { screen } = await renderRoute({
 			path: '/recipes/recipe-1',
 			session,
@@ -86,6 +89,7 @@ describe('recipe detail', () => {
 		if (!recipeState.recipe) throw new Error('recipe was not seeded')
 		recipeState.recipe.ingredients = ['200g pasta']
 		recipeState.recipe.steps = ['boil the pasta']
+
 		const { screen } = await renderRoute({
 			path: '/recipes/recipe-1',
 			session,

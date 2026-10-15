@@ -13,6 +13,7 @@ import { importRecipe } from '@/lib/import/server'
 
 function field(form: FormData, key: string) {
 	const value = form.get(key)
+
 	return typeof value === 'string' ? value.trim() : ''
 }
 
@@ -21,11 +22,13 @@ export function AddRecipeDialog({ children }: { children: React.ReactNode }) {
 	const router = useRouter()
 	const [open, setOpen] = useState(false)
 	const [step, setStep] = useState<'choose' | 'import'>('choose')
+
 	return (
 		<DialogPrimitive.Root
 			open={open}
 			onOpenChange={(next) => {
 				setOpen(next)
+
 				if (!next) setStep('choose')
 			}}
 		>
@@ -124,21 +127,26 @@ function ImportStep({
 	const active = useRef(true)
 	useEffect(() => {
 		active.current = true
+
 		return () => {
 			active.current = false
 		}
 	}, [])
+
 	return (
 		<form
 			className="flex flex-col gap-3"
 			onSubmit={async (event) => {
 				event.preventDefault()
 				const url = field(new FormData(event.currentTarget), 'url')
+
 				if (!url) return
 				setPending(true)
 				setError(undefined)
+
 				try {
 					const recipe = await importRecipe({ data: { url } })
+
 					if (!active.current) return
 					onImported(recipe.id)
 				} catch (cause) {

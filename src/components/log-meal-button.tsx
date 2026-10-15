@@ -13,6 +13,7 @@ export function LogMealButton({ recipeId }: { recipeId: string }) {
 	useEffect(() => {
 		if (!logged) return
 		const timer = setTimeout(() => setLogged(false), 2000)
+
 		return () => clearTimeout(timer)
 	}, [logged])
 
@@ -24,6 +25,7 @@ export function LogMealButton({ recipeId }: { recipeId: string }) {
 				onClick={async () => {
 					setPending(true)
 					setError(false)
+
 					try {
 						await logMeal({ data: { recipeId } })
 						await router.invalidate()

@@ -36,6 +36,7 @@ const dateFormat = new Intl.DateTimeFormat('en', {
 function Shelf() {
 	const { recipes: userRecipes } = Route.useLoaderData()
 	const reduce = useReducedMotion()
+
 	const enter = reduce
 		? {}
 		: {
@@ -43,7 +44,9 @@ function Shelf() {
 				animate: { opacity: 1, y: 0 },
 				transition: { duration: 0.6, ease },
 			}
+
 	const isEmpty = userRecipes.length === 0
+
 	if (isEmpty) {
 		return (
 			<main className="flex-1">
@@ -73,6 +76,7 @@ function Shelf() {
 			</main>
 		)
 	}
+
 	return (
 		<main className="flex-1">
 			<motion.div {...enter} className="flex flex-col gap-6 p-6 md:p-10">

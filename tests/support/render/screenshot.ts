@@ -9,6 +9,7 @@ export async function waitForImages(timeout = 1000) {
 	await Promise.all(
 		Array.from(document.images, (image) => {
 			if (image.complete) return Promise.resolve()
+
 			return Promise.race([
 				image.decode().catch(() => undefined),
 				new Promise<void>((resolve) => setTimeout(resolve, timeout)),

@@ -13,11 +13,13 @@ const ease = [0.16, 1, 0.3, 1] as const
 
 function field(form: FormData, key: string) {
 	const value = form.get(key)
+
 	return typeof value === 'string' ? value.trim() : ''
 }
 
 function NewRecipe() {
 	const reduce = useReducedMotion()
+
 	const enter = reduce
 		? {}
 		: {
@@ -25,6 +27,7 @@ function NewRecipe() {
 				animate: { opacity: 1, y: 0 },
 				transition: { duration: 0.6, ease },
 			}
+
 	return (
 		<main className="flex-1">
 			<motion.div
@@ -53,6 +56,7 @@ function ManualForm() {
 	const navigate = useNavigate()
 	const [error, setError] = useState<string>()
 	const [pending, setPending] = useState(false)
+
 	return (
 		<form
 			className="border-foreground bg-card flex flex-col gap-3 border-2 p-5 shadow-md"
@@ -63,12 +67,16 @@ function ManualForm() {
 				const imageUrl = field(form, 'imageUrl')
 				const ingredients = field(form, 'ingredients')
 				const steps = field(form, 'steps')
+
 				if (!title) {
 					setError('give the recipe a name')
+
 					return
 				}
+
 				setPending(true)
 				setError(undefined)
+
 				try {
 					await createRecipe({
 						data: {

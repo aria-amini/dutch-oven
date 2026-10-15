@@ -12,7 +12,9 @@ import { getRecipe, updateRecipeContent } from '@/lib/recipes/server'
 export const Route = createFileRoute('/_app/recipes/$recipeId')({
 	loader: async ({ params }) => {
 		const recipe = await getRecipe({ data: { id: params.recipeId } })
+
 		if (!recipe) throw notFound()
+
 		return recipe
 	},
 	component: RecipeDetail,
@@ -31,8 +33,10 @@ function RecipeDetail() {
 	const [ingredients, setIngredients] = useState(recipe.ingredients.join('\n'))
 	const [steps, setSteps] = useState(recipe.steps.join('\n'))
 	const [pending, setPending] = useState(false)
+
 	const save = async () => {
 		setPending(true)
+
 		try {
 			await updateRecipeContent({
 				data: {
@@ -47,6 +51,7 @@ function RecipeDetail() {
 			setPending(false)
 		}
 	}
+
 	return (
 		<main className="bg-background text-foreground min-h-dvh p-6 md:p-10">
 			<Link

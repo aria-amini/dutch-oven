@@ -32,9 +32,11 @@ export function AppNav() {
 	const pathname = useRouterState({
 		select: (state) => state.location.pathname,
 	})
+
 	const session = authClient.useSession()
 	const user = session.data?.user
 	const isGuest = Boolean(user?.isAnonymous)
+
 	return (
 		<nav
 			aria-label="Primary"
@@ -68,10 +70,12 @@ export function AppNav() {
 
 function AccountControls({ name }: { name: string }) {
 	const navigate = useNavigate()
+
 	const signOut = async () => {
 		await authClient.signOut()
 		await navigate({ to: '/' })
 	}
+
 	return (
 		<div className="order-first flex items-center gap-2.5 px-2.5 py-2 md:order-none md:mt-auto md:w-full">
 			<span className="text-muted-foreground min-w-0 flex-1 truncate text-[13px] font-bold tracking-wide uppercase">
@@ -124,12 +128,14 @@ function NavItem({
 			? 'border-foreground bg-kitchen-yolk shadow-sm'
 			: 'hover:border-foreground hover:bg-card hover:shadow-sm focus-visible:border-foreground border-transparent'
 	} ${disabled ? 'opacity-35' : ''}`
+
 	const content = (
 		<>
 			<Icon size={18} weight={active ? 'fill' : 'regular'} aria-hidden />
 			{label}
 		</>
 	)
+
 	if (disabled || !to) {
 		return (
 			<span
@@ -141,6 +147,7 @@ function NavItem({
 			</span>
 		)
 	}
+
 	return (
 		<Link
 			to={to}

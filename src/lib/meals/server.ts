@@ -27,7 +27,9 @@ export const logMeal = createServerFn({ method: 'POST' })
 export const listCookCounts = createServerFn({ method: 'GET' }).handler(
 	async () => {
 		const session = await getCurrentSession()
+
 		if (!session) return []
+
 		return listCookCountsForUser(session.user.id)
 	},
 )

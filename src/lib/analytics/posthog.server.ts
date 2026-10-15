@@ -13,5 +13,6 @@ export function getPostHogClient() {
 			flushInterval: 0,
 		})
 	}
+
 	return posthogClient
 }

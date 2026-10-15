@@ -8,6 +8,7 @@ import { inject } from 'vite-plus/test'
 import { test as baseTest } from './server'
 
 const DEFAULT_SCHEMA_PATH = 'src/db/schema/index.ts'
+
 const ROOT_MARKERS = [
 	'vite.config.ts',
 	'vite.config.mts',
@@ -34,6 +35,7 @@ export interface DbFixture {
 }
 
 let dbConfig: DbConfig = {}
+
 let seedFunction: (db: Database) => Promise<void> | void = async () => {}
 
 function findProjectRoot(start = process.cwd()) {
@@ -45,6 +47,7 @@ function findProjectRoot(start = process.cwd()) {
 		}
 
 		const parent = dirname(directory)
+
 		if (parent === directory) return start
 		directory = parent
 	}
@@ -62,11 +65,14 @@ export const test = baseTest.extend<DbFixture>({
 			const { drizzle } = await import('drizzle-orm/node-postgres')
 			const { Pool } = await import('pg')
 			const root = dbConfig.root ?? findProjectRoot()
+
 			const schemaPath = resolve(
 				root,
 				dbConfig.schemaPath ?? DEFAULT_SCHEMA_PATH,
 			)
+
 			const client = new Pool({ connectionString: inject('dbUri') })
+
 			const db = Object.assign(drizzle({ client }), {
 				$client: client,
 			})
@@ -105,5 +111,6 @@ export async function resetDatabase(
 	const schema = await import(/* @vite-ignore */ schemaPath)
 
 	await reset(db, schema)
+
 	if (seedFunction) await seedFunction(db)
 }

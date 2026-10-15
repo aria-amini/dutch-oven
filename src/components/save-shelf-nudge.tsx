@@ -5,10 +5,12 @@ import { useState } from 'react'
 import { authClient } from '@/lib/auth/client'
 
 const DISMISS_KEY = 'dutch-oven.shelf-nudge-dismissed'
+
 const RECIPE_THRESHOLD = 3
 
 export function SaveShelfNudge({ recipeCount }: { recipeCount: number }) {
 	const session = authClient.useSession()
+
 	const [dismissed, setDismissed] = useState(
 		() =>
 			typeof localStorage !== 'undefined' &&

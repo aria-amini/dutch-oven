@@ -18,15 +18,18 @@ const HOP_BY_HOP_HEADERS = new Set([
 export function createPostHogProxyRequestHandler(options: PostHogProxyOptions) {
 	return async function proxyPostHogRequest(request: Request) {
 		const requestUrl = new URL(request.url)
+
 		const upstreamPath = requestUrl.pathname.startsWith(
 			options.publicPathPrefix,
 		)
 			? requestUrl.pathname.slice(options.publicPathPrefix.length)
 			: ''
+
 		const upstreamUrl = new URL(
 			buildUpstreamPath(options, upstreamPath) + requestUrl.search,
 			trimTrailingSlash(options.upstreamOrigin) + '/',
 		)
+
 		const headers = new Headers(request.headers)
 		const connectionHeader = headers.get('connection')
 
@@ -37,6 +40,7 @@ export function createPostHogProxyRequestHandler(options: PostHogProxyOptions) {
 		if (connectionHeader) {
 			for (const token of connectionHeader.split(',')) {
 				const header = token.trim().toLowerCase()
+
 				if (header) {
 					headers.delete(header)
 				}

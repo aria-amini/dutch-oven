@@ -32,6 +32,7 @@ export function SegmentedControl<T extends string>({
 		>
 			{options.map((option) => {
 				const isSelected = value === option.value
+
 				return (
 					<button
 						key={option.value}

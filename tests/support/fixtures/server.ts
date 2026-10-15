@@ -10,6 +10,7 @@ export type MswServerFixture = {
 export const test = createMswFixture<SetupServer>({
 	createContext: async () => {
 		const { default: handlers } = await import('@tests/support/mocks/handlers')
+
 		return setupServer(...handlers)
 	},
 	lifecycle: {

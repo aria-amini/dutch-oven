@@ -10,7 +10,9 @@ export type UseGoogleAuthOptions = {
 function sanitizeRedirect(candidate: string): string {
 	try {
 		const url = new URL(candidate, window.location.origin)
+
 		if (url.origin !== window.location.origin) return '/'
+
 		return url.pathname + url.search + url.hash
 	} catch {
 		return '/'

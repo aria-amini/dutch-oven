@@ -24,6 +24,7 @@ export function GoogleAuthButton({
 }: GoogleAuthButtonProps) {
 	const internal = useGoogleAuth({ fallbackRedirect })
 	const isLoading = externalIsLoading ?? internal.isLoading
+
 	return (
 		<Button
 			type="button"

@@ -38,6 +38,7 @@ vi.mock('@/lib/auth/session', () => ({
 
 vi.mock('@/routes/__root', async () => {
 	const React = await import('react')
+
 	const { Outlet, createRootRouteWithContext } =
 		await import('@tanstack/react-router')
 

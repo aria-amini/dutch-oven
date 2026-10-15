@@ -13,6 +13,7 @@ export const Route = createFileRoute('/auth/signup')({
 	beforeLoad: redirectAuthenticatedUsers,
 	component: Signup,
 })
+
 function Signup() {
 	const navigate = useNavigate()
 	const session = authClient.useSession()
@@ -20,12 +21,15 @@ function Signup() {
 	const [name, setName] = useState('')
 	const [email, setEmail] = useState('')
 	const [password, setPassword] = useState('')
+
 	const submit = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault()
 		const { error } = await authClient.signUp.email({ name, email, password })
+
 		if (error) toast.error(error.message)
 		else await navigate({ to: '/recipes' })
 	}
+
 	return (
 		<main className="grid min-h-dvh place-items-center p-6">
 			<Card className="w-full max-w-md">

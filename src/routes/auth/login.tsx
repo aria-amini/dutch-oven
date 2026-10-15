@@ -21,16 +21,20 @@ function Login() {
 	const search = Route.useSearch()
 	const [email, setEmail] = useState('')
 	const [password, setPassword] = useState('')
+
 	const submit = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault()
+
 		const result = await authClient.signIn.email({
 			email,
 			password,
 			callbackURL: search.redirect ?? '/',
 		})
+
 		if (result.error) toast.error(result.error.message)
 		else await navigate({ to: search.redirect ?? '/' })
 	}
+
 	return (
 		<main className="grid min-h-dvh place-items-center p-6">
 			<Card className="w-full max-w-md">

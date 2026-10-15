@@ -9,6 +9,7 @@ type Recipe = {
 	imageUrl: string | null
 	createdAt: Date
 }
+
 type Collection = {
 	id: string
 	userId: string

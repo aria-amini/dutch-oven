@@ -13,6 +13,7 @@ export async function logMealForUser(
 		.select({ id: recipes.id })
 		.from(recipes)
 		.where(and(eq(recipes.id, recipeId), eq(recipes.userId, userId)))
+
 	if (!owned) throw new Error('recipe not found')
 
 	const [mealLog] = await database
@@ -24,6 +25,7 @@ export async function logMealForUser(
 			cookedAt,
 		})
 		.returning()
+
 	return mealLog
 }
 
@@ -33,6 +35,7 @@ export async function listCookCountsForUser(
 ) {
 	const cookCount = count(mealLogs.id).as('count')
 	const lastCookedAt = max(mealLogs.cookedAt).as('lastCookedAt')
+
 	return database
 		.select({ recipeId: mealLogs.recipeId, count: cookCount, lastCookedAt })
 		.from(mealLogs)
@@ -51,5 +54,6 @@ export async function deleteMealLogForUser(
 		.delete(mealLogs)
 		.where(and(eq(mealLogs.id, id), eq(mealLogs.userId, userId)))
 		.returning({ id: mealLogs.id })
+
 	return mealLog ?? null
 }

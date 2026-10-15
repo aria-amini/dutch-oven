@@ -28,6 +28,7 @@ type RenderedRoute = {
 
 function resolveRoutePath({ path, name }: RouteTestOptions) {
 	if (path) return path
+
 	if (name) return `/${name}`
 	throw new Error('Expected either path or name for route test')
 }

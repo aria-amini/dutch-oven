@@ -27,6 +27,7 @@ export const getAvatarUrl = createServerFn({ method: 'GET' })
 		if (!data.image) return undefined
 
 		const isPublicUrl = /^https?:\/\//.test(data.image)
+
 		if (isPublicUrl) return data.image
 
 		const command = new GetObjectCommand({
@@ -45,6 +46,7 @@ export const getAvatarUploadUrl = createServerFn({ method: 'POST' })
 			Key: data.key,
 			ContentType: 'image/*',
 		})
+
 		return {
 			url: await getSignedUrl(getStorageClient(), command, {
 				expiresIn: 900,

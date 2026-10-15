@@ -33,11 +33,14 @@ export default async function setup(project: TestProject) {
 			const client = new Pool({
 				connectionString: container.getConnectionUri(),
 			})
+
 			try {
 				const db = drizzle({ client })
+
 				for (const ext of REQUIRED_EXTENSIONS) {
 					await db.execute(`CREATE EXTENSION IF NOT EXISTS "${ext}"`)
 				}
+
 				await migrate(db, { migrationsFolder })
 			} finally {
 				await client.end()

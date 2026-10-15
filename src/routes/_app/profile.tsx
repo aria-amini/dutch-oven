@@ -9,13 +9,16 @@ import { getAvatarUploadUrl, getAvatarUrl } from '@/lib/s3'
 export const Route = createFileRoute('/_app/profile')({
 	component: Profile,
 })
+
 function Profile() {
 	const session = authClient.useSession()
 	const navigate = useNavigate()
 	const [avatar, setAvatar] = useState<string>()
 	const user = session.data?.user
+
 	const upload = async (event: React.ChangeEvent<HTMLInputElement>) => {
 		const file = event.target.files?.[0]
+
 		if (!file || !user) return
 		const key = `avatars/${user.id}-${crypto.randomUUID()}`
 		const { url } = await getAvatarUploadUrl({ data: { key } })
@@ -27,6 +30,7 @@ function Profile() {
 		await authClient.updateUser({ image: key })
 		setAvatar(await getAvatarUrl({ data: { image: key } }))
 	}
+
 	if (user?.isAnonymous) {
 		return (
 			<main className="mx-auto min-h-dvh max-w-xl space-y-8 p-6">
@@ -43,6 +47,7 @@ function Profile() {
 			</main>
 		)
 	}
+
 	return (
 		<main className="mx-auto min-h-dvh max-w-xl space-y-8 p-6">
 			<h1 className="text-4xl font-bold">Profile</h1>
