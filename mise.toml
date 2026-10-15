@@ -2,7 +2,13 @@
 vite-plus = "https://github.com/markmals/mise-vite-plus"
 
 [tools]
+node = "24"
 vite-plus = "latest"
 uv = "latest"
 jq = "latest"
+gum = "latest"
 
+[tasks.bootstrap]
+description = "Bootstrap a fresh clone"
+usage = 'flag "--verbose" help="Show direct command output"'
+run = "node mise-tasks/bootstrap.ts"

@@ -1,11 +1,12 @@
 #:schema https://pitchfork.jdx.dev/schema.json
 
 # The daemon namespace derives from the directory name, so each jj workspace
-# (wt switch) gets isolated daemons with its own ports from mise-tasks/setup.ts.
+# gets isolated daemons with its own ports from mise run bootstrap.
 
 [daemons.dev]
-run = "exec vp dev"
+run = 'APP_PORT="$PORT" exec vp dev --strictPort'
 mise = true
 auto = ["start", "stop"]
 retry = 3
-ready_output = "Local:"
+port = 3000
+ready_cmd = { run = 'curl -fsS "http://127.0.0.1:$PORT/" > /dev/null', timeout = "30s" }

@@ -13,7 +13,7 @@ export type CoercedEnvSchema = {
   
   /**
    * **RAILWAY_ENVIRONMENT_NAME**  
-   * Set automatically by Railway; used to detect preview deploys below.  
+   * Set automatically by Railway and used to detect preview deployments.  
    * ![icon](data:image/svg+xml;utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cpath%20fill%3D%22%23808080%22%20d%3D%22M29%2022h-5a2.003%202.003%200%200%201-2-2v-6a2%202%200%200%201%202-2h5v2h-5v6h5ZM18%2012h-4V8h-2v14h6a2.003%202.003%200%200%200%202-2v-6a2%202%200%200%200-2-2m-4%208v-6h4v6Zm-6-8H3v2h5v2H4a2%202%200%200%200-2%202v2a2%202%200%200%200%202%202h6v-8a2%202%200%200%200-2-2m0%208H4v-2h4Z%22%2F%3E%3C%2Fsvg%3E)   
    */
   RAILWAY_ENVIRONMENT_NAME?: string;
@@ -22,16 +22,27 @@ export type CoercedEnvSchema = {
    * **APP_ENV**  
    * ![icon](data:image/svg+xml;utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20fill%3D%22%23808080%22%20d%3D%22M7.885%2010.23L12%203.463l4.116%206.769zm9.606%2011q-1.558%200-2.64-1.081t-1.082-2.64t1.082-2.649t2.64-1.09t2.649%201.09t1.09%202.649t-1.09%202.64t-2.649%201.082m-13.722-.5v-6.462h6.462v6.462z%22%2F%3E%3C%2Fsvg%3E)   
    */
-  APP_ENV: "development" | "preview" | "production" | "test";
+  APP_ENV?: "development" | "preview" | "production" | "test";
   
   /**
    * **APP_PORT**  
+   * mise run bootstrap writes a unique port per workspace to .env.workspace.local.  
    * ![icon](data:image/svg+xml;utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20fill%3D%22%23808080%22%20d%3D%22M20.95%2022.375L18%2019.425v2.225h-2V16h5.65v2H19.4l2.95%202.95zM12%2022q-2.075%200-3.9-.788t-3.175-2.137T2.788%2015.9T2%2012t.788-3.9t2.137-3.175T8.1%202.788T12%202t3.9.788t3.175%202.137T21.213%208.1T22%2012q0%20.5-.05%201t-.15%201h-2.05q.125-.5.188-1T20%2012t-.062-1t-.188-1h-3.4q.075.5.113%201t.037%201t-.037%201t-.113%201h-2q.075-.5.113-1t.037-1t-.037-1t-.113-1h-4.7q-.075.5-.112%201T9.5%2012t.038%201t.112%201H13v2h-2.9q.3%201.075.775%202.063T12%2019.95q.5%200%201-.062t1-.113v2.05q-.5.05-1%20.113T12%2022m-7.75-8h3.4q-.075-.5-.112-1T7.5%2012t.038-1t.112-1h-3.4q-.125.5-.187%201T4%2012t.063%201t.187%201m.85-6h2.95q.225-.925.563-1.812T9.4%204.45q-1.375.45-2.475%201.363T5.1%208m4.3%2011.55q-.45-.85-.788-1.737T8.05%2016H5.1q.725%201.275%201.825%202.188T9.4%2019.55M10.1%208h3.8q-.3-1.075-.775-2.062T12%204.05q-.65.9-1.125%201.888T10.1%208m5.85%200h2.95q-.725-1.275-1.825-2.187T14.6%204.45q.45.85.788%201.738T15.95%208%22%2F%3E%3C%2Fsvg%3E)   
    */
-  APP_PORT: number;
+  APP_PORT?: number;
+  
+  /**
+   * **BASE_URL**  
+   * Playwright target; bootstrap writes the workspace proxy URL locally.  
+   * ![icon](data:image/svg+xml;utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cpath%20fill%3D%22%23808080%22%20d%3D%22M24%2021V9h-2v14h8v-2zm-4-6v-4c0-1.103-.897-2-2-2h-6v14h2v-6h1.48l2.335%206h2.145l-2.333-6H18c1.103%200%202-.897%202-2m-6-4h4v4h-4zM8%2023H4c-1.103%200-2-.897-2-2V9h2v12h4V9h2v12c0%201.103-.897%202-2%202%22%2F%3E%3C%2Fsvg%3E)   
+   */
+  BASE_URL?: string;
   
   /**
    * **INFISICAL_CLIENT_ID**  
+   * Deployed environments resolve secrets from Infisical through  
+   * .env.preview and .env.production.  
+   * ![icon](data:image/svg+xml;utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22%23808080%22%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%20512%20512%22%3E%3Cpath%20d%3D%22M477.8%20173.6c-22.1-22.2-51.5-34.5-82.7-34.5c-29.5%200-59.5%2012.8-89.4%2038.1c-21.2%2017.9-38%2038.6-49.7%2055.2c-10.2-13.7-26.2-33.2-46.6-51.3c-14.9-13.4-29.8-23.9-44.2-31.2c-16.7-8.5-32.9-12.8-48-12.8c-31.3%200-60.8%2012.2-82.9%2034.5S0%20223.5%200%20255s12.2%2061.2%2034.3%2083.5c22.2%2022.2%2051.6%2034.5%2082.9%2034.5c35.4%200%2070.7-25.2%2094.1-46.3c20.5-18.6%2035.9-37.5%2045-49.7c16.2%2022.3%2035%2046.1%2055.4%2063.9c26.7%2023.3%2053.2%2034.1%2083.4%2034.1c31.2%200%2060.5-12.3%2082.7-34.6c22.1-22.2%2034.3-51.9%2034.3-83.4s-12.2-61.1-34.3-83.4M180.8%20293c-24.4%2022-47.5%2034.6-63.6%2034.6c-39.6%200-71.8-32.6-71.8-72.6s32.2-72.6%2071.8-72.6c16.5%200%2038.5%2011.6%2062%2032.5c12.6%2011.2%2025.5%2025.3%2036.9%2040c-10.5%2013.4-23%2027-35.3%2038.1M395%20329.5c-18.8%200-35.4-7-53.6-22.9C328%20295%20314.1%20279%20296%20254.5c12.1-16.6%2025.4-31.2%2039-42.9c21.1-17.8%2041.9-27.3%2060-27.3c39.5%200%2071.6%2032.6%2071.6%2072.6s-32.1%2072.6-71.6%2072.6%22%2F%3E%3C%2Fsvg%3E)   
    *   
    * 📚 {@link https://infisical.com/docs/documentation/platform/identities/machine-identities | Infisical Machine Identities}  
    */
@@ -42,6 +53,13 @@ export type CoercedEnvSchema = {
    * ![icon](data:image/svg+xml;utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cpath%20fill%3D%22%23808080%22%20d%3D%22M24%2021V9h-2v14h8v-2zm-4-6v-4c0-1.103-.897-2-2-2h-6v14h2v-6h1.48l2.335%206h2.145l-2.333-6H18c1.103%200%202-.897%202-2m-6-4h4v4h-4zM8%2023H4c-1.103%200-2-.897-2-2V9h2v12h4V9h2v12c0%201.103-.897%202-2%202%22%2F%3E%3C%2Fsvg%3E)   
    */
   BETTER_AUTH_URL: string;
+  
+  /**
+   * **BETTER_AUTH_SECRET_LOCAL** 🔐 _sensitive_  
+   * Bootstrap seeds this in .env.development.local; development only.  
+   * ![icon](data:image/svg+xml;utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cpath%20fill%3D%22%23808080%22%20d%3D%22M29%2022h-5a2.003%202.003%200%200%201-2-2v-6a2%202%200%200%201%202-2h5v2h-5v6h5ZM18%2012h-4V8h-2v14h6a2.003%202.003%200%200%200%202-2v-6a2%202%200%200%200-2-2m-4%208v-6h4v6Zm-6-8H3v2h5v2H4a2%202%200%200%200-2%202v2a2%202%200%200%200%202%202h6v-8a2%202%200%200%200-2-2m0%208H4v-2h4Z%22%2F%3E%3C%2Fsvg%3E)   
+   */
+  BETTER_AUTH_SECRET_LOCAL?: string;
   
   /**
    * **BETTER_AUTH_SECRET** 🔐 _sensitive_  
@@ -63,6 +81,8 @@ export type CoercedEnvSchema = {
   
   /**
    * **GOOGLE_CLIENT_ID**  
+   * Google sign-in is optional in development. Set both values in .env.local to  
+   * enable it with a "Desktop app" OAuth client, which accepts any loopback port.  
    * ![icon](data:image/svg+xml;utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cpath%20fill%3D%22%23808080%22%20d%3D%22M29%2022h-5a2.003%202.003%200%200%201-2-2v-6a2%202%200%200%201%202-2h5v2h-5v6h5ZM18%2012h-4V8h-2v14h6a2.003%202.003%200%200%200%202-2v-6a2%202%200%200%200-2-2m-4%208v-6h4v6Zm-6-8H3v2h5v2H4a2%202%200%200%200-2%202v2a2%202%200%200%200%202%202h6v-8a2%202%200%200%200-2-2m0%208H4v-2h4Z%22%2F%3E%3C%2Fsvg%3E)   
    */
   GOOGLE_CLIENT_ID?: string;
@@ -75,33 +95,36 @@ export type CoercedEnvSchema = {
   
   /**
    * **AWS_S3_BUCKET_NAME**  
+   * S3-compatible object storage. Dev runs MinIO via docker-compose and creates  
+   * the bucket on first use; production points at a pre-provisioned bucket. Only  
+   * production requires the credentials.  
    * ![icon](data:image/svg+xml;utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cpath%20fill%3D%22%23808080%22%20d%3D%22M29%2022h-5a2.003%202.003%200%200%201-2-2v-6a2%202%200%200%201%202-2h5v2h-5v6h5ZM18%2012h-4V8h-2v14h6a2.003%202.003%200%200%200%202-2v-6a2%202%200%200%200-2-2m-4%208v-6h4v6Zm-6-8H3v2h5v2H4a2%202%200%200%200-2%202v2a2%202%200%200%200%202%202h6v-8a2%202%200%200%200-2-2m0%208H4v-2h4Z%22%2F%3E%3C%2Fsvg%3E)   
    */
-  AWS_S3_BUCKET_NAME: string;
+  AWS_S3_BUCKET_NAME?: string;
   
   /**
    * **AWS_REGION**  
    * ![icon](data:image/svg+xml;utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cpath%20fill%3D%22%23808080%22%20d%3D%22M29%2022h-5a2.003%202.003%200%200%201-2-2v-6a2%202%200%200%201%202-2h5v2h-5v6h5ZM18%2012h-4V8h-2v14h6a2.003%202.003%200%200%200%202-2v-6a2%202%200%200%200-2-2m-4%208v-6h4v6Zm-6-8H3v2h5v2H4a2%202%200%200%200-2%202v2a2%202%200%200%200%202%202h6v-8a2%202%200%200%200-2-2m0%208H4v-2h4Z%22%2F%3E%3C%2Fsvg%3E)   
    */
-  AWS_REGION: string;
+  AWS_REGION?: string;
   
   /**
    * **AWS_ENDPOINT_URL**  
    * ![icon](data:image/svg+xml;utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cpath%20fill%3D%22%23808080%22%20d%3D%22M24%2021V9h-2v14h8v-2zm-4-6v-4c0-1.103-.897-2-2-2h-6v14h2v-6h1.48l2.335%206h2.145l-2.333-6H18c1.103%200%202-.897%202-2m-6-4h4v4h-4zM8%2023H4c-1.103%200-2-.897-2-2V9h2v12h4V9h2v12c0%201.103-.897%202-2%202%22%2F%3E%3C%2Fsvg%3E)   
    */
-  AWS_ENDPOINT_URL: string;
+  AWS_ENDPOINT_URL?: string;
   
   /**
-   * **AWS_ACCESS_KEY_ID**  
+   * **AWS_ACCESS_KEY_ID** 🔐 _sensitive_  
    * ![icon](data:image/svg+xml;utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cpath%20fill%3D%22%23808080%22%20d%3D%22M29%2022h-5a2.003%202.003%200%200%201-2-2v-6a2%202%200%200%201%202-2h5v2h-5v6h5ZM18%2012h-4V8h-2v14h6a2.003%202.003%200%200%200%202-2v-6a2%202%200%200%200-2-2m-4%208v-6h4v6Zm-6-8H3v2h5v2H4a2%202%200%200%200-2%202v2a2%202%200%200%200%202%202h6v-8a2%202%200%200%200-2-2m0%208H4v-2h4Z%22%2F%3E%3C%2Fsvg%3E)   
    */
-  AWS_ACCESS_KEY_ID: string;
+  AWS_ACCESS_KEY_ID?: string;
   
   /**
    * **AWS_SECRET_ACCESS_KEY** 🔐 _sensitive_  
    * ![icon](data:image/svg+xml;utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cpath%20fill%3D%22%23808080%22%20d%3D%22M29%2022h-5a2.003%202.003%200%200%201-2-2v-6a2%202%200%200%201%202-2h5v2h-5v6h5ZM18%2012h-4V8h-2v14h6a2.003%202.003%200%200%200%202-2v-6a2%202%200%200%200-2-2m-4%208v-6h4v6Zm-6-8H3v2h5v2H4a2%202%200%200%200-2%202v2a2%202%200%200%200%202%202h6v-8a2%202%200%200%200-2-2m0%208H4v-2h4Z%22%2F%3E%3C%2Fsvg%3E)   
    */
-  AWS_SECRET_ACCESS_KEY: string;
+  AWS_SECRET_ACCESS_KEY?: string;
   
   /**
    * **VITE_POSTHOG_PROJECT_TOKEN**  
@@ -129,25 +152,25 @@ export type CoercedEnvSchema = {
   
 };
 
-type _CoercedEnvSchema_b689b547 = CoercedEnvSchema;
+type _CoercedEnvSchema_88d0cb2d = CoercedEnvSchema;
 
 declare module 'varlock/env' {
-  export interface TypedEnvSchema extends Readonly<_CoercedEnvSchema_b689b547> {}
-  export interface PublicTypedEnvSchema extends Readonly<Pick<_CoercedEnvSchema_b689b547, 'RAILWAY_ENVIRONMENT_NAME' | 'APP_ENV' | 'APP_PORT' | 'INFISICAL_CLIENT_ID' | 'BETTER_AUTH_URL' | 'GOOGLE_CLIENT_ID' | 'AWS_S3_BUCKET_NAME' | 'AWS_REGION' | 'AWS_ENDPOINT_URL' | 'AWS_ACCESS_KEY_ID' | 'VITE_POSTHOG_PROJECT_TOKEN' | 'VITE_POSTHOG_HOST' | 'VITE_PUBLIC_SENTRY_DSN'>> {}
+  export interface TypedEnvSchema extends Readonly<_CoercedEnvSchema_88d0cb2d> {}
+  export interface PublicTypedEnvSchema extends Readonly<Pick<_CoercedEnvSchema_88d0cb2d, 'RAILWAY_ENVIRONMENT_NAME' | 'APP_ENV' | 'APP_PORT' | 'BASE_URL' | 'INFISICAL_CLIENT_ID' | 'BETTER_AUTH_URL' | 'GOOGLE_CLIENT_ID' | 'AWS_S3_BUCKET_NAME' | 'AWS_REGION' | 'AWS_ENDPOINT_URL' | 'VITE_POSTHOG_PROJECT_TOKEN' | 'VITE_POSTHOG_HOST' | 'VITE_PUBLIC_SENTRY_DSN'>> {}
 }
 
 
 export type EnvSchemaAsStrings = {
   [Property in keyof CoercedEnvSchema]:
-    CoercedEnvSchema[Property] extends string ? CoercedEnvSchema[Property]
-      : (CoercedEnvSchema[Property] extends boolean ? ('true' | 'false') : string)
+    NonNullable<CoercedEnvSchema[Property]> extends string ? NonNullable<CoercedEnvSchema[Property]>
+      : (NonNullable<CoercedEnvSchema[Property]> extends boolean ? ('true' | 'false') : string)
 };
 
-type _EnvSchemaAsStrings_b689b547 = EnvSchemaAsStrings;
+type _EnvSchemaAsStrings_88d0cb2d = EnvSchemaAsStrings;
 declare global {
 
   // add types for global process.env
   namespace NodeJS {
-    interface ProcessEnv extends _EnvSchemaAsStrings_b689b547 {}
+    interface ProcessEnv extends _EnvSchemaAsStrings_88d0cb2d {}
   }
 }
