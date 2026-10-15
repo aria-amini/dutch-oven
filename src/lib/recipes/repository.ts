@@ -164,7 +164,7 @@ export async function createRecipeForUser(
 
 function contentLines(lines: string[] | RecipeIngredient[] | undefined) {
 	return (lines ?? [])
-		.map((line) => (typeof line === 'string' ? line : line.raw).trim())
+		.map((line) => (line instanceof Object ? line.raw : line).trim())
 		.filter(Boolean)
 }
 

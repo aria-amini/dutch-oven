@@ -38,32 +38,34 @@ function Login() {
 	return (
 		<main className="grid min-h-dvh place-items-center p-6">
 			<Card className="w-full max-w-md">
-				<CardContent className="space-y-6 pt-6">
-					<h1 className="text-3xl font-bold">Sign in</h1>
-					<GoogleAuthButton fallbackRedirect="/recipes" className="w-full" />
-					<form onSubmit={submit} className="space-y-4">
-						<Input
-							required
-							type="email"
-							placeholder="you@example.com"
-							value={email}
-							onChange={(event) => setEmail(event.target.value)}
-						/>
-						<Input
-							required
-							type="password"
-							placeholder="Password"
-							value={password}
-							onChange={(event) => setPassword(event.target.value)}
-						/>
-						<Button className="w-full">Sign in</Button>
-					</form>
-					<p className="text-sm">
-						New here?{' '}
-						<Link to="/auth/signup" className="underline">
-							Create an account
-						</Link>
-					</p>
+				<CardContent>
+					<div className="space-y-6">
+						<h1 className="text-3xl font-bold">Sign in</h1>
+						<GoogleAuthButton fallbackRedirect="/recipes" className="w-full" />
+						<form onSubmit={submit} className="space-y-4">
+							<Input
+								required
+								type="email"
+								placeholder="you@example.com"
+								value={email}
+								onChange={(event) => setEmail(event.target.value)}
+							/>
+							<Input
+								required
+								type="password"
+								placeholder="Password"
+								value={password}
+								onChange={(event) => setPassword(event.target.value)}
+							/>
+							<Button className="w-full">Sign in</Button>
+						</form>
+						<p className="text-sm">
+							New here?{' '}
+							<Link to="/auth/signup" className="underline">
+								Create an account
+							</Link>
+						</p>
+					</div>
 				</CardContent>
 			</Card>
 		</main>

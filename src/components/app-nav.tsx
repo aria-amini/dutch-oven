@@ -9,6 +9,7 @@ import {
 import { Link, useNavigate, useRouterState } from '@tanstack/react-router'
 
 import { authClient } from '@/lib/auth/client'
+import { cn } from '@/lib/utils/ui'
 
 const navItems = [
 	{ label: 'home', icon: HouseIcon, to: '/' as const, match: ['/'] },
@@ -44,7 +45,7 @@ export function AppNav() {
 		>
 			<Link
 				to="/"
-				className="mr-auto shrink-0 px-2 py-1 font-mono text-[15px] font-extrabold tracking-tight whitespace-nowrap lowercase md:mr-0 md:mb-6"
+				className="mr-auto shrink-0 px-2 py-1 font-mono text-sm font-extrabold tracking-tight whitespace-nowrap lowercase md:mr-0 md:mb-6"
 			>
 				dutch-oven
 			</Link>
@@ -78,7 +79,7 @@ function AccountControls({ name }: { name: string }) {
 
 	return (
 		<div className="order-first flex items-center gap-2.5 px-2.5 py-2 md:order-none md:mt-auto md:w-full">
-			<span className="text-muted-foreground min-w-0 flex-1 truncate text-[13px] font-bold tracking-wide uppercase">
+			<span className="text-muted-foreground min-w-0 flex-1 truncate text-xs font-bold tracking-wide uppercase">
 				{name}
 			</span>
 			<button
@@ -98,7 +99,7 @@ function GuestSticker() {
 	return (
 		<Link
 			to="/auth/signup"
-			className="border-foreground hover:bg-card focus-visible:outline-kitchen-eggplant order-first flex items-center gap-2.5 border-2 border-dashed px-2.5 py-2 text-[13px] font-bold tracking-wide uppercase hover:shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 md:order-none md:mt-auto md:w-full"
+			className="border-foreground hover:bg-card focus-visible:outline-kitchen-eggplant order-first flex items-center gap-2.5 border-2 border-dashed px-2.5 py-2 text-xs font-bold tracking-wide uppercase hover:shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 md:order-none md:mt-auto md:w-full"
 		>
 			<FingerprintIcon size={18} aria-hidden />
 			guest — save shelf
@@ -121,13 +122,14 @@ function NavItem({
 	disabled?: boolean
 	bottom?: boolean
 }) {
-	const className = `flex items-center gap-2.5 border-2 px-2.5 py-2 text-[13px] font-bold tracking-wide uppercase md:w-full ${
-		bottom ? 'md:mt-auto ' : ''
-	}${
+	const className = cn(
+		'flex items-center gap-2.5 border-2 px-2.5 py-2 text-xs font-bold tracking-wide uppercase md:w-full',
+		bottom && 'md:mt-auto',
 		active
 			? 'border-foreground bg-kitchen-yolk shadow-sm'
-			: 'hover:border-foreground hover:bg-card hover:shadow-sm focus-visible:border-foreground border-transparent'
-	} ${disabled ? 'opacity-35' : ''}`
+			: 'hover:border-foreground hover:bg-card focus-visible:border-foreground border-transparent hover:shadow-sm',
+		disabled && 'opacity-35',
+	)
 
 	const content = (
 		<>
@@ -152,7 +154,10 @@ function NavItem({
 		<Link
 			to={to}
 			aria-current={active ? 'page' : undefined}
-			className={`${className} focus-visible:outline-kitchen-eggplant focus-visible:outline-2 focus-visible:outline-offset-2`}
+			className={cn(
+				className,
+				'focus-visible:outline-kitchen-eggplant focus-visible:outline-2 focus-visible:outline-offset-2',
+			)}
 		>
 			{content}
 		</Link>

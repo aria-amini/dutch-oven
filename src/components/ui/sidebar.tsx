@@ -81,7 +81,7 @@ function SidebarProvider({
 
 	const setOpen = React.useCallback(
 		(value: boolean | ((value: boolean) => boolean)) => {
-			const openState = typeof value === 'function' ? value(open) : value
+			const openState = value instanceof Function ? value(open) : value
 
 			if (setOpenProp) {
 				setOpenProp(openState)
@@ -134,6 +134,7 @@ function SidebarProvider({
 		[state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar],
 	)
 
+	// SAFETY: CSS custom properties are absent from CSSProperties, and every value is a string.
 	// oxlint-disable-next-line typescript/consistent-type-assertions
 	const wrapperStyle = {
 		'--sidebar-width': SIDEBAR_WIDTH,
@@ -189,6 +190,7 @@ function Sidebar({
 	}
 
 	if (isMobile) {
+		// SAFETY: CSS custom properties are absent from CSSProperties, and every value is a string.
 		// oxlint-disable-next-line typescript/consistent-type-assertions
 		const mobileStyle = {
 			'--sidebar-width': SIDEBAR_WIDTH_MOBILE,
@@ -532,11 +534,8 @@ function SidebarMenuButton({
 		return button
 	}
 
-	if (typeof tooltip === 'string') {
-		tooltip = {
-			children: tooltip,
-		}
-	}
+	const tooltipProps =
+		tooltip instanceof Object ? tooltip : { children: tooltip }
 
 	return (
 		<Tooltip>
@@ -545,7 +544,7 @@ function SidebarMenuButton({
 				side="right"
 				align="center"
 				hidden={state !== 'collapsed' || isMobile}
-				{...tooltip}
+				{...tooltipProps}
 			/>
 		</Tooltip>
 	)
@@ -606,6 +605,7 @@ function SidebarMenuSkeleton({
 		return `${Math.floor(Math.random() * 40) + 50}%`
 	})
 
+	// SAFETY: CSS custom properties are absent from CSSProperties, and every value is a string.
 	// oxlint-disable-next-line typescript/consistent-type-assertions
 	const skeletonStyle = {
 		'--skeleton-width': width,

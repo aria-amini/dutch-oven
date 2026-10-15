@@ -18,12 +18,12 @@ type Collection = {
 	createdAt: Date
 }
 
-const shelfState = vi.hoisted(
-	(): { recipes: Recipe[]; collections: Collection[] } => ({
-		recipes: [],
-		collections: [],
-	}),
-)
+type ShelfState = { recipes: Recipe[]; collections: Collection[] }
+
+const shelfState = vi.hoisted<ShelfState>(() => ({
+	recipes: [],
+	collections: [],
+}))
 
 vi.mock('@/lib/recipes/server', () => ({
 	listShelf: () =>

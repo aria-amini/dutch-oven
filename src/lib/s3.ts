@@ -9,16 +9,30 @@ import { z } from 'zod'
 
 import { serverEnv as env } from '@/env.server'
 
-function getStorageClient() {
-	return new S3Client({
-		region: env.AWS_REGION,
-		endpoint: env.AWS_ENDPOINT_URL,
-		credentials: {
-			accessKeyId: env.AWS_ACCESS_KEY_ID,
-			secretAccessKey: env.AWS_SECRET_ACCESS_KEY,
-		},
-		forcePathStyle: true,
-	})
+// Storage settings are optional in development and required in production.
+const storageConfig = z.object({
+	AWS_REGION: z.string().min(1),
+	AWS_ENDPOINT_URL: z.url(),
+	AWS_ACCESS_KEY_ID: z.string().min(1),
+	AWS_SECRET_ACCESS_KEY: z.string().min(1),
+	AWS_S3_BUCKET_NAME: z.string().min(1),
+})
+
+function getStorage() {
+	const config = storageConfig.parse(env)
+
+	return {
+		bucket: config.AWS_S3_BUCKET_NAME,
+		client: new S3Client({
+			region: config.AWS_REGION,
+			endpoint: config.AWS_ENDPOINT_URL,
+			credentials: {
+				accessKeyId: config.AWS_ACCESS_KEY_ID,
+				secretAccessKey: config.AWS_SECRET_ACCESS_KEY,
+			},
+			forcePathStyle: true,
+		}),
+	}
 }
 
 export const getAvatarUrl = createServerFn({ method: 'GET' })
@@ -30,25 +44,26 @@ export const getAvatarUrl = createServerFn({ method: 'GET' })
 
 		if (isPublicUrl) return data.image
 
-		const command = new GetObjectCommand({
-			Bucket: env.AWS_S3_BUCKET_NAME,
-			Key: data.image,
-		})
+		const { bucket, client } = getStorage()
 
-		return getSignedUrl(getStorageClient(), command, { expiresIn: 60 * 60 })
+		const command = new GetObjectCommand({ Bucket: bucket, Key: data.image })
+
+		return getSignedUrl(client, command, { expiresIn: 60 * 60 })
 	})
 
 export const getAvatarUploadUrl = createServerFn({ method: 'POST' })
 	.validator(z.object({ key: z.string().min(1).max(200) }))
 	.handler(async ({ data }) => {
+		const { bucket, client } = getStorage()
+
 		const command = new PutObjectCommand({
-			Bucket: env.AWS_S3_BUCKET_NAME,
+			Bucket: bucket,
 			Key: data.key,
 			ContentType: 'image/*',
 		})
 
 		return {
-			url: await getSignedUrl(getStorageClient(), command, {
+			url: await getSignedUrl(client, command, {
 				expiresIn: 900,
 			}),
 		}

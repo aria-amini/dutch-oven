@@ -1,12 +1,15 @@
 import { vi } from 'vite-plus/test'
 
-type MockSession = unknown
+export type MockSession = {
+	user: { id: string; name: string; email: string }
+	session: { id: string; token: string }
+}
 
-const authState = vi.hoisted<{ session: MockSession }>(() => ({
+const authState = vi.hoisted<{ session: MockSession | null }>(() => ({
 	session: null,
 }))
 
-export function setMockSession(session: MockSession) {
+export function setMockSession(session: MockSession | null) {
 	authState.session = session
 }
 
