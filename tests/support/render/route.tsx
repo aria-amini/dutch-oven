@@ -6,7 +6,7 @@ import {
 	RouterProvider,
 	type AnyRouter,
 } from '@tanstack/react-router'
-import { setMockSession } from '@tests/support/mocks/browser'
+import { setMockSession, type MockSession } from '@tests/support/mocks/browser'
 import { render, type RenderResult } from 'vitest-browser-react'
 
 import { createTestQueryClient } from './component'
@@ -16,7 +16,7 @@ type RouteTarget =
 	| { path?: undefined; name: string }
 
 export type RouteTestOptions = RouteTarget & {
-	session?: unknown
+	session?: MockSession
 	setup?: () => Promise<void> | void
 }
 
@@ -28,6 +28,7 @@ type RenderedRoute = {
 
 function resolveRoutePath({ path, name }: RouteTestOptions) {
 	if (path) return path
+
 	if (name) return `/${name}`
 	throw new Error('Expected either path or name for route test')
 }

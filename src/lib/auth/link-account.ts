@@ -16,6 +16,7 @@ export async function moveGuestDataToNewUser(
 ) {
 	const fromId = anonymousUser.user.id
 	const toId = newUser.user.id
+
 	if (fromId === toId) return
 
 	await database.transaction(async (tx) => {

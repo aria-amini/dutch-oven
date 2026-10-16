@@ -10,6 +10,7 @@ export type MswBrowserFixture = {
 export const test = createMswFixture<SetupWorker>({
 	createContext: async () => {
 		const { default: handlers } = await import('@tests/support/mocks/handlers')
+
 		return setupWorker(...handlers)
 	},
 	lifecycle: {

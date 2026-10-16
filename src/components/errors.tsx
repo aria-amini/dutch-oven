@@ -52,6 +52,7 @@ export function ServerErrorComponent({ error, reset }: ErrorComponentProps) {
 	useEffect(() => {
 		Sentry.captureException(error)
 	}, [error])
+
 	return (
 		<div className="flex flex-1 flex-col items-center justify-center px-6 py-24">
 			<Card className="mx-auto max-w-xl text-center">

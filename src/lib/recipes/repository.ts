@@ -29,6 +29,7 @@ export async function listShelfForUser(
 			.where(eq(recipes.userId, userId))
 			.orderBy(desc(recipes.createdAt)),
 	])
+
 	return { collections: userCollections, recipes: userRecipes }
 }
 
@@ -41,7 +42,9 @@ export async function getRecipeForUser(
 		.select()
 		.from(recipes)
 		.where(and(eq(recipes.id, id), eq(recipes.userId, userId)))
+
 	if (!recipe) return null
+
 	const [ingredients, steps] = await Promise.all([
 		database
 			.select({ text: recipeIngredients.text })
@@ -54,6 +57,7 @@ export async function getRecipeForUser(
 			.where(eq(recipeSteps.recipeId, recipe.id))
 			.orderBy(asc(recipeSteps.position)),
 	])
+
 	return {
 		...recipe,
 		ingredients: ingredients.map((item) => item.text),
@@ -70,6 +74,7 @@ export async function createCollectionForUser(
 		.select({ value: max(collections.position) })
 		.from(collections)
 		.where(eq(collections.userId, userId))
+
 	const [collection] = await database
 		.insert(collections)
 		.values({
@@ -80,6 +85,7 @@ export async function createCollectionForUser(
 			createdAt: new Date(),
 		})
 		.returning()
+
 	return collection
 }
 
@@ -94,6 +100,7 @@ export async function renameCollectionForUser(
 		.set({ name })
 		.where(and(eq(collections.id, id), eq(collections.userId, userId)))
 		.returning()
+
 	return collection ?? null
 }
 
@@ -106,6 +113,7 @@ export async function deleteCollectionForUser(
 		.delete(collections)
 		.where(and(eq(collections.id, id), eq(collections.userId, userId)))
 		.returning({ id: collections.id })
+
 	return collection ?? null
 }
 
@@ -131,8 +139,10 @@ export async function createRecipeForUser(
 						eq(collections.userId, userId),
 					),
 				)
+
 			if (!owned) throw new Error('collection not found')
 		}
+
 		const [recipe] = await tx
 			.insert(recipes)
 			.values({
@@ -144,15 +154,17 @@ export async function createRecipeForUser(
 				createdAt: new Date(),
 			})
 			.returning()
+
 		if (!recipe) return recipe
 		await insertRecipeContent(tx, recipe.id, input.ingredients, input.steps)
+
 		return recipe
 	})
 }
 
 function contentLines(lines: string[] | RecipeIngredient[] | undefined) {
 	return (lines ?? [])
-		.map((line) => (typeof line === 'string' ? line : line.raw).trim())
+		.map((line) => (line instanceof Object ? line.raw : line).trim())
 		.filter(Boolean)
 }
 
@@ -164,6 +176,7 @@ async function insertRecipeContent(
 ) {
 	const ingredients = contentLines(ingredientLines)
 	const steps = contentLines(stepLines)
+
 	if (ingredients.length) {
 		await database.insert(recipeIngredients).values(
 			ingredients.map((text, position) => ({
@@ -174,6 +187,7 @@ async function insertRecipeContent(
 			})),
 		)
 	}
+
 	if (steps.length) {
 		await database.insert(recipeSteps).values(
 			steps.map((text, position) => ({
@@ -197,10 +211,12 @@ export async function updateRecipeContentForUser(
 			.select({ id: recipes.id })
 			.from(recipes)
 			.where(and(eq(recipes.id, id), eq(recipes.userId, userId)))
+
 		if (!recipe) return null
 		await tx.delete(recipeIngredients).where(eq(recipeIngredients.recipeId, id))
 		await tx.delete(recipeSteps).where(eq(recipeSteps.recipeId, id))
 		await insertRecipeContent(tx, id, input.ingredients, input.steps)
+
 		return recipe
 	})
 }

@@ -15,10 +15,12 @@ export const getRouter = () => {
 		defaultErrorComponent: ServerErrorComponent,
 		defaultNotFoundComponent: NotFoundComponent,
 	})
+
 	if (!router.isServer) {
 		Sentry.addIntegration(
 			Sentry.tanstackRouterBrowserTracingIntegration(router),
 		)
 	}
+
 	return router
 }

@@ -1,3 +1,6 @@
+// The Google logo keeps its four brand fills; they are fixed brand colors,
+// not theme values.
+/* oxlint-disable shadcn/no-raw-colors */
 import { SpinnerIcon } from '@phosphor-icons/react'
 
 import { Button } from '@/components/ui/button'
@@ -24,6 +27,7 @@ export function GoogleAuthButton({
 }: GoogleAuthButtonProps) {
 	const internal = useGoogleAuth({ fallbackRedirect })
 	const isLoading = externalIsLoading ?? internal.isLoading
+
 	return (
 		<Button
 			type="button"

@@ -29,13 +29,17 @@ export function ChipSelect<TValue extends string>({
 	const toggle = (value: TValue) => {
 		if (disabled) return
 		const isSelected = selected.includes(value)
+
 		if (isSelected) {
 			onChange(selected.filter((v) => v !== value))
+
 			return
 		}
+
 		if (maxSelections && selected.length >= maxSelections) {
 			return
 		}
+
 		onChange([...selected, value])
 	}
 
@@ -48,6 +52,7 @@ export function ChipSelect<TValue extends string>({
 		>
 			{options.map((option) => {
 				const isSelected = selected.includes(option.value)
+
 				const isAtLimit =
 					!isSelected &&
 					maxSelections !== undefined &&

@@ -16,7 +16,9 @@ function stubFetch() {
 		async (_input: RequestInfo | URL, _init?: RequestInit) =>
 			new Response('ok'),
 	)
+
 	vi.stubGlobal('fetch', fetchMock)
+
 	return fetchMock
 }
 
@@ -32,6 +34,7 @@ describe('createPostHogProxyRequestHandler', () => {
 		)
 
 		const url = fetchMock.mock.calls[0]?.[0]
+
 		if (!(url instanceof URL)) throw new Error('expected a URL')
 		expect(url.toString()).toBe('https://us.i.posthog.com/decide/?v=3')
 	})

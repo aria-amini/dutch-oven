@@ -26,6 +26,7 @@ export function createMswFixture<TContext>({
 		if (!context) {
 			context = await createContext()
 		}
+
 		return context
 	}
 

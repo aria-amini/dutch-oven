@@ -16,6 +16,7 @@ import { parseRecipe, type ImportedRecipe } from './parse'
 const execFileAsync = promisify(execFile)
 
 const MAX_REDIRECTS = 5
+
 const MAX_HTML_BYTES = 4 * 1024 * 1024
 
 const BROWSER_HEADERS = {
@@ -45,11 +46,13 @@ const DECOY_MARKERS = [
 export function isWalled(status: number, html: string) {
 	if (status === 401 || status === 403) return true
 	const sample = html.slice(0, 50_000).toLowerCase()
+
 	return DECOY_MARKERS.some((marker) => sample.includes(marker))
 }
 
 function isPrivateIpv4(ip: string) {
 	const [a = 0, b = 0, c = 0] = ip.split('.').map(Number)
+
 	return (
 		a === 0 ||
 		a === 10 ||
@@ -70,24 +73,31 @@ type Hextets = [number, number, number, number, number, number, number, number]
 
 function expandIpv6(ip: string): Hextets {
 	const [head = '', tail = ''] = ip.split('::')
+
 	const parseGroup = (group: string): number[] => {
 		if (!group.includes('.')) return [Number.parseInt(group, 16)]
+
 		const [a = 0, b = 0, c = 0, d = 0] = group
 			.slice(group.lastIndexOf(':') + 1)
 			.split('.')
 			.map(Number)
+
 		return [(a << 8) | b, (c << 8) | d]
 	}
+
 	const groups = (side: string): number[] =>
 		side === '' ? [] : side.split(':').flatMap(parseGroup)
+
 	const headGroups = groups(head)
 	const tailGroups = ip.includes('::') ? groups(tail) : []
 	const fill = 8 - headGroups.length - tailGroups.length
+
 	const all = [
 		...headGroups,
 		...Array<number>(Math.max(fill, 0)).fill(0),
 		...tailGroups,
 	]
+
 	return [
 		all[0]!,
 		all[1]!,
@@ -106,34 +116,49 @@ function embeddedIpv4(hextets: Hextets) {
 
 export function isPrivateIp(ip: string) {
 	const version = isIP(ip)
+
 	if (version === 4) return isPrivateIpv4(ip)
+
 	if (version === 6) {
 		const lower = ip.toLowerCase()
+
 		const trimmed = lower
 			.split(':')
 			.filter((group) => group !== '' && group !== '0')
+
 		if (trimmed.length === 0) return true
+
 		if (trimmed.length === 1 && trimmed[0] === '1' && !lower.includes('.'))
 			return true
 		const hextets = expandIpv6(lower)
 		const first = hextets[0]
+
 		if (first >= 0xff00) return true
+
 		if (first === 0x2001 && hextets[1] === 0x0db8) return true
+
 		if (first >= 0xfc00 && first <= 0xfdff) return true
+
 		if (first >= 0xfe80 && first <= 0xfeff) return true
+
 		if (first === 0x2002)
 			return isPrivateIpv4(
 				`${hextets[1] >> 8}.${hextets[1] & 0xff}.${hextets[2] >> 8}.${hextets[2] & 0xff}`,
 			)
+
 		if (first === 0x64 && hextets[1] === 0xff9b)
 			return isPrivateIpv4(embeddedIpv4(hextets))
 		const leadingZero = hextets.slice(0, 5).every((hextet) => hextet === 0)
+
 		if (leadingZero && hextets[5] === 0xffff)
 			return isPrivateIpv4(embeddedIpv4(hextets))
+
 		if (leadingZero && hextets[5] === 0)
 			return isPrivateIpv4(embeddedIpv4(hextets))
+
 		return false
 	}
+
 	return true
 }
 
@@ -145,20 +170,29 @@ type PinnedTarget = {
 
 async function assertPublicHttpUrl(raw: string): Promise<PinnedTarget> {
 	const url = new URL(raw)
+
 	if (url.protocol !== 'http:' && url.protocol !== 'https:')
 		throw new Error(`unsupported scheme: ${url.protocol}`)
 	const hostname = url.hostname.replace(/^\[|\]$/g, '')
+
 	if (!hostname) throw new Error('missing hostname')
+
 	if (isIP(hostname)) {
 		if (isPrivateIp(hostname)) throw new Error(`private address: ${hostname}`)
+
 		return { url, hostname, address: hostname }
 	}
+
 	const addresses = await lookup(hostname, { all: true })
+
 	if (addresses.length === 0) throw new Error(`unresolvable host: ${hostname}`)
+
 	for (const { address } of addresses)
 		if (isPrivateIp(address)) throw new Error(`private address: ${hostname}`)
 	const address = addresses[0]?.address
+
 	if (!address) throw new Error(`unresolvable host: ${hostname}`)
+
 	return { url, hostname, address }
 }
 
@@ -170,10 +204,13 @@ function pinnedDispatcher(target: PinnedTarget) {
 		connect: {
 			lookup(hostname, _options, callback) {
 				const address = hostname === target.hostname ? target.address : ''
+
 				if (!address || isPrivateIp(address)) {
 					callback(new Error(`refusing connection to ${hostname}`), '', 4)
+
 					return
 				}
+
 				callback(null, address, isIP(address))
 			},
 		},
@@ -185,30 +222,40 @@ async function readHtmlBody(response: { body: ReadableStream | null }) {
 	const reader = response.body.getReader()
 	const chunks: Uint8Array[] = []
 	let received = 0
+
 	for (;;) {
 		const { done, value } = await reader.read()
+
 		if (done) break
 		received += value.byteLength
+
 		if (received > MAX_HTML_BYTES) {
 			await reader.cancel()
+
 			return null
 		}
+
 		chunks.push(value)
 	}
+
 	const bytes = new Uint8Array(received)
 	let offset = 0
+
 	for (const chunk of chunks) {
 		bytes.set(chunk, offset)
 		offset += chunk.byteLength
 	}
+
 	return new TextDecoder().decode(bytes)
 }
 
 async function fetchPlain(rawUrl: string) {
 	let url = rawUrl
+
 	for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
 		const target = await assertPublicHttpUrl(url)
 		const dispatcher = pinnedDispatcher(target)
+
 		try {
 			const response = await fetch(target.url, {
 				headers: BROWSER_HEADERS,
@@ -216,27 +263,38 @@ async function fetchPlain(rawUrl: string) {
 				signal: AbortSignal.timeout(15_000),
 				dispatcher,
 			})
+
 			if (response.status >= 300 && response.status < 400) {
 				const location = response.headers.get('location')
 				await response.body?.cancel()
+
 				if (!location) return null
 				url = new URL(location, target.url).toString()
 				continue
 			}
+
 			const contentType = response.headers.get('content-type') ?? ''
+
 			if (!/text\/html|application\/xhtml\+xml/i.test(contentType)) {
 				await response.body?.cancel()
+
 				return null
 			}
+
 			const html = await readHtmlBody(response)
+
 			if (html === null) return null
+
 			if (isWalled(response.status, html)) return null
+
 			if (!response.ok) return null
+
 			return { html, url: target.url.toString() }
 		} finally {
 			await dispatcher.close()
 		}
 	}
+
 	return null
 }
 
@@ -251,12 +309,14 @@ function resolveImportScript() {
 		const path = join(dir, 'import-fetch.py')
 		await writeFile(path, importFetchScript)
 		await writeFile(`${path}.lock`, importFetchLock)
+
 		return path
 	})()
 	const pending = importScriptPath
 	pending.catch(() => {
 		if (importScriptPath === pending) importScriptPath = undefined
 	})
+
 	return pending
 }
 
@@ -267,12 +327,14 @@ async function fetchImpersonated(url: string) {
 			['run', '--locked', await resolveImportScript(), url],
 			{ maxBuffer: 16 * 1024 * 1024, timeout: 60_000 },
 		)
+
 		return stdout.length > 0 ? stdout : null
 	} catch (error) {
 		console.warn(
 			'impersonated recipe fetch failed (requires uv on PATH):',
 			error instanceof Error ? error.message : error,
 		)
+
 		return null
 	}
 }
@@ -286,16 +348,22 @@ export async function fetchRecipeHtml(
 	rawUrl: string,
 ): Promise<FetchedRecipePage | null> {
 	await assertPublicHttpUrl(rawUrl)
+
 	try {
 		const page = await fetchPlain(rawUrl)
+
 		if (page) {
 			const recipe = parseRecipe(page.html, page.url)
+
 			if (recipe) return { html: page.html, recipe }
 		}
 	} catch {
 		// transport failure — fall through to the impersonated tier
 	}
+
 	const html = await fetchImpersonated(rawUrl)
+
 	if (!html) return null
+
 	return { html, recipe: parseRecipe(html, rawUrl) }
 }

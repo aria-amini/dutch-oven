@@ -15,6 +15,7 @@ function isAllowedHost(host: string) {
 			`^${pattern.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replaceAll('*', '[^/]*')}$`,
 			'i',
 		)
+
 		return regex.test(host)
 	})
 }
@@ -22,6 +23,7 @@ function isAllowedHost(host: string) {
 function withForwardedOrigin(request: Request) {
 	const host = request.headers.get('x-forwarded-host')
 	const proto = request.headers.get('x-forwarded-proto') ?? 'https'
+
 	if (
 		!host ||
 		!isAllowedHost(host) ||
@@ -29,7 +31,9 @@ function withForwardedOrigin(request: Request) {
 	) {
 		return request
 	}
+
 	const url = new URL(request.url)
+
 	return new Request(`${proto}://${host}${url.pathname}${url.search}`, request)
 }
 

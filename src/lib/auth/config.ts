@@ -10,7 +10,9 @@ import { serverEnv as env } from '@/env.server'
 import { moveGuestDataToNewUser } from './link-account'
 
 const appUrl = new URL(env.BETTER_AUTH_URL)
+
 const appOrigin = appUrl.origin
+
 const appHostname = appUrl.hostname
 
 export const allowedHosts = [
@@ -37,16 +39,15 @@ export function getAuth() {
 			schema: { account, session, user, verification },
 		}),
 		emailAndPassword: { enabled: true, autoSignIn: true },
-		...(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET
-			? {
-					socialProviders: {
+		socialProviders:
+			env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET
+				? {
 						google: {
 							clientId: env.GOOGLE_CLIENT_ID,
 							clientSecret: env.GOOGLE_CLIENT_SECRET,
 						},
-					},
-				}
-			: {}),
+					}
+				: {},
 		plugins: [
 			// Dev uses a shared "Desktop app" Google OAuth client, which accepts
 			// any loopback port without registration — so every app/workspace

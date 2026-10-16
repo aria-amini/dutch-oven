@@ -4,6 +4,7 @@ import { motion, useReducedMotion } from 'framer-motion'
 import { useState } from 'react'
 
 import { createRecipe } from '@/lib/recipes/server'
+import { formField } from '@/lib/utils/form'
 
 export const Route = createFileRoute('/_app/recipes/new')({
 	component: NewRecipe,
@@ -11,13 +12,9 @@ export const Route = createFileRoute('/_app/recipes/new')({
 
 const ease = [0.16, 1, 0.3, 1] as const
 
-function field(form: FormData, key: string) {
-	const value = form.get(key)
-	return typeof value === 'string' ? value.trim() : ''
-}
-
 function NewRecipe() {
 	const reduce = useReducedMotion()
+
 	const enter = reduce
 		? {}
 		: {
@@ -25,6 +22,7 @@ function NewRecipe() {
 				animate: { opacity: 1, y: 0 },
 				transition: { duration: 0.6, ease },
 			}
+
 	return (
 		<main className="flex-1">
 			<motion.div
@@ -34,7 +32,7 @@ function NewRecipe() {
 				<div>
 					<Link
 						to="/recipes"
-						className="focus-visible:outline-kitchen-eggplant mb-4 inline-flex items-center gap-1.5 text-[13px] font-bold uppercase underline focus-visible:outline-2 focus-visible:outline-offset-2"
+						className="focus-visible:outline-kitchen-eggplant mb-4 inline-flex items-center gap-1.5 text-xs font-bold uppercase underline focus-visible:outline-2 focus-visible:outline-offset-2"
 					>
 						<ArrowLeft size={14} weight="bold" aria-hidden />
 						back to the shelf
@@ -53,27 +51,32 @@ function ManualForm() {
 	const navigate = useNavigate()
 	const [error, setError] = useState<string>()
 	const [pending, setPending] = useState(false)
+
 	return (
 		<form
 			className="border-foreground bg-card flex flex-col gap-3 border-2 p-5 shadow-md"
 			onSubmit={async (event) => {
 				event.preventDefault()
 				const form = new FormData(event.currentTarget)
-				const title = field(form, 'title')
-				const imageUrl = field(form, 'imageUrl')
-				const ingredients = field(form, 'ingredients')
-				const steps = field(form, 'steps')
+				const title = formField(form, 'title')
+				const imageUrl = formField(form, 'imageUrl')
+				const ingredients = formField(form, 'ingredients')
+				const steps = formField(form, 'steps')
+
 				if (!title) {
 					setError('give the recipe a name')
+
 					return
 				}
+
 				setPending(true)
 				setError(undefined)
+
 				try {
 					await createRecipe({
 						data: {
 							title,
-							...(imageUrl ? { imageUrl } : {}),
+							imageUrl,
 							ingredients: ingredients.split('\n'),
 							steps: steps.split('\n'),
 						},
@@ -85,7 +88,7 @@ function ManualForm() {
 				}
 			}}
 		>
-			<p className="text-[13px] font-bold uppercase">new recipe</p>
+			<p className="text-xs font-bold uppercase">new recipe</p>
 			<input
 				name="title"
 				required
@@ -102,7 +105,7 @@ function ManualForm() {
 				aria-label="Photo URL"
 				className="border-foreground bg-background border-2 px-3 py-2 text-sm font-semibold placeholder:opacity-50"
 			/>
-			<label className="text-[13px] font-bold uppercase" htmlFor="ingredients">
+			<label className="text-xs font-bold uppercase" htmlFor="ingredients">
 				ingredients (one per line)
 			</label>
 			<textarea
@@ -112,7 +115,7 @@ function ManualForm() {
 				placeholder="200g pasta\n1 tbsp miso"
 				className="border-foreground bg-background focus-visible:outline-kitchen-eggplant resize-y border-2 px-3 py-2 text-sm font-semibold placeholder:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2"
 			/>
-			<label className="text-[13px] font-bold uppercase" htmlFor="steps">
+			<label className="text-xs font-bold uppercase" htmlFor="steps">
 				steps (one per line)
 			</label>
 			<textarea
@@ -123,7 +126,7 @@ function ManualForm() {
 				className="border-foreground bg-background focus-visible:outline-kitchen-eggplant resize-y border-2 px-3 py-2 text-sm font-semibold placeholder:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2"
 			/>
 			{error ? (
-				<p role="alert" className="text-kitchen-tomato text-[13px] font-bold">
+				<p role="alert" className="text-kitchen-tomato text-xs font-bold">
 					{error}
 				</p>
 			) : null}
@@ -131,13 +134,13 @@ function ManualForm() {
 				<button
 					type="submit"
 					disabled={pending}
-					className="border-foreground bg-kitchen-basil border-2 px-4 py-2 text-[13px] font-bold uppercase shadow-sm transition-transform hover:-translate-y-0.5 disabled:opacity-50"
+					className="border-foreground bg-kitchen-basil border-2 px-4 py-2 text-xs font-bold uppercase shadow-sm transition-transform hover:-translate-y-0.5 disabled:opacity-50"
 				>
 					{pending ? 'saving…' : 'save to shelf'}
 				</button>
 				<Link
 					to="/recipes"
-					className="border-foreground bg-background border-2 px-4 py-2 text-[13px] font-bold uppercase"
+					className="border-foreground bg-background border-2 px-4 py-2 text-xs font-bold uppercase"
 				>
 					cancel
 				</Link>

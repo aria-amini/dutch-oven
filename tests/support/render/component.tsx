@@ -42,9 +42,11 @@ export async function renderComponent(
 	container.style.minHeight = '100vh'
 
 	const element = options.element
+
 	const rootRoute = createRootRoute({
 		component: () => element,
 	})
+
 	const router = createRouter({
 		routeTree: rootRoute,
 		history: createMemoryHistory({ initialEntries: ['/'] }),

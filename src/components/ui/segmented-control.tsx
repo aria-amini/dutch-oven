@@ -27,11 +27,14 @@ export function SegmentedControl<T extends string>({
 		<div
 			className={cn('bg-muted grid w-full rounded-md p-1 gap-1', className)}
 			style={{
+				// The column count follows the option count at runtime.
+				// oxlint-disable-next-line shadcn/no-inline-styles
 				gridTemplateColumns: `repeat(${options.length}, minmax(0, 1fr))`,
 			}}
 		>
 			{options.map((option) => {
 				const isSelected = value === option.value
+
 				return (
 					<button
 						key={option.value}

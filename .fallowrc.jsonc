@@ -1,4 +1,10 @@
 {
+	// Run by mise and Vitest config, not imported from app code.
+	"entry": [
+		"mise-tasks/bootstrap.ts",
+		"mise-tasks/migrate.ts",
+		"tests/support/db.global-setup.ts",
+	],
 	"ignoreExports": [
 		{
 			"file": "src/components/ui/**",

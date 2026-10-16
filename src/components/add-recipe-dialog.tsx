@@ -10,22 +10,20 @@ import { useNavigate, useRouter } from '@tanstack/react-router'
 import { useEffect, useRef, useState } from 'react'
 
 import { importRecipe } from '@/lib/import/server'
-
-function field(form: FormData, key: string) {
-	const value = form.get(key)
-	return typeof value === 'string' ? value.trim() : ''
-}
+import { formField } from '@/lib/utils/form'
 
 export function AddRecipeDialog({ children }: { children: React.ReactNode }) {
 	const navigate = useNavigate()
 	const router = useRouter()
 	const [open, setOpen] = useState(false)
 	const [step, setStep] = useState<'choose' | 'import'>('choose')
+
 	return (
 		<DialogPrimitive.Root
 			open={open}
 			onOpenChange={(next) => {
 				setOpen(next)
+
 				if (!next) setStep('choose')
 			}}
 		>
@@ -65,7 +63,7 @@ export function AddRecipeDialog({ children }: { children: React.ReactNode }) {
 									<span className="block text-base leading-tight font-extrabold">
 										from a link
 									</span>
-									<span className="text-muted-foreground text-[13px] font-semibold">
+									<span className="text-muted-foreground text-xs font-semibold">
 										paste a url, we pull it in
 									</span>
 								</span>
@@ -86,7 +84,7 @@ export function AddRecipeDialog({ children }: { children: React.ReactNode }) {
 									<span className="block text-base leading-tight font-extrabold">
 										my own two hands
 									</span>
-									<span className="text-muted-foreground text-[13px] font-semibold">
+									<span className="text-muted-foreground text-xs font-semibold">
 										write it yourself
 									</span>
 								</span>
@@ -124,21 +122,26 @@ function ImportStep({
 	const active = useRef(true)
 	useEffect(() => {
 		active.current = true
+
 		return () => {
 			active.current = false
 		}
 	}, [])
+
 	return (
 		<form
 			className="flex flex-col gap-3"
 			onSubmit={async (event) => {
 				event.preventDefault()
-				const url = field(new FormData(event.currentTarget), 'url')
+				const url = formField(new FormData(event.currentTarget), 'url')
+
 				if (!url) return
 				setPending(true)
 				setError(undefined)
+
 				try {
 					const recipe = await importRecipe({ data: { url } })
+
 					if (!active.current) return
 					onImported(recipe.id)
 				} catch (cause) {
@@ -168,14 +171,14 @@ function ImportStep({
 				<button
 					type="submit"
 					disabled={pending}
-					className="border-foreground bg-kitchen-basil border-2 px-4 py-2 text-[13px] font-bold uppercase shadow-sm transition-transform hover:-translate-y-0.5 disabled:opacity-50"
+					className="border-foreground bg-kitchen-basil border-2 px-4 py-2 text-xs font-bold uppercase shadow-sm transition-transform hover:-translate-y-0.5 disabled:opacity-50"
 				>
 					{pending ? 'fetching…' : 'import'}
 				</button>
 				<button
 					type="button"
 					onClick={onBack}
-					className="focus-visible:outline-kitchen-eggplant inline-flex items-center gap-1 text-[13px] font-bold uppercase underline focus-visible:outline-2 focus-visible:outline-offset-2"
+					className="focus-visible:outline-kitchen-eggplant inline-flex items-center gap-1 text-xs font-bold uppercase underline focus-visible:outline-2 focus-visible:outline-offset-2"
 				>
 					<ArrowLeft size={13} weight="bold" aria-hidden />
 					back
@@ -187,7 +190,7 @@ function ImportStep({
 				</output>
 			) : null}
 			{error ? (
-				<p role="alert" className="text-kitchen-tomato text-[13px] font-bold">
+				<p role="alert" className="text-kitchen-tomato text-xs font-bold">
 					{error}
 				</p>
 			) : null}

@@ -24,6 +24,7 @@ async function seedUser(db: Database) {
 		createdAt: new Date(),
 		updatedAt: new Date(),
 	})
+
 	return id
 }
 
@@ -32,6 +33,7 @@ describe('meal logs', () => {
 		const userId = await seedUser(db)
 		const pasta = await createRecipeForUser(userId, { title: 'pasta' }, db)
 		const soup = await createRecipeForUser(userId, { title: 'soup' }, db)
+
 		if (!pasta || !soup) throw new Error('failed to create test recipes')
 		const first = new Date('2026-08-01T18:00:00.000Z')
 		const second = new Date('2026-08-02T18:00:00.000Z')
@@ -50,8 +52,10 @@ describe('meal logs', () => {
 		const userId = await seedUser(db)
 		const otherId = await seedUser(db)
 		const recipe = await createRecipeForUser(userId, { title: 'dal' }, db)
+
 		if (!recipe) throw new Error('failed to create test recipe')
 		const log = await logMealForUser(userId, recipe.id, new Date(), db)
+
 		if (!log) throw new Error('failed to create test meal log')
 
 		expect(await listCookCountsForUser(otherId, db)).toEqual([])
@@ -65,11 +69,13 @@ describe('meal logs', () => {
 	test('rejects recipes owned by another user', async ({ db }) => {
 		const userId = await seedUser(db)
 		const otherId = await seedUser(db)
+
 		const recipe = await createRecipeForUser(
 			otherId,
 			{ title: 'not yours' },
 			db,
 		)
+
 		if (!recipe) throw new Error('failed to create test recipe')
 
 		await expect(
@@ -82,6 +88,7 @@ describe('meal logs', () => {
 		const userId = await seedUser(db)
 		const pasta = await createRecipeForUser(guestId, { title: 'pasta' }, db)
 		const soup = await createRecipeForUser(guestId, { title: 'soup' }, db)
+
 		if (!pasta || !soup) throw new Error('failed to create test recipes')
 		const first = new Date('2026-08-01T18:00:00.000Z')
 		const second = new Date('2026-08-02T18:00:00.000Z')

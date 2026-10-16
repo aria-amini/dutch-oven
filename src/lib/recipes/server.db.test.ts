@@ -24,6 +24,7 @@ async function seedUser(db: Database) {
 		createdAt: new Date(),
 		updatedAt: new Date(),
 	})
+
 	return id
 }
 
@@ -38,6 +39,7 @@ describe('recipe shelf', () => {
 			'weeknight heroes',
 			db,
 		)
+
 		const sunday = await createCollectionForUser(userId, 'slow sunday', db)
 		expect(weeknight?.position).toBe(0)
 		expect(sunday?.position).toBe(1)
@@ -47,6 +49,7 @@ describe('recipe shelf', () => {
 			{ title: 'miso butter pasta', collectionId: weeknight?.id },
 			db,
 		)
+
 		expect(recipe?.collectionId).toBe(weeknight?.id)
 
 		const shelf = await listShelfForUser(userId, db)
@@ -75,6 +78,7 @@ describe('recipe shelf', () => {
 
 	test('creates and reads recipe content in order', async ({ db }) => {
 		const userId = await seedUser(db)
+
 		const recipe = await createRecipeForUser(
 			userId,
 			{
@@ -84,6 +88,7 @@ describe('recipe shelf', () => {
 			},
 			db,
 		)
+
 		if (!recipe) throw new Error('recipe was not created')
 
 		await expect(
@@ -96,11 +101,13 @@ describe('recipe shelf', () => {
 
 	test('replaces recipe content and checks ownership', async ({ db }) => {
 		const userId = await seedUser(db)
+
 		const recipe = await createRecipeForUser(
 			userId,
 			{ title: 'dal', ingredients: ['lentils'], steps: ['simmer'] },
 			db,
 		)
+
 		if (!recipe) throw new Error('recipe was not created')
 
 		await updateRecipeContentForUser(

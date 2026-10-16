@@ -2,6 +2,11 @@
 
 lockfile_version = 1
 
+[[tools.gum]]
+version = "2.0.2"
+backend = "aqua:charmbracelet/gum"
+specifiers = ["latest"]
+
 [[tools.jq]]
 version = "1.8.2"
 backend = "aqua:jqlang/jq"
@@ -52,7 +57,10 @@ provenance = "github-attestations"
 [[tools.node]]
 version = "24.17.0"
 backend = "core:node"
-specifiers = ["24.17.0"]
+specifiers = [
+    "24",
+    "24.17.0",
+]
 
 [tools.node."platforms.linux-arm64"]
 checksum = "sha256:faa0d59ba7fe7045c950ed09b190578fb8eee73e4358686d38fcc99ca58c1480"
