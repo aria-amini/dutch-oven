@@ -4,10 +4,11 @@ import {
 	S3Client,
 } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
-import { createServerFn } from '@tanstack/react-start'
+import { createServerFn, createServerOnlyFn } from '@tanstack/react-start'
 import { z } from 'zod'
 
 import { serverEnv as env } from '@/env.server'
+import { getCurrentSession } from '@/lib/auth/session'
 
 // Storage settings are optional in development and required in production.
 const storageConfig = z.object({
@@ -53,18 +54,30 @@ export const getAvatarUrl = createServerFn({ method: 'GET' })
 
 export const getAvatarUploadUrl = createServerFn({ method: 'POST' })
 	.validator(z.object({ key: z.string().min(1).max(200) }))
-	.handler(async ({ data }) => {
-		const { bucket, client } = getStorage()
+	.handler(({ data }) => createAvatarUploadUrl(data.key))
 
-		const command = new PutObjectCommand({
-			Bucket: bucket,
-			Key: data.key,
-			ContentType: 'image/*',
-		})
+export const createAvatarUploadUrl = createServerOnlyFn(async (key: string) => {
+	const session = await getCurrentSession()
 
-		return {
-			url: await getSignedUrl(client, command, {
-				expiresIn: 900,
-			}),
-		}
+	if (!session || session.user.isAnonymous) {
+		throw new Error('Sign in to upload an avatar')
+	}
+
+	if (!key.startsWith(`avatars/${session.user.id}-`)) {
+		throw new Error('Invalid avatar key')
+	}
+
+	const { bucket, client } = getStorage()
+
+	const command = new PutObjectCommand({
+		Bucket: bucket,
+		Key: key,
+		ContentType: 'image/*',
 	})
+
+	return {
+		url: await getSignedUrl(client, command, {
+			expiresIn: 900,
+		}),
+	}
+})
