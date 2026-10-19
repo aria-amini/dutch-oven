@@ -1,3 +1,4 @@
+import { Dialog as DialogPrimitive } from '@base-ui/react/dialog'
 import {
 	ArrowLeft,
 	ArrowRight,
@@ -5,14 +6,17 @@ import {
 	LinkSimple,
 	X,
 } from '@phosphor-icons/react'
-import * as DialogPrimitive from '@radix-ui/react-dialog'
 import { useNavigate, useRouter } from '@tanstack/react-router'
 import { useEffect, useRef, useState } from 'react'
 
 import { importRecipe } from '@/lib/import/server'
 import { formField } from '@/lib/utils/form'
 
-export function AddRecipeDialog({ children }: { children: React.ReactNode }) {
+export function AddRecipeDialog({
+	children,
+}: {
+	children: React.ReactElement
+}) {
 	const navigate = useNavigate()
 	const router = useRouter()
 	const [open, setOpen] = useState(false)
@@ -27,10 +31,10 @@ export function AddRecipeDialog({ children }: { children: React.ReactNode }) {
 				if (!next) setStep('choose')
 			}}
 		>
-			<DialogPrimitive.Trigger asChild>{children}</DialogPrimitive.Trigger>
+			<DialogPrimitive.Trigger render={children} />
 			<DialogPrimitive.Portal>
-				<DialogPrimitive.Overlay className="bg-foreground/40 fixed inset-0 isolate z-50" />
-				<DialogPrimitive.Content className="border-foreground bg-card text-foreground fixed top-1/2 left-1/2 z-50 w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 border-2 p-6 shadow-lg outline-none sm:max-w-md">
+				<DialogPrimitive.Backdrop className="bg-foreground/40 fixed inset-0 isolate z-50" />
+				<DialogPrimitive.Popup className="border-foreground bg-card text-foreground fixed top-1/2 left-1/2 z-50 w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 border-2 p-6 shadow-lg outline-none sm:max-w-md">
 					<div className="mb-5 flex items-start justify-between gap-4">
 						<div>
 							<DialogPrimitive.Title className="text-2xl font-extrabold tracking-tight">
@@ -104,7 +108,7 @@ export function AddRecipeDialog({ children }: { children: React.ReactNode }) {
 							}}
 						/>
 					)}
-				</DialogPrimitive.Content>
+				</DialogPrimitive.Popup>
 			</DialogPrimitive.Portal>
 		</DialogPrimitive.Root>
 	)
