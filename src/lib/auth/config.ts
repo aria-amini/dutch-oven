@@ -25,7 +25,7 @@ export const allowedHosts = [
 	'app-dutch-oven-*.up.railway.app',
 ]
 
-export function getAuth() {
+function createAuth() {
 	return betterAuth({
 		appName: 'dutch-oven',
 		baseURL: {
@@ -65,4 +65,12 @@ export function getAuth() {
 			tanstackStartCookies(),
 		],
 	})
+}
+
+let auth: ReturnType<typeof createAuth> | undefined
+
+export function getAuth() {
+	auth ??= createAuth()
+
+	return auth
 }
