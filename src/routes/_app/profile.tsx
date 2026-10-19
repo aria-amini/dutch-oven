@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 
-import { Button } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { authClient } from '@/lib/auth/client'
 import { getAvatarUploadUrl, getAvatarUrl } from '@/lib/s3'
@@ -40,9 +40,9 @@ function Profile() {
 						no account yet — your shelf lives only in this browser. make an
 						account to keep it on any device.
 					</p>
-					<Button asChild>
-						<Link to="/auth/signup">keep my shelf</Link>
-					</Button>
+					<Link to="/auth/signup" className={buttonVariants()}>
+						keep my shelf
+					</Link>
 				</div>
 			</main>
 		)

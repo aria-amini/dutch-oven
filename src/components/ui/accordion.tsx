@@ -1,5 +1,5 @@
+import { Accordion as AccordionPrimitive } from '@base-ui/react/accordion'
 import { CaretDownIcon as ChevronDown } from '@phosphor-icons/react'
-import { Accordion as AccordionPrimitive } from 'radix-ui'
 import * as React from 'react'
 
 import { cn } from '@/lib/utils/ui'
@@ -33,7 +33,7 @@ function AccordionTrigger({
 			<AccordionPrimitive.Trigger
 				data-slot="accordion-trigger"
 				className={cn(
-					'flex flex-1 items-center justify-between gap-4 rounded-md py-3 text-left text-sm font-medium transition-all outline-none hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&[data-state=open]>svg]:rotate-180',
+					'flex flex-1 items-center justify-between gap-4 rounded-md py-3 text-left text-sm font-medium transition-all outline-none hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&[data-panel-open]>svg]:rotate-180',
 					className,
 				)}
 				{...props}
@@ -49,15 +49,15 @@ function AccordionContent({
 	className,
 	children,
 	...props
-}: React.ComponentProps<typeof AccordionPrimitive.Content>) {
+}: React.ComponentProps<typeof AccordionPrimitive.Panel>) {
 	return (
-		<AccordionPrimitive.Content
+		<AccordionPrimitive.Panel
 			data-slot="accordion-content"
-			className="data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down overflow-hidden text-sm"
+			className="h-(--accordion-panel-height) overflow-hidden text-sm transition-[height] duration-200 ease-out data-ending-style:h-0 data-starting-style:h-0"
 			{...props}
 		>
 			<div className={cn('pt-0 pb-3', className)}>{children}</div>
-		</AccordionPrimitive.Content>
+		</AccordionPrimitive.Panel>
 	)
 }
 

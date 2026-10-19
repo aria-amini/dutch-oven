@@ -1,5 +1,5 @@
+import { useRender } from '@base-ui/react/use-render'
 import { CaretRightIcon, DotsThreeIcon } from '@phosphor-icons/react'
-import * as Slot from '@radix-ui/react-slot'
 import * as React from 'react'
 
 import { cn } from '@/lib/utils/ui'
@@ -32,21 +32,19 @@ function BreadcrumbItem({ className, ...props }: React.ComponentProps<'li'>) {
 }
 
 function BreadcrumbLink({
-	asChild,
 	className,
+	render,
 	...props
-}: React.ComponentProps<'a'> & {
-	asChild?: boolean
-}) {
-	const Comp = asChild ? Slot.Root : 'a'
-
-	return (
-		<Comp
-			data-slot="breadcrumb-link"
-			className={cn('hover:text-foreground transition-colors', className)}
-			{...props}
-		/>
-	)
+}: useRender.ComponentProps<'a'>) {
+	return useRender({
+		defaultTagName: 'a',
+		render,
+		props: {
+			'data-slot': 'breadcrumb-link',
+			className: cn('hover:text-foreground transition-colors', className),
+			...props,
+		},
+	})
 }
 
 function BreadcrumbPage({ className, ...props }: React.ComponentProps<'span'>) {
