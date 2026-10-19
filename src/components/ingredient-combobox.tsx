@@ -3,66 +3,11 @@
    a native datalist cannot style or fully control the suggestion list. */
 import { useId, useRef, useState } from 'react'
 
+import { pantrySprites, resolveSpriteSrc } from '@/lib/pantry/sprites'
 import { cn } from '@/lib/utils/ui'
 
 const ingredients = [
-	'apple',
-	'avocado',
-	'bacon',
-	'banana',
-	'bell pepper',
-	'black pepper',
-	'blueberries',
-	'bread',
-	'broccoli',
-	'butter',
-	'carrot',
-	'cheese',
-	'cherry',
-	'chicken',
-	'chili pepper',
-	'chocolate',
-	'cinnamon',
-	'coffee',
-	'corn',
-	'cucumber',
-	'egg',
-	'eggplant',
-	'fish',
-	'flour',
-	'garlic',
-	'grapes',
-	'honey',
-	'jalapeno',
-	'kale',
-	'lemon',
-	'lettuce',
-	'mango',
-	'meat',
-	'milk',
-	'mushroom',
-	'mustard',
-	'nuts',
-	'olive oil',
-	'olives',
-	'onion',
-	'orange',
-	'peach',
-	'pear',
-	'peas',
-	'pineapple',
-	'potato',
-	'radish',
-	'rice',
-	'salmon',
-	'salt',
-	'sausage',
-	'steak',
-	'strawberry',
-	'tomato',
-	'watermelon',
-	'wheat',
-	'zucchini',
+	...new Set(pantrySprites.flatMap((entry) => entry.aliases)),
 ]
 
 function suggest(query: string): string[] {
@@ -170,10 +115,15 @@ export function IngredientCombobox({
 							}}
 							onMouseEnter={() => setActiveIndex(index)}
 							className={cn(
-								'cursor-pointer px-3 py-2 font-semibold',
+								'flex cursor-pointer items-center gap-3 px-3 py-2 font-semibold',
 								index === activeIndex && 'bg-kitchen-yolk',
 							)}
 						>
+							<img
+								src={resolveSpriteSrc(suggestion)}
+								alt=""
+								className="size-8 object-contain [image-rendering:pixelated]"
+							/>
 							{suggestion}
 						</li>
 					))}

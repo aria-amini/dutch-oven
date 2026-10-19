@@ -13,6 +13,8 @@ import type { pantryItems } from '@/db/schema'
 import {
 	pantrySearch,
 	pantryQuantityMax,
+	pantryLocations,
+	pantryLocationLabels,
 	type PantryLocation,
 } from '@/lib/pantry/model'
 import {
@@ -20,6 +22,7 @@ import {
 	listPantry,
 	setPantryItemQuantity,
 } from '@/lib/pantry/server'
+import { resolveSpriteSrc } from '@/lib/pantry/sprites'
 import { cn } from '@/lib/utils/ui'
 
 export const Route = createFileRoute('/_app/pantry/')({
@@ -30,24 +33,18 @@ export const Route = createFileRoute('/_app/pantry/')({
 
 type PantryItem = typeof pantryItems.$inferSelect
 
-const locations: {
-	id: PantryLocation
-	label: string
-	tabClass: string
-}[] = [
-	{ id: 'fridge', label: 'fridge', tabClass: 'bg-kitchen-eggplant text-white' },
-	{ id: 'freezer', label: 'freezer', tabClass: 'bg-kitchen-basil text-black' },
-	{
-		id: 'pantry-shelf',
-		label: 'pantry shelf',
-		tabClass: 'bg-kitchen-yolk text-black',
-	},
-	{
-		id: 'spice-rack',
-		label: 'spice rack',
-		tabClass: 'bg-kitchen-tomato text-black',
-	},
-]
+const locationClasses: Record<PantryLocation, string> = {
+	fridge: 'bg-kitchen-eggplant text-white',
+	freezer: 'bg-kitchen-basil text-black',
+	'pantry-shelf': 'bg-kitchen-yolk text-black',
+	'spice-rack': 'bg-kitchen-tomato text-black',
+}
+
+const locations = pantryLocations.map((id) => ({
+	id,
+	label: pantryLocationLabels[id],
+	tabClass: locationClasses[id],
+}))
 
 const dateFormat = new Intl.DateTimeFormat('en', {
 	month: 'short',
@@ -216,9 +213,12 @@ function Slot({
 					: 'border-foreground bg-card hover:-translate-y-0.5 hover:shadow-sm',
 			)}
 		>
-			<span className="text-center text-xs leading-tight font-bold break-all lowercase">
-				{item.name}
-			</span>
+			<img
+				src={resolveSpriteSrc(item.name, item.spriteKey)}
+				alt=""
+				className="size-10 object-contain [image-rendering:pixelated] md:size-12"
+			/>
+			<span className="sr-only">{item.name}</span>
 			<span className="bg-foreground text-background absolute right-0.5 bottom-0.5 px-1 font-mono text-xs leading-4 font-bold">
 				{item.quantity}
 			</span>
@@ -279,6 +279,11 @@ function DetailPanel({
 		>
 			{item ? (
 				<div className="flex flex-col items-center gap-4">
+					<img
+						src={resolveSpriteSrc(item.name, item.spriteKey)}
+						alt=""
+						className="size-20 object-contain [image-rendering:pixelated]"
+					/>
 					<h2 className="text-2xl font-extrabold tracking-tight lowercase">
 						{item.name}
 					</h2>

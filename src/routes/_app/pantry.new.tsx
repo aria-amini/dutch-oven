@@ -12,6 +12,7 @@ import {
 	type PantryLocation,
 } from '@/lib/pantry/model'
 import { createPantryItem } from '@/lib/pantry/server'
+import { resolveSpriteSrc } from '@/lib/pantry/sprites'
 import { cn } from '@/lib/utils/ui'
 
 export const Route = createFileRoute('/_app/pantry/new')({
@@ -95,6 +96,16 @@ function NewPantryItem() {
 						ingredient
 					</label>
 					<IngredientCombobox id="name" value={name} onChange={setName} />
+					<div className="flex items-center gap-3 py-2">
+						<img
+							src={resolveSpriteSrc(name)}
+							alt="Ingredient icon preview"
+							className="size-12 object-contain [image-rendering:pixelated]"
+						/>
+						<span className="text-muted-foreground text-sm">
+							{name.trim() || 'your ingredient'}
+						</span>
+					</div>
 					<label className="text-xs font-bold uppercase" htmlFor="quantity">
 						how many
 					</label>
