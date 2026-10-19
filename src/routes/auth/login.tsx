@@ -21,18 +21,28 @@ function Login() {
 	const search = Route.useSearch()
 	const [email, setEmail] = useState('')
 	const [password, setPassword] = useState('')
+	const [pending, setPending] = useState(false)
 
 	const submit = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault()
 
-		const result = await authClient.signIn.email({
-			email,
-			password,
-			callbackURL: search.redirect ?? '/',
-		})
+		if (pending) return
+		setPending(true)
 
-		if (result.error) toast.error(result.error.message)
-		else await navigate({ to: search.redirect ?? '/' })
+		try {
+			const result = await authClient.signIn.email({
+				email,
+				password,
+				callbackURL: search.redirect ?? '/',
+			})
+
+			if (result.error) toast.error(result.error.message)
+			else await navigate({ to: search.redirect ?? '/' })
+		} catch {
+			toast.error('Could not sign you in. Try again.')
+		} finally {
+			setPending(false)
+		}
 	}
 
 	return (
@@ -57,8 +67,8 @@ function Login() {
 								value={password}
 								onChange={(event) => setPassword(event.target.value)}
 							/>
-							<Button type="submit" className="w-full">
-								Sign in
+							<Button type="submit" className="w-full" disabled={pending}>
+								{pending ? 'Signing in…' : 'Sign in'}
 							</Button>
 						</form>
 						<p className="text-sm">

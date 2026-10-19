@@ -22,6 +22,28 @@ describe('auth forms', () => {
 		})
 	})
 
+	test('ignores a second sign-in click while the first is pending', async () => {
+		let settle: (value: { error: null }) => void = () => {}
+
+		authMocks.signInEmail.mockClear()
+		authMocks.signInEmail.mockImplementationOnce(
+			() => new Promise((resolve) => (settle = resolve)),
+		)
+
+		const { screen } = await renderRoute({ path: '/auth/login' })
+
+		await screen.getByPlaceholder('you@example.com').fill('cook@example.com')
+		await screen.getByPlaceholder('Password').fill('correct horse')
+		await screen.getByRole('button', { name: 'Sign in', exact: true }).click()
+
+		const pending = screen.getByRole('button', { name: 'Signing in…' })
+		await expect.element(pending).toBeDisabled()
+		await pending.click({ force: true })
+
+		expect(authMocks.signInEmail).toHaveBeenCalledTimes(1)
+		settle({ error: null })
+	})
+
 	test('signs up from the submit button', async () => {
 		const { screen } = await renderRoute({ path: '/auth/signup' })
 
