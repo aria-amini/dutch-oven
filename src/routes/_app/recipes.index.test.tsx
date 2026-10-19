@@ -18,11 +18,16 @@ type Collection = {
 	createdAt: Date
 }
 
-type ShelfState = { recipes: Recipe[]; collections: Collection[] }
+type ShelfState = {
+	recipes: Recipe[]
+	collections: Collection[]
+	created: { title: string; ingredients?: string[]; steps?: string[] }[]
+}
 
 const shelfState = vi.hoisted<ShelfState>(() => ({
 	recipes: [],
 	collections: [],
+	created: [],
 }))
 
 vi.mock('@/lib/recipes/server', () => ({
@@ -38,8 +43,15 @@ vi.mock('@/lib/recipes/server', () => ({
 	createRecipe: async ({
 		data,
 	}: {
-		data: { title: string; imageUrl?: string; collectionId?: string }
+		data: {
+			title: string
+			imageUrl?: string
+			collectionId?: string
+			ingredients?: string[]
+			steps?: string[]
+		}
 	}) => {
+		shelfState.created.push(data)
 		shelfState.recipes.push({
 			id: crypto.randomUUID(),
 			userId: 'user-1',
@@ -76,6 +88,7 @@ const dal: Recipe = {
 
 describe('recipes shelf', () => {
 	beforeEach(() => {
+		shelfState.created = []
 		shelfState.recipes = []
 		shelfState.collections = []
 	})
@@ -114,6 +127,36 @@ describe('recipes shelf', () => {
 		await screen.getByRole('button', { name: 'recipe' }).click()
 		await expect.element(screen.getByText('from a link')).toBeVisible()
 		await expect.element(screen.getByText('my own two hands')).toBeVisible()
+	})
+
+	test('builds ingredients from a quantity, a unit, and a suggested name', async () => {
+		const { screen } = await renderRoute({
+			path: '/recipes/new',
+			session: testSession,
+		})
+
+		await screen.getByRole('textbox', { name: 'Recipe name' }).fill('Toast')
+		await screen.getByRole('spinbutton', { name: 'Quantity 1' }).fill('1.5')
+		await screen.getByRole('combobox', { name: 'Unit 1' }).selectOptions('cup')
+		await screen.getByRole('combobox', { name: 'Ingredient 1' }).fill('flo')
+		await screen.getByRole('option', { name: 'flour' }).click()
+		await expect
+			.element(screen.getByRole('combobox', { name: 'Ingredient 1' }))
+			.toHaveValue('flour')
+
+		await screen.getByRole('button', { name: 'add ingredient' }).click()
+		await screen.getByRole('spinbutton', { name: 'Quantity 2' }).fill('2')
+		await screen.getByRole('combobox', { name: 'Ingredient 2' }).fill('eggs')
+		await screen.getByRole('button', { name: 'save to shelf' }).click()
+
+		await expect
+			.poll(() => shelfState.created.at(-1))
+			.toEqual(
+				expect.objectContaining({
+					title: 'Toast',
+					ingredients: ['1½ cup flour', '2 eggs'],
+				}),
+			)
 	})
 
 	test('closes the add fork from its close button', async () => {

@@ -24,10 +24,27 @@ export function IngredientCombobox({
 	id,
 	value,
 	onChange,
+	name = 'name',
+	required = true,
+	placeholder = 'carrots',
+	label,
+	compact = false,
+	inputRef,
+	onKeyDown,
+	onPaste,
 }: {
-	id: string
+	id?: string
 	value: string
 	onChange: (name: string) => void
+	name?: string
+	required?: boolean
+	placeholder?: string
+	label?: string
+	compact?: boolean
+	inputRef?: React.Ref<HTMLInputElement>
+	// Runs for keys the suggestion list does not handle.
+	onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>
+	onPaste?: React.ClipboardEventHandler<HTMLInputElement>
 }) {
 	const listboxId = useId()
 	const blurTimeout = useRef<ReturnType<typeof setTimeout>>(undefined)
@@ -44,12 +61,32 @@ export function IngredientCombobox({
 		setActiveIndex(-1)
 	}
 
+	function handleListKey(event: React.KeyboardEvent<HTMLInputElement>) {
+		if (event.key === 'ArrowDown') {
+			event.preventDefault()
+			setActiveIndex((index) => Math.min(index + 1, suggestions.length - 1))
+		} else if (event.key === 'ArrowUp') {
+			event.preventDefault()
+			setActiveIndex((index) => Math.max(index - 1, -1))
+		} else if (event.key === 'Enter' && activeIndex >= 0) {
+			event.preventDefault()
+			const suggestion = suggestions[activeIndex]
+
+			if (suggestion) pick(suggestion)
+		} else if (event.key === 'Escape') {
+			setOpen(false)
+			setActiveIndex(-1)
+		}
+	}
+
 	return (
 		<div className="relative">
 			<input
+				ref={inputRef}
 				id={id}
-				name="name"
-				required
+				name={name}
+				required={required}
+				aria-label={label}
 				maxLength={80}
 				value={value}
 				role="combobox"
@@ -62,7 +99,7 @@ export function IngredientCombobox({
 				}
 				aria-autocomplete="list"
 				autoComplete="off"
-				placeholder="carrots"
+				placeholder={placeholder}
 				onChange={(event) => {
 					onChange(event.target.value)
 					setOpen(true)
@@ -72,28 +109,18 @@ export function IngredientCombobox({
 				onBlur={() => {
 					blurTimeout.current = setTimeout(() => setOpen(false), 150)
 				}}
+				onPaste={onPaste}
 				onKeyDown={(event) => {
-					if (!expanded) return
+					if (expanded) handleListKey(event)
 
-					if (event.key === 'ArrowDown') {
-						event.preventDefault()
-						setActiveIndex((index) =>
-							Math.min(index + 1, suggestions.length - 1),
-						)
-					} else if (event.key === 'ArrowUp') {
-						event.preventDefault()
-						setActiveIndex((index) => Math.max(index - 1, -1))
-					} else if (event.key === 'Enter' && activeIndex >= 0) {
-						event.preventDefault()
-						const suggestion = suggestions[activeIndex]
-
-						if (suggestion) pick(suggestion)
-					} else if (event.key === 'Escape') {
-						setOpen(false)
-						setActiveIndex(-1)
-					}
+					if (!event.defaultPrevented) onKeyDown?.(event)
 				}}
-				className="border-foreground bg-background focus-visible:outline-kitchen-eggplant w-full border-2 px-3 py-3 text-lg font-bold placeholder:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2"
+				className={cn(
+					'border-foreground bg-background focus-visible:outline-kitchen-eggplant w-full border-2 placeholder:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2',
+					compact
+						? 'px-3 py-2 text-sm font-semibold'
+						: 'px-3 py-3 text-lg font-bold',
+				)}
 			/>
 			{expanded ? (
 				<ul
