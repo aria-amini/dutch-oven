@@ -6,7 +6,6 @@ import {
 	recipeIngredients,
 	recipeSteps,
 	recipes,
-	type RecipeIngredient,
 } from '@/db/schema'
 
 type RecipeDatabase =
@@ -95,7 +94,7 @@ export async function createRecipeForUser(
 		title: string
 		imageUrl?: string | undefined
 		collectionId?: string | undefined
-		ingredients?: string[] | RecipeIngredient[] | undefined
+		ingredients?: string[] | undefined
 		steps?: string[] | undefined
 	},
 	database: typeof db = db,
@@ -134,16 +133,14 @@ export async function createRecipeForUser(
 	})
 }
 
-function contentLines(lines: string[] | RecipeIngredient[] | undefined) {
-	return (lines ?? [])
-		.map((line) => (line instanceof Object ? line.raw : line).trim())
-		.filter(Boolean)
+function contentLines(lines: string[] | undefined) {
+	return (lines ?? []).map((line) => line.trim()).filter(Boolean)
 }
 
 async function insertRecipeContent(
 	database: RecipeDatabase,
 	recipeId: string,
-	ingredientLines: string[] | RecipeIngredient[] | undefined,
+	ingredientLines: string[] | undefined,
 	stepLines: string[] | undefined,
 ) {
 	const ingredients = contentLines(ingredientLines)
