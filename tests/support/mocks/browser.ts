@@ -30,7 +30,11 @@ export function setMockSession(session: MockSession | null) {
 
 vi.mock('@/lib/auth/client', () => ({
 	authClient: {
-		useSession: () => ({ data: authState.session, isPending: false }),
+		useSession: () => ({
+			data: authState.session,
+			isPending: false,
+			refetch: vi.fn(),
+		}),
 		signIn: {
 			email: authMocks.signInEmail,
 			social: vi.fn(),
