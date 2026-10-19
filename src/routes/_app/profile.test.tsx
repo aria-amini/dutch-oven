@@ -8,6 +8,10 @@ vi.mock('@/lib/s3', () => ({
 	getAvatarUploadUrl: vi.fn(),
 }))
 
+vi.mock('@/lib/shelf/server', () => ({
+	getShelfStats: async () => ({ recipes: 0, pantryItems: 0 }),
+}))
+
 describe('profile account states', () => {
 	test('offers sign-in instead of upload controls without a session', async () => {
 		const { screen } = await renderRoute({ path: '/profile' })
