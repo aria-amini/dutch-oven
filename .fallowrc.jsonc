@@ -34,5 +34,8 @@
 		"radix-ui",
 		"clsx",
 		"tailwind-merge",
+		// Build tooling: mise-tasks/ imports execa, styles.css imports shadcn CSS
+		"execa",
+		"shadcn",
 	],
 }

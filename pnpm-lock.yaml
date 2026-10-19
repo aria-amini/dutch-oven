@@ -203,9 +203,6 @@ importers:
       '@fontsource-variable/open-sans':
         specifier: ^5.3.0
         version: 5.3.0
-      '@fontsource-variable/oxanium':
-        specifier: ^5.2.8
-        version: 5.3.0
       '@phosphor-icons/react':
         specifier: ^2.1.10
         version: 2.1.10(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
@@ -1167,9 +1164,6 @@ packages:
 
   '@fontsource-variable/open-sans@5.3.0':
     resolution: {integrity: sha512-VOfhZfLIOBVa6K/dTEu7scqQXYdGa4jBX8quFpQ0S6574B+W2EOBJf9PkqyVtMEI7WWIWNEbpvPc3vY1mN2mmQ==}
-
-  '@fontsource-variable/oxanium@5.3.0':
-    resolution: {integrity: sha512-oVOH5mHRMDLQsxG6h2XAOCxyD+uQL2w5zAjy1FgnAlqt183JDVGPxy9FWK7dDnhEO8huXfP6V2C3QJUj1Ac/Sw==}
 
   '@grpc/grpc-js@1.14.6':
     resolution: {integrity: sha512-SgC/B3/VZ8lTyOZ4Cwk6f1skWhmkNAaVfiX90qd5u1rRXGKk1//8FTUEN9GvOUq7rfWIqAYkA3CoyumYVpOS6g==}
@@ -7449,8 +7443,6 @@ snapshots:
   '@fontsource-variable/jetbrains-mono@5.3.0': {}
 
   '@fontsource-variable/open-sans@5.3.0': {}
-
-  '@fontsource-variable/oxanium@5.3.0': {}
 
   '@grpc/grpc-js@1.14.6':
     dependencies:
