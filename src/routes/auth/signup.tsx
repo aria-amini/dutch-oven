@@ -78,7 +78,7 @@ function Signup() {
 								value={password}
 								onChange={(event) => setPassword(event.target.value)}
 							/>
-							<Button className="w-full" disabled={pending}>
+							<Button type="submit" className="w-full" disabled={pending}>
 								{pending ? 'Signing up…' : 'Sign up'}
 							</Button>
 						</form>
