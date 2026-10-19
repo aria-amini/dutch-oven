@@ -4,13 +4,62 @@ import {
 	ArrowRight,
 	ChefHat,
 	LinkSimple,
+	Note,
 	X,
 } from '@phosphor-icons/react'
 import { useNavigate, useRouter } from '@tanstack/react-router'
 import { useEffect, useRef, useState } from 'react'
 
+import { parseNote, type NoteDraft } from '@/lib/import/note'
 import { importRecipe } from '@/lib/import/server'
 import { formField } from '@/lib/utils/form'
+import { cn } from '@/lib/utils/ui'
+
+const descriptions = {
+	choose: "where's it coming from?",
+	import: 'paste the link, we pull it in',
+	note: 'copy a note, paste it here',
+}
+
+function ChoiceButton({
+	icon,
+	iconClassName,
+	title,
+	hint,
+	onClick,
+}: {
+	icon: React.ReactNode
+	iconClassName: string
+	title: string
+	hint: string
+	onClick: () => void
+}) {
+	return (
+		<button
+			type="button"
+			onClick={onClick}
+			className="border-foreground bg-background focus-visible:outline-kitchen-eggplant flex items-center gap-3 border-2 px-3 py-2.5 text-left shadow-sm transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2"
+		>
+			<span
+				className={cn(
+					'border-foreground grid size-10 shrink-0 place-items-center border-2',
+					iconClassName,
+				)}
+			>
+				{icon}
+			</span>
+			<span className="flex-1">
+				<span className="block text-base leading-tight font-extrabold">
+					{title}
+				</span>
+				<span className="text-muted-foreground text-xs font-semibold">
+					{hint}
+				</span>
+			</span>
+			<ArrowRight size={16} weight="bold" aria-hidden />
+		</button>
+	)
+}
 
 export function AddRecipeDialog({
 	children,
@@ -20,7 +69,7 @@ export function AddRecipeDialog({
 	const navigate = useNavigate()
 	const router = useRouter()
 	const [open, setOpen] = useState(false)
-	const [step, setStep] = useState<'choose' | 'import'>('choose')
+	const [step, setStep] = useState<'choose' | 'import' | 'note'>('choose')
 
 	return (
 		<DialogPrimitive.Root
@@ -41,9 +90,7 @@ export function AddRecipeDialog({
 								add a recipe
 							</DialogPrimitive.Title>
 							<DialogPrimitive.Description className="text-muted-foreground mt-1 text-sm font-semibold">
-								{step === 'choose'
-									? "where's it coming from?"
-									: 'paste the link, we pull it in'}
+								{descriptions[step]}
 							</DialogPrimitive.Description>
 						</div>
 						<DialogPrimitive.Close
@@ -55,47 +102,32 @@ export function AddRecipeDialog({
 					</div>
 					{step === 'choose' ? (
 						<div className="flex flex-col gap-3">
-							<button
-								type="button"
+							<ChoiceButton
+								icon={<LinkSimple size={18} weight="bold" aria-hidden />}
+								iconClassName="bg-kitchen-eggplant text-white"
+								title="from a link"
+								hint="paste a url, we pull it in"
 								onClick={() => setStep('import')}
-								className="border-foreground bg-background focus-visible:outline-kitchen-eggplant flex items-center gap-3 border-2 px-3 py-2.5 text-left shadow-sm transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2"
-							>
-								<span className="border-foreground bg-kitchen-eggplant grid size-10 shrink-0 place-items-center border-2 text-white">
-									<LinkSimple size={18} weight="bold" aria-hidden />
-								</span>
-								<span className="flex-1">
-									<span className="block text-base leading-tight font-extrabold">
-										from a link
-									</span>
-									<span className="text-muted-foreground text-xs font-semibold">
-										paste a url, we pull it in
-									</span>
-								</span>
-								<ArrowRight size={16} weight="bold" aria-hidden />
-							</button>
-							<button
-								type="button"
+							/>
+							<ChoiceButton
+								icon={<Note size={18} weight="bold" aria-hidden />}
+								iconClassName="bg-kitchen-yolk text-black"
+								title="from a note"
+								hint="paste one from ios notes"
+								onClick={() => setStep('note')}
+							/>
+							<ChoiceButton
+								icon={<ChefHat size={18} weight="bold" aria-hidden />}
+								iconClassName="bg-kitchen-tomato text-black"
+								title="my own two hands"
+								hint="write it yourself"
 								onClick={() => {
 									setOpen(false)
 									void navigate({ to: '/recipes/new' })
 								}}
-								className="border-foreground bg-background focus-visible:outline-kitchen-eggplant flex items-center gap-3 border-2 px-3 py-2.5 text-left shadow-sm transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2"
-							>
-								<span className="border-foreground bg-kitchen-tomato grid size-10 shrink-0 place-items-center border-2 text-black">
-									<ChefHat size={18} weight="bold" aria-hidden />
-								</span>
-								<span className="flex-1">
-									<span className="block text-base leading-tight font-extrabold">
-										my own two hands
-									</span>
-									<span className="text-muted-foreground text-xs font-semibold">
-										write it yourself
-									</span>
-								</span>
-								<ArrowRight size={16} weight="bold" aria-hidden />
-							</button>
+							/>
 						</div>
-					) : (
+					) : step === 'import' ? (
 						<ImportStep
 							onBack={() => setStep('choose')}
 							onImported={(recipeId) => {
@@ -105,6 +137,14 @@ export function AddRecipeDialog({
 									to: '/recipes/$recipeId',
 									params: { recipeId },
 								})
+							}}
+						/>
+					) : (
+						<NoteStep
+							onBack={() => setStep('choose')}
+							onParsed={(noteDraft) => {
+								setOpen(false)
+								void navigate({ to: '/recipes/new', state: { noteDraft } })
 							}}
 						/>
 					)}
@@ -193,6 +233,76 @@ function ImportStep({
 					grabbing the page — some sites make us knock twice
 				</output>
 			) : null}
+			{error ? (
+				<p role="alert" className="text-kitchen-tomato text-xs font-bold">
+					{error}
+				</p>
+			) : null}
+		</form>
+	)
+}
+
+function NoteStep({
+	onBack,
+	onParsed,
+}: {
+	onBack: () => void
+	onParsed: (draft: NoteDraft) => void
+}) {
+	const [error, setError] = useState<string>()
+
+	return (
+		<form
+			className="flex flex-col gap-3"
+			onSubmit={(event) => {
+				event.preventDefault()
+
+				const draft = parseNote(
+					formField(new FormData(event.currentTarget), 'note'),
+				)
+
+				if (!draft) {
+					setError('paste a note first')
+
+					return
+				}
+
+				onParsed(draft)
+			}}
+		>
+			<label className="sr-only" htmlFor="note-text">
+				Recipe note
+			</label>
+			<textarea
+				id="note-text"
+				name="note"
+				rows={8}
+				placeholder={
+					'miso butter pasta\n\ningredients\n200g pasta\n1 tbsp miso\n\nsteps\nboil the pasta'
+				}
+				onChange={() => setError(undefined)}
+				className="border-foreground bg-background focus-visible:outline-kitchen-eggplant resize-y border-2 px-3 py-2.5 text-sm font-semibold placeholder:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2"
+			/>
+			<p className="text-muted-foreground text-xs font-semibold">
+				in notes: open the note, tap ⋯, share, copy. the first line is the
+				title. you check it over before it saves.
+			</p>
+			<div className="flex items-center gap-3">
+				<button
+					type="submit"
+					className="border-foreground bg-kitchen-basil border-2 px-4 py-2 text-xs font-bold uppercase shadow-sm transition-transform hover:-translate-y-0.5"
+				>
+					review
+				</button>
+				<button
+					type="button"
+					onClick={onBack}
+					className="focus-visible:outline-kitchen-eggplant inline-flex items-center gap-1 text-xs font-bold uppercase underline focus-visible:outline-2 focus-visible:outline-offset-2"
+				>
+					<ArrowLeft size={13} weight="bold" aria-hidden />
+					back
+				</button>
+			</div>
 			{error ? (
 				<p role="alert" className="text-kitchen-tomato text-xs font-bold">
 					{error}
