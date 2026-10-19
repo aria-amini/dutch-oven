@@ -9,6 +9,15 @@ const authState = vi.hoisted<{ session: MockSession | null }>(() => ({
 	session: null,
 }))
 
+const authMocks = vi.hoisted(() => ({
+	signInEmail: vi.fn(async () => ({ error: null })),
+	signUpEmail: vi.fn(async () => ({ error: null })),
+}))
+
+export function getAuthMocks() {
+	return authMocks
+}
+
 export function setMockSession(session: MockSession | null) {
 	authState.session = session
 }
@@ -17,11 +26,11 @@ vi.mock('@/lib/auth/client', () => ({
 	authClient: {
 		useSession: () => ({ data: authState.session, isPending: false }),
 		signIn: {
-			email: vi.fn(),
+			email: authMocks.signInEmail,
 			social: vi.fn(),
 		},
 		signUp: {
-			email: vi.fn(async () => ({ error: null })),
+			email: authMocks.signUpEmail,
 		},
 		requestPasswordReset: vi.fn(),
 		resetPassword: vi.fn(),

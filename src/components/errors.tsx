@@ -9,7 +9,7 @@ import type { ErrorComponentProps } from '@tanstack/react-router'
 import { Link } from '@tanstack/react-router'
 import { useEffect } from 'react'
 
-import { Button } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 
 // ========================================================================
@@ -31,12 +31,10 @@ export function NotFoundComponent() {
 						get you back on track.
 					</p>
 					<div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
-						<Button asChild>
-							<Link to="/">
-								<ArrowLeftIcon className="h-4 w-4" />
-								Back to Home
-							</Link>
-						</Button>
+						<Link to="/" className={buttonVariants()}>
+							<ArrowLeftIcon className="h-4 w-4" />
+							Back to Home
+						</Link>
 					</div>
 				</CardContent>
 			</Card>
@@ -71,12 +69,10 @@ export function ServerErrorComponent({ error, reset }: ErrorComponentProps) {
 							<ArrowsClockwiseIcon className="h-4 w-4" />
 							Try Again
 						</Button>
-						<Button asChild variant="secondary">
-							<Link to="/">
-								<ArrowLeftIcon className="h-4 w-4" />
-								Back to Home
-							</Link>
-						</Button>
+						<Link to="/" className={buttonVariants({ variant: 'secondary' })}>
+							<ArrowLeftIcon className="h-4 w-4" />
+							Back to Home
+						</Link>
 					</div>
 				</CardContent>
 			</Card>

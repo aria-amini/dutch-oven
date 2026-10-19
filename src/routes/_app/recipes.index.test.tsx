@@ -115,4 +115,20 @@ describe('recipes shelf', () => {
 		await expect.element(screen.getByText('from a link')).toBeVisible()
 		await expect.element(screen.getByText('my own two hands')).toBeVisible()
 	})
+
+	test('closes the add fork from its close button', async () => {
+		shelfState.recipes = [misoButterPasta, dal]
+
+		const { screen } = await renderRoute({
+			path: '/recipes',
+			session: testSession,
+		})
+
+		await screen.getByRole('button', { name: 'recipe' }).click()
+		await expect.element(screen.getByText('from a link')).toBeVisible()
+		await screen.getByRole('button', { name: 'Close' }).click()
+		await expect
+			.element(screen.getByText('from a link'))
+			.not.toBeInTheDocument()
+	})
 })

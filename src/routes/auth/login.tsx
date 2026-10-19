@@ -57,7 +57,9 @@ function Login() {
 								value={password}
 								onChange={(event) => setPassword(event.target.value)}
 							/>
-							<Button className="w-full">Sign in</Button>
+							<Button type="submit" className="w-full">
+								Sign in
+							</Button>
 						</form>
 						<p className="text-sm">
 							New here?{' '}
