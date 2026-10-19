@@ -21,6 +21,7 @@ export const allowedHosts = [
 	'*.localhost',
 	'*.localhost:*',
 	'*.lvh.ariaamini.com',
+	'*.dev.ariaamini.com',
 	'dutch-oven-*.up.railway.app',
 	'app-dutch-oven-*.up.railway.app',
 ]
