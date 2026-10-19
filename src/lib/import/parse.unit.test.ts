@@ -120,6 +120,15 @@ const JSON_LD_WITH_OG_IMAGE_PAGE = `
 </head><body></body></html>
 `
 
+function pageWithImage(image: string) {
+	return `<script type="application/ld+json">${JSON.stringify({
+		'@type': 'Recipe',
+		name: 'Image Soup',
+		image,
+		recipeIngredient: ['1 leek'],
+	})}</script>`
+}
+
 const WALLED_PAGE = `<html><head><title>Just a moment...</title></head><body>challenge-platform</body></html>`
 
 describe('parseRecipe', () => {
@@ -193,5 +202,25 @@ describe('parseRecipe', () => {
 
 	test('fails honestly on decoy pages', () => {
 		expect(parseRecipe(WALLED_PAGE)).toBeNull()
+	})
+
+	test('resolves a relative image against the page URL', () => {
+		const recipe = parseRecipe(
+			pageWithImage('/img/soup.jpg'),
+			'https://example.com/recipes/soup',
+		)
+
+		expect(recipe?.imageUrl).toBe('https://example.com/img/soup.jpg')
+	})
+
+	test.each([
+		['a data URL', 'data:image/png;base64,AAAA'],
+		['a javascript URL', 'javascript:alert(1)'],
+		['an over-long URL', `https://example.com/${'a'.repeat(500)}.jpg`],
+		['a relative URL without a page URL', '/img/soup.jpg'],
+	])('drops %s as the image', (_label, image) => {
+		const recipe = parseRecipe(pageWithImage(image))
+		expect(recipe?.title).toBe('Image Soup')
+		expect(recipe?.imageUrl).toBeUndefined()
 	})
 })
