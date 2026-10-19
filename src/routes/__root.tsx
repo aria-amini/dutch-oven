@@ -6,6 +6,7 @@ import {
 	Scripts,
 	createRootRoute,
 } from '@tanstack/react-router'
+import { Toaster } from 'sonner'
 
 import { queryClient } from '@/lib/utils/query'
 
@@ -49,6 +50,18 @@ function RootComponent() {
 						<Outlet />
 					)}
 				</QueryClientProvider>
+				<Toaster
+					position="bottom-right"
+					toastOptions={{
+						unstyled: true,
+						classNames: {
+							toast:
+								'border-foreground bg-card text-foreground flex w-full items-center gap-3 border-2 px-4 py-3 text-sm font-semibold shadow-md',
+							error: 'bg-kitchen-tomato text-black',
+							success: 'bg-kitchen-basil text-black',
+						},
+					}}
+				/>
 				<Scripts />
 			</body>
 		</html>
