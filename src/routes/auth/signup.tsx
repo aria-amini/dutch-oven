@@ -21,13 +21,24 @@ function Signup() {
 	const [name, setName] = useState('')
 	const [email, setEmail] = useState('')
 	const [password, setPassword] = useState('')
+	const [pending, setPending] = useState(false)
 
 	const submit = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault()
-		const { error } = await authClient.signUp.email({ name, email, password })
 
-		if (error) toast.error(error.message)
-		else await navigate({ to: '/recipes' })
+		if (pending) return
+		setPending(true)
+
+		try {
+			const { error } = await authClient.signUp.email({ name, email, password })
+
+			if (error) toast.error(error.message)
+			else await navigate({ to: '/recipes' })
+		} catch {
+			toast.error('Could not create your account. Try again.')
+		} finally {
+			setPending(false)
+		}
 	}
 
 	return (
@@ -67,7 +78,9 @@ function Signup() {
 								value={password}
 								onChange={(event) => setPassword(event.target.value)}
 							/>
-							<Button className="w-full">Sign up</Button>
+							<Button className="w-full" disabled={pending}>
+								{pending ? 'Signing up…' : 'Sign up'}
+							</Button>
 						</form>
 						<Link to="/auth/login" className="text-sm underline">
 							Already have an account? Sign in
