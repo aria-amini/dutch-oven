@@ -126,7 +126,48 @@ describe('recipes shelf', () => {
 
 		await screen.getByRole('button', { name: 'recipe' }).click()
 		await expect.element(screen.getByText('from a link')).toBeVisible()
+		await expect.element(screen.getByText('from a note')).toBeVisible()
 		await expect.element(screen.getByText('my own two hands')).toBeVisible()
+	})
+
+	test('turns a pasted note into a reviewable draft and saves it', async () => {
+		shelfState.recipes = [misoButterPasta]
+
+		const { screen } = await renderRoute({
+			path: '/recipes',
+			session: testSession,
+		})
+
+		await screen.getByRole('button', { name: 'recipe' }).click()
+		await screen.getByText('from a note').click()
+		await screen
+			.getByRole('textbox', { name: 'Recipe note' })
+			.fill('Dal\n\nIngredients\n• 1 cup lentils\n• 1 onion\n\nMethod\nSimmer.')
+		await screen.getByRole('button', { name: 'review' }).click()
+
+		await expect
+			.element(screen.getByRole('textbox', { name: 'Recipe name' }))
+			.toHaveValue('Dal')
+		await expect
+			.element(screen.getByRole('combobox', { name: 'Ingredient 2' }))
+			.toHaveValue('onion')
+		await expect
+			.element(screen.getByRole('spinbutton', { name: 'Quantity 1' }))
+			.toHaveValue(1)
+		await expect
+			.element(screen.getByRole('combobox', { name: 'Unit 1' }))
+			.toHaveValue('cup')
+
+		await screen.getByRole('button', { name: 'save to shelf' }).click()
+		await expect
+			.poll(() => shelfState.created.at(-1))
+			.toEqual(
+				expect.objectContaining({
+					title: 'Dal',
+					ingredients: ['1 cup lentils', '1 onion'],
+					steps: ['Simmer.'],
+				}),
+			)
 	})
 
 	test('builds ingredients from a quantity, a unit, and a suggested name', async () => {
