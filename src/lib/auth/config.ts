@@ -21,11 +21,12 @@ export const allowedHosts = [
 	'*.localhost',
 	'*.localhost:*',
 	'*.lvh.ariaamini.com',
+	'*.dev.ariaamini.com',
 	'dutch-oven-*.up.railway.app',
 	'app-dutch-oven-*.up.railway.app',
 ]
 
-export function getAuth() {
+function createAuth() {
 	return betterAuth({
 		appName: 'dutch-oven',
 		baseURL: {
@@ -65,4 +66,12 @@ export function getAuth() {
 			tanstackStartCookies(),
 		],
 	})
+}
+
+let auth: ReturnType<typeof createAuth> | undefined
+
+export function getAuth() {
+	auth ??= createAuth()
+
+	return auth
 }

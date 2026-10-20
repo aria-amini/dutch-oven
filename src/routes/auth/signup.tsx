@@ -67,7 +67,9 @@ function Signup() {
 								value={password}
 								onChange={(event) => setPassword(event.target.value)}
 							/>
-							<Button className="w-full">Sign up</Button>
+							<Button type="submit" className="w-full">
+								Sign up
+							</Button>
 						</form>
 						<Link to="/auth/login" className="text-sm underline">
 							Already have an account? Sign in

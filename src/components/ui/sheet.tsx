@@ -1,4 +1,4 @@
-import * as SheetPrimitive from '@radix-ui/react-dialog'
+import { Dialog as SheetPrimitive } from '@base-ui/react/dialog'
 import { RiCloseLine } from '@remixicon/react'
 import * as React from 'react'
 
@@ -30,9 +30,9 @@ function SheetPortal({
 function SheetOverlay({
 	className,
 	...props
-}: React.ComponentProps<typeof SheetPrimitive.Overlay>) {
+}: React.ComponentProps<typeof SheetPrimitive.Backdrop>) {
 	return (
-		<SheetPrimitive.Overlay
+		<SheetPrimitive.Backdrop
 			data-slot="sheet-overlay"
 			className={cn(
 				'fixed inset-0 z-50 bg-black/80 duration-100 supports-backdrop-filter:backdrop-blur-xs data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0',
@@ -49,14 +49,14 @@ function SheetContent({
 	side = 'right',
 	showCloseButton = true,
 	...props
-}: React.ComponentProps<typeof SheetPrimitive.Content> & {
+}: React.ComponentProps<typeof SheetPrimitive.Popup> & {
 	side?: 'top' | 'right' | 'bottom' | 'left'
 	showCloseButton?: boolean
 }) {
 	return (
 		<SheetPortal>
 			<SheetOverlay />
-			<SheetPrimitive.Content
+			<SheetPrimitive.Popup
 				data-slot="sheet-content"
 				data-side={side}
 				className={cn(
@@ -67,18 +67,21 @@ function SheetContent({
 			>
 				{children}
 				{showCloseButton && (
-					<SheetPrimitive.Close data-slot="sheet-close" asChild>
-						<Button
-							variant="ghost"
-							className="absolute top-4 right-4"
-							size="icon-sm"
-						>
-							<RiCloseLine />
-							<span className="sr-only">Close</span>
-						</Button>
+					<SheetPrimitive.Close
+						data-slot="sheet-close"
+						render={
+							<Button
+								variant="ghost"
+								className="absolute top-4 right-4"
+								size="icon-sm"
+							/>
+						}
+					>
+						<RiCloseLine />
+						<span className="sr-only">Close</span>
 					</SheetPrimitive.Close>
 				)}
-			</SheetPrimitive.Content>
+			</SheetPrimitive.Popup>
 		</SheetPortal>
 	)
 }
