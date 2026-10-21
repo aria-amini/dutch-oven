@@ -70,6 +70,11 @@ function looksLikeIngredient(line: string) {
 
 // ===== Entry =====
 
+// TODO: text without headings is ambiguous — the line heuristics above guess
+// between ingredients and steps, and a note with several recipes reads as one.
+// Replace with a smarter parser (likely an LLM with a structured-output schema
+// derived from recipeInput) once one is wired up.
+
 export function parseNote(note: string): NoteDraft | null {
 	const lines = note
 		.split(/\r?\n/)
