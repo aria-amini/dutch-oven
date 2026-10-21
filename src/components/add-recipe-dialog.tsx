@@ -3,8 +3,8 @@ import {
 	ArrowLeft,
 	ArrowRight,
 	LinkSimple,
-	Note,
 	Plus,
+	TextAlignLeft,
 	X,
 } from '@phosphor-icons/react'
 import { useNavigate, useRouter } from '@tanstack/react-router'
@@ -17,18 +17,49 @@ import { cn } from '@/lib/utils/ui'
 
 const descriptions = {
 	import: 'paste the link, we pull it in',
-	note: 'copy a note, paste it here',
+	note: 'paste a recipe from notes, a message, anywhere',
+}
+
+// Sites the link importer is verified against; most recipe sites work.
+const importSites = [
+	{ id: 'nytimes', name: 'NYT Cooking' },
+	{ id: 'allrecipes', name: 'Allrecipes' },
+	{ id: 'seriouseats', name: 'Serious Eats' },
+	{ id: 'bonappetit', name: 'Bon Appétit' },
+	{ id: 'bbcgoodfood', name: 'BBC Good Food' },
+	{ id: 'simplyrecipes', name: 'Simply Recipes' },
+] as const
+
+function ImportSites() {
+	return (
+		<span className="mt-1 flex items-center gap-1">
+			{importSites.map((site) => (
+				<img
+					key={site.id}
+					src={`/import-sites/${site.id}.png`}
+					alt={site.name}
+					title={site.name}
+					className="size-4"
+				/>
+			))}
+			<span className="text-muted-foreground ml-1 text-xs font-semibold">
+				&amp; most recipe sites
+			</span>
+		</span>
+	)
 }
 
 function ChoiceButton({
 	icon,
 	iconClassName,
 	title,
+	subtext,
 	onClick,
 }: {
 	icon: React.ReactNode
 	iconClassName: string
 	title: string
+	subtext?: React.ReactNode
 	onClick: () => void
 }) {
 	return (
@@ -45,8 +76,11 @@ function ChoiceButton({
 			>
 				{icon}
 			</span>
-			<span className="flex-1 text-sm leading-tight font-extrabold">
-				{title}
+			<span className="flex-1">
+				<span className="block text-sm leading-tight font-extrabold">
+					{title}
+				</span>
+				{subtext}
 			</span>
 			<ArrowRight size={16} weight="bold" aria-hidden />
 		</button>
@@ -102,18 +136,6 @@ export function AddRecipeDialog({
 					{step === 'choose' ? (
 						<div className="flex flex-col gap-2">
 							<ChoiceButton
-								icon={<LinkSimple size={18} weight="bold" aria-hidden />}
-								iconClassName="bg-kitchen-eggplant text-white"
-								title="paste a url"
-								onClick={() => setStep('import')}
-							/>
-							<ChoiceButton
-								icon={<Note size={18} weight="bold" aria-hidden />}
-								iconClassName="bg-kitchen-yolk text-black"
-								title="import ios notes"
-								onClick={() => setStep('note')}
-							/>
-							<ChoiceButton
 								icon={<Plus size={18} weight="bold" aria-hidden />}
 								iconClassName="bg-kitchen-tomato text-black"
 								title="write new recipe"
@@ -121,6 +143,19 @@ export function AddRecipeDialog({
 									setOpen(false)
 									void navigate({ to: '/recipes/new' })
 								}}
+							/>
+							<ChoiceButton
+								icon={<LinkSimple size={18} weight="bold" aria-hidden />}
+								iconClassName="bg-kitchen-eggplant text-white"
+								title="paste a url"
+								subtext={<ImportSites />}
+								onClick={() => setStep('import')}
+							/>
+							<ChoiceButton
+								icon={<TextAlignLeft size={18} weight="bold" aria-hidden />}
+								iconClassName="bg-kitchen-yolk text-black"
+								title="paste text"
+								onClick={() => setStep('note')}
 							/>
 						</div>
 					) : step === 'import' ? (
@@ -258,7 +293,7 @@ function NoteStep({
 				)
 
 				if (!draft) {
-					setError('paste a note first')
+					setError('paste a recipe first')
 
 					return
 				}
@@ -267,7 +302,7 @@ function NoteStep({
 			}}
 		>
 			<label className="sr-only" htmlFor="note-text">
-				Recipe note
+				Recipe text
 			</label>
 			<textarea
 				id="note-text"
@@ -280,8 +315,9 @@ function NoteStep({
 				className="border-foreground bg-background focus-visible:outline-kitchen-eggplant resize-y border-2 px-3 py-2.5 text-sm font-semibold placeholder:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2"
 			/>
 			<p className="text-muted-foreground text-xs font-semibold">
-				in notes: open the note, tap ⋯, share, copy. the first line is the
-				title. you check it over before it saves.
+				the first line is the title. lines under &ldquo;ingredients&rdquo; and
+				&ldquo;steps&rdquo; headings land in place. you check it over before it
+				saves.
 			</p>
 			<div className="flex items-center gap-3">
 				<button

@@ -325,7 +325,7 @@ describe('recipes shelf', () => {
 
 		await screen.getByRole('button', { name: 'recipe' }).click()
 		await expect.element(screen.getByText('paste a url')).toBeVisible()
-		await expect.element(screen.getByText('import ios notes')).toBeVisible()
+		await expect.element(screen.getByText('paste text')).toBeVisible()
 		await expect.element(screen.getByText('write new recipe')).toBeVisible()
 	})
 
@@ -338,9 +338,9 @@ describe('recipes shelf', () => {
 		})
 
 		await screen.getByRole('button', { name: 'recipe' }).click()
-		await screen.getByText('import ios notes').click()
+		await screen.getByText('paste text').click()
 		await screen
-			.getByRole('textbox', { name: 'Recipe note' })
+			.getByRole('textbox', { name: 'Recipe text' })
 			.fill('Dal\n\nIngredients\n• 1 cup lentils\n• 1 onion\n\nMethod\nSimmer.')
 		await screen.getByRole('button', { name: 'review' }).click()
 
