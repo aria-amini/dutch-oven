@@ -5,21 +5,21 @@ import { requireUserId } from '@/lib/auth/session'
 
 import { pantryFields } from './model'
 import {
-	createPantryItemForUser,
+	createPantryItemsForUser,
 	deletePantryItemForUser,
 	listPantryForUser,
 	setPantryItemQuantityForUser,
 } from './repository'
-import { insertPantryItem } from './schema'
+import { insertPantryItems } from './schema'
 
 export const listPantry = createServerFn({ method: 'GET' }).handler(async () =>
 	listPantryForUser(await requireUserId()),
 )
 
-export const createPantryItem = createServerFn({ method: 'POST' })
-	.validator(insertPantryItem)
+export const createPantryItems = createServerFn({ method: 'POST' })
+	.validator(insertPantryItems)
 	.handler(async ({ data }) =>
-		createPantryItemForUser(await requireUserId(), data),
+		createPantryItemsForUser(await requireUserId(), data),
 	)
 
 export const setPantryItemQuantity = createServerFn({ method: 'POST' })

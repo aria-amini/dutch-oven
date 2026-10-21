@@ -1,5 +1,5 @@
 import { Dialog } from '@base-ui/react/dialog'
-import { Minus, Plus, X } from '@phosphor-icons/react'
+import { Lightning, Minus, Plus, X } from '@phosphor-icons/react'
 import {
 	createFileRoute,
 	Link,
@@ -93,6 +93,24 @@ function Pantry() {
 					</Link>
 				</header>
 
+				<Link
+					to="/ingredients/bulk"
+					search={{ loc }}
+					className="border-foreground bg-kitchen-yolk focus-visible:outline-kitchen-eggplant flex items-center gap-4 border-2 p-4 shadow-md transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-2 focus-visible:outline-offset-2 md:p-5"
+				>
+					<span className="border-foreground bg-card flex size-12 shrink-0 items-center justify-center border-2">
+						<Lightning size={26} weight="fill" aria-hidden />
+					</span>
+					<span className="flex flex-col">
+						<span className="text-lg font-extrabold tracking-tight md:text-xl">
+							add ingredients
+						</span>
+						<span className="text-sm">
+							stock your spices, meat, dairy and more in a few taps
+						</span>
+					</span>
+				</Link>
+
 				<nav aria-label="Locations" className="grid grid-cols-3 gap-2 sm:flex">
 					{locations.map((location) => {
 						const active = location.id === activeLocation?.id
@@ -136,9 +154,9 @@ function Pantry() {
 								/>
 							))}
 							<Link
-								to="/ingredients/new"
+								to="/ingredients/bulk"
 								search={{ loc: activeLocation?.id ?? 'fridge' }}
-								aria-label="Add an ingredient"
+								aria-label="Add ingredients"
 								className="border-foreground/40 hover:border-foreground hover:text-foreground text-foreground/50 focus-visible:outline-kitchen-eggplant flex aspect-square items-center justify-center border-2 border-dashed transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
 							>
 								<Plus size={22} weight="bold" aria-hidden />
