@@ -1,4 +1,4 @@
-import { ArrowLeft } from '@phosphor-icons/react'
+import { ArrowLeft, CookingPot } from '@phosphor-icons/react'
 import {
 	createFileRoute,
 	Link,
@@ -10,6 +10,7 @@ import { useState } from 'react'
 import { toast } from 'sonner'
 
 import type { collections } from '@/db/schema'
+import { logCook, undoCook } from '@/lib/cooks/server'
 import {
 	formatMinutes,
 	recipeMinutesMax,
@@ -46,6 +47,11 @@ const dateFormat = new Intl.DateTimeFormat('en', {
 	month: 'long',
 	day: 'numeric',
 	year: 'numeric',
+})
+
+const shortDateFormat = new Intl.DateTimeFormat('en', {
+	month: 'short',
+	day: 'numeric',
 })
 
 const fieldClassName =
@@ -125,6 +131,11 @@ function RecipeView({
 						{formatMinutes(recipe.totalMinutes)}
 					</span>
 				) : null}
+				<span className={cn(stickerClassName, 'bg-background rotate-1')}>
+					{recipe.lastCookedAt
+						? `cooked ${recipe.cookCount}× · last ${shortDateFormat.format(recipe.lastCookedAt)}`
+						: 'not cooked yet'}
+				</span>
 				{recipe.sourceUrl ? (
 					<a
 						href={recipe.sourceUrl}
@@ -140,6 +151,7 @@ function RecipeView({
 				) : null}
 			</p>
 			<div className="mt-6 flex flex-wrap items-center gap-3">
+				<CookedButton recipe={recipe} />
 				<button
 					type="button"
 					className="border-foreground bg-background focus-visible:outline-kitchen-eggplant border-2 px-3 py-2 text-xs font-bold uppercase shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2"
@@ -218,6 +230,51 @@ function RecipeView({
 				</section>
 			) : null}
 		</>
+	)
+}
+
+function CookedButton({ recipe }: { recipe: Recipe }) {
+	const router = useRouter()
+	const [pending, setPending] = useState(false)
+
+	const undo = async (id: string) => {
+		try {
+			await undoCook({ data: { id } })
+			await router.invalidate()
+		} catch {
+			toast.error("couldn't undo that — try again")
+		}
+	}
+
+	const cooked = async () => {
+		setPending(true)
+
+		try {
+			const cook = await logCook({ data: { recipeId: recipe.id } })
+
+			if (!cook) throw new Error('recipe not found')
+
+			await router.invalidate()
+			toast.success(`logged ${recipe.title} — nice cooking`, {
+				action: { label: 'undo', onClick: () => void undo(cook.id) },
+			})
+		} catch {
+			toast.error("couldn't log that — try again")
+		} finally {
+			setPending(false)
+		}
+	}
+
+	return (
+		<button
+			type="button"
+			disabled={pending}
+			onClick={() => void cooked()}
+			className="border-foreground bg-kitchen-yolk focus-visible:outline-kitchen-eggplant inline-flex items-center gap-2 border-2 px-5 py-3 text-sm font-extrabold uppercase shadow-md transition-transform not-disabled:hover:-translate-x-0.5 not-disabled:hover:-translate-y-0.5 not-disabled:hover:shadow-lg focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50"
+		>
+			<CookingPot size={20} weight="bold" aria-hidden />
+			cooked it
+		</button>
 	)
 }
 

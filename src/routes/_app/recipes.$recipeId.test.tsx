@@ -1,20 +1,10 @@
 import { renderRoute } from '@tests/support/render/route'
 import { beforeEach, describe, expect, test, vi } from 'vite-plus/test'
+import { page } from 'vitest/browser'
 
-type Recipe = {
-	id: string
-	userId: string
-	collectionId: string | null
-	title: string
-	imageUrl: string | null
-	sourceUrl: string | null
-	servings: number | null
-	totalMinutes: number | null
-	notes: string | null
-	createdAt: Date
-	ingredients: string[]
-	steps: string[]
-}
+import type { getRecipe } from '@/lib/recipes/server'
+
+type Recipe = NonNullable<Awaited<ReturnType<typeof getRecipe>>>
 
 const recipeState: { recipe: Recipe | null } = vi.hoisted(() => ({
 	recipe: null,
@@ -61,6 +51,33 @@ vi.mock('@/lib/recipes/server', () => ({
 	},
 }))
 
+vi.mock('@/lib/cooks/server', () => ({
+	logCook: async ({ data }: { data: { recipeId: string } }) => {
+		const recipe = recipeState.recipe
+
+		if (!recipe || recipe.id !== data.recipeId) return null
+		recipeState.recipe = {
+			...recipe,
+			cookCount: recipe.cookCount + 1,
+			lastCookedAt: new Date(),
+		}
+
+		return { id: 'cook-1' }
+	},
+	undoCook: async () => {
+		const recipe = recipeState.recipe
+
+		if (!recipe) return null
+		recipeState.recipe = {
+			...recipe,
+			cookCount: recipe.cookCount - 1,
+			lastCookedAt: recipe.cookCount > 1 ? recipe.lastCookedAt : null,
+		}
+
+		return { id: 'cook-1' }
+	},
+}))
+
 const session = {
 	user: { id: 'user-1', name: 'Test User', email: 'test@example.com' },
 	session: { id: 'session-1', token: 'token' },
@@ -81,6 +98,8 @@ describe('recipe detail', () => {
 			totalMinutes: null,
 			notes: null,
 			createdAt: new Date(),
+			cookCount: 0,
+			lastCookedAt: null,
 			ingredients: [],
 			steps: [],
 		}
@@ -210,5 +229,21 @@ describe('recipe detail', () => {
 		await expect
 			.element(screen.getByLabelText('book', { exact: true }))
 			.toHaveDisplayValue('weeknight')
+	})
+
+	test('logs a cook with one tap and can undo it', async () => {
+		const { screen } = await renderRoute({
+			path: '/recipes/recipe-1',
+			session,
+		})
+
+		await expect.element(screen.getByText('not cooked yet')).toBeVisible()
+		await screen.getByRole('button', { name: 'cooked it' }).click()
+
+		await expect
+			.element(screen.getByText('cooked 1×', { exact: false }))
+			.toBeVisible()
+		await page.getByRole('button', { name: 'undo' }).click()
+		await expect.element(screen.getByText('not cooked yet')).toBeVisible()
 	})
 })

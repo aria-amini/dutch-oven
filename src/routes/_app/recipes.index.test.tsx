@@ -1,9 +1,10 @@
 import { renderRoute } from '@tests/support/render/route'
 import { beforeEach, describe, expect, test, vi } from 'vite-plus/test'
 
-import type { collections, recipes } from '@/db/schema'
+import type { collections } from '@/db/schema'
+import type { listShelf } from '@/lib/recipes/server'
 
-type Recipe = typeof recipes.$inferSelect
+type Recipe = Awaited<ReturnType<typeof listShelf>>['recipes'][number]
 
 type Collection = typeof collections.$inferSelect
 
@@ -52,6 +53,8 @@ vi.mock('@/lib/recipes/server', () => ({
 			totalMinutes: null,
 			notes: null,
 			createdAt: new Date(),
+			cookCount: 0,
+			lastCookedAt: null,
 		})
 	},
 	listBooks: () => Promise.resolve(shelfState.collections),
@@ -110,6 +113,8 @@ const misoButterPasta: Recipe = {
 	totalMinutes: null,
 	notes: null,
 	createdAt: new Date(),
+	cookCount: 0,
+	lastCookedAt: null,
 }
 
 const dal: Recipe = {
@@ -123,6 +128,8 @@ const dal: Recipe = {
 	totalMinutes: null,
 	notes: null,
 	createdAt: new Date(),
+	cookCount: 0,
+	lastCookedAt: null,
 }
 
 describe('recipes shelf', () => {
@@ -209,6 +216,30 @@ describe('recipes shelf', () => {
 		await expect
 			.element(screen.getByText('no recipes match', { exact: false }))
 			.toBeVisible()
+	})
+
+	test('sorts by most cooked and badges cooked recipes', async () => {
+		shelfState.recipes = [
+			misoButterPasta,
+			{ ...dal, cookCount: 3, lastCookedAt: new Date() },
+		]
+
+		const { screen } = await renderRoute({
+			path: '/recipes',
+			session: testSession,
+		})
+
+		const titles = () =>
+			screen
+				.getByRole('heading', { level: 3 })
+				.elements()
+				.map((element) => element.textContent)
+
+		await expect.poll(titles).toEqual(['miso butter pasta', 'dal'])
+		await expect.element(screen.getByTitle('cooked 3 times')).toBeVisible()
+
+		await screen.getByRole('link', { name: 'most cooked' }).click()
+		await expect.poll(titles).toEqual(['dal', 'miso butter pasta'])
 	})
 
 	test('adds a book and opens it', async () => {

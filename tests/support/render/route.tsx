@@ -7,6 +7,7 @@ import {
 	type AnyRouter,
 } from '@tanstack/react-router'
 import { setMockSession, type MockSession } from '@tests/support/mocks/browser'
+import { Toaster } from 'sonner'
 import { render, type RenderResult } from 'vitest-browser-react'
 
 import { createTestQueryClient } from './component'
@@ -67,6 +68,8 @@ export async function renderRoute(
 	const screen = await render(
 		<QueryClientProvider client={queryClient}>
 			<RouterProvider router={router} />
+			{/* the app's Toaster lives in the document shell, which tests don't mount */}
+			<Toaster />
 		</QueryClientProvider>,
 		{ container },
 	)

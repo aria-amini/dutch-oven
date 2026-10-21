@@ -1,8 +1,9 @@
-import { and, asc, desc, eq, max } from 'drizzle-orm'
+import { and, asc, count, desc, eq, getColumns, max, sql } from 'drizzle-orm'
 
 import { db } from '@/db/connection'
 import {
 	collections,
+	mealLogs,
 	recipeIngredients,
 	recipeSteps,
 	recipes,
@@ -13,15 +14,40 @@ type RecipeDatabase =
 	| typeof db
 	| Parameters<Parameters<typeof db.transaction>[0]>[0]
 
+function cookStatsForUser(database: typeof db, userId: string) {
+	return database
+		.select({
+			recipeId: mealLogs.recipeId,
+			cookCount: count().as('cook_count'),
+			lastCookedAt: max(mealLogs.cookedAt).as('last_cooked_at'),
+		})
+		.from(mealLogs)
+		.where(eq(mealLogs.userId, userId))
+		.groupBy(mealLogs.recipeId)
+		.as('cook_stats')
+}
+
+function recipesWithCooks(database: typeof db, userId: string) {
+	const stats = cookStatsForUser(database, userId)
+
+	return database
+		.select({
+			...getColumns(recipes),
+			cookCount: sql<number>`coalesce(${stats.cookCount}, 0)`.mapWith(Number),
+			lastCookedAt: stats.lastCookedAt,
+		})
+		.from(recipes)
+		.leftJoin(stats, eq(stats.recipeId, recipes.id))
+		.$dynamic()
+}
+
 export async function listShelfForUser(
 	userId: string,
 	database: typeof db = db,
 ) {
 	const [userCollections, userRecipes] = await Promise.all([
 		listCollectionsForUser(userId, database),
-		database
-			.select()
-			.from(recipes)
+		recipesWithCooks(database, userId)
 			.where(eq(recipes.userId, userId))
 			.orderBy(desc(recipes.createdAt)),
 	])
@@ -34,10 +60,9 @@ export async function getRecipeForUser(
 	id: string,
 	database: typeof db = db,
 ) {
-	const [recipe] = await database
-		.select()
-		.from(recipes)
-		.where(and(eq(recipes.id, id), eq(recipes.userId, userId)))
+	const [recipe] = await recipesWithCooks(database, userId).where(
+		and(eq(recipes.id, id), eq(recipes.userId, userId)),
+	)
 
 	if (!recipe) return null
 

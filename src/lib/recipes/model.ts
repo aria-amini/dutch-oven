@@ -80,11 +80,43 @@ export const recipeMoveInput = z.object({
 	collectionId: z.string().min(1).nullable(),
 })
 
+export const shelfSorts = ['newest', 'most-cooked'] as const
+
+export type ShelfSort = (typeof shelfSorts)[number]
+
+export const shelfSortLabels: Record<ShelfSort, string> = {
+	newest: 'newest',
+	'most-cooked': 'most cooked',
+}
+
 export const shelfSearch = z.object({
+	sort: z.enum(shelfSorts).optional().catch(undefined),
 	book: z.string().min(1).optional().catch(undefined),
 	q: z.string().trim().min(1).max(recipeTitleMax).optional().catch(undefined),
 })
 
 export function matchesRecipeQuery(title: string, query: string | undefined) {
 	return !query || title.toLocaleLowerCase().includes(query.toLocaleLowerCase())
+}
+
+type Rankable = {
+	createdAt: Date
+	cookCount: number
+	lastCookedAt: Date | null
+}
+
+export function sortShelf<T extends Rankable>(
+	recipes: T[],
+	sort: ShelfSort = 'newest',
+) {
+	const newest = (a: T, b: T) => b.createdAt.getTime() - a.createdAt.getTime()
+
+	if (sort === 'newest') return [...recipes].sort(newest)
+
+	return [...recipes].sort(
+		(a, b) =>
+			b.cookCount - a.cookCount ||
+			(b.lastCookedAt?.getTime() ?? 0) - (a.lastCookedAt?.getTime() ?? 0) ||
+			newest(a, b),
+	)
 }
