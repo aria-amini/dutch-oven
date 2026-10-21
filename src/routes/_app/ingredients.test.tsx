@@ -1,6 +1,6 @@
 import { renderRoute } from '@tests/support/render/route'
 import { beforeEach, describe, expect, test, vi } from 'vite-plus/test'
-import { page } from 'vitest/browser'
+import { page, userEvent } from 'vitest/browser'
 
 import type { pantryItems } from '@/db/schema'
 import type { PantryItemInput } from '@/lib/pantry/model'
@@ -13,19 +13,20 @@ const state = vi.hoisted<{ items: (typeof pantryItems.$inferSelect)[] }>(
 
 vi.mock('@/lib/pantry/server', () => ({
 	listPantry: async () => state.items,
-	createPantryItem: async ({ data }: { data: PantryItemInput }) => {
-		const item = {
-			...data,
-			id: 'new-item',
-			userId: 'user-1',
-			spriteKey: data.spriteKey ?? null,
-			createdAt: new Date('2026-10-19T12:00:00Z'),
-		}
+	createPantryItems: async ({ data }: { data: PantryItemInput[] }) =>
+		data.map((input, index) => {
+			const item = {
+				...input,
+				id: `bulk-${index}`,
+				userId: 'user-1',
+				spriteKey: input.spriteKey ?? null,
+				createdAt: new Date('2026-10-19T12:00:00Z'),
+			}
 
-		state.items.push(item)
+			state.items.push(item)
 
-		return item
-	},
+			return item
+		}),
 	setPantryItemQuantity: async ({
 		data,
 	}: {
@@ -49,54 +50,56 @@ const session = {
 	session: { id: 'session-1', token: 'token' },
 }
 
+const item = (
+	id: string,
+	category: PantryItemInput['category'],
+): typeof pantryItems.$inferSelect => ({
+	id,
+	userId: 'user-1',
+	name: id,
+	quantity: 2,
+	category,
+	spriteKey: null,
+	createdAt: new Date('2026-10-19T12:00:00Z'),
+})
+
 describe('ingredients', () => {
 	beforeEach(() => {
-		state.items = [
-			{
-				id: 'carrots',
-				userId: 'user-1',
-				name: 'carrots',
-				quantity: 2,
-				location: 'fridge',
-				spriteKey: null,
-				createdAt: new Date('2026-10-19T12:00:00Z'),
-			},
-		]
+		state.items = [item('carrots', 'vegetables'), item('eggs', 'dairy')]
 	})
 
-	test('shows location inventory and the empty state', async () => {
+	test('groups everything by category and toggles a filter', async () => {
+		const { screen } = await renderRoute({ path: '/ingredients', session })
+		const carrots = screen.getByRole('link', { name: 'carrots, quantity 2' })
+		const eggs = screen.getByRole('link', { name: 'eggs, quantity 2' })
+		await expect.element(carrots).toBeVisible()
+		await expect.element(eggs).toBeVisible()
+		await expect
+			.element(screen.getByRole('heading', { name: /vegetables & herbs/ }))
+			.toBeVisible()
+
+		const dairy = screen.getByRole('link', {
+			name: 'dairy & eggs',
+			exact: true,
+		})
+
+		await dairy.click()
+		await expect.element(carrots).not.toBeInTheDocument()
+		await expect.element(eggs).toBeVisible()
+		await dairy.click()
+		await expect.element(carrots).toBeVisible()
+	})
+
+	test('invites an empty kitchen to add ingredients', async () => {
+		state.items = []
 		const { screen } = await renderRoute({ path: '/ingredients', session })
 		await expect
-			.element(screen.getByRole('link', { name: 'carrots, quantity 2' }))
+			.element(screen.getByText('your kitchen is empty'))
 			.toBeVisible()
-		await screen.getByRole('link', { name: 'freezer', exact: true }).click()
+		await screen.getByRole('link', { name: 'add ingredients' }).click()
 		await expect
-			.element(screen.getByRole('link', { name: 'carrots, quantity 2' }))
-			.not.toBeInTheDocument()
-		await expect
-			.element(screen.getByRole('link', { name: 'Add an ingredient' }))
+			.element(screen.getByRole('heading', { name: 'stock up fast' }))
 			.toBeVisible()
-	})
-
-	test('adds a custom ingredient with a quantity and location', async () => {
-		const { screen } = await renderRoute({
-			path: '/ingredients/new?loc=freezer',
-			session,
-		})
-
-		await screen
-			.getByRole('combobox', { name: 'ingredient', exact: true })
-			.fill('frozen dumplings')
-		await screen.getByRole('spinbutton', { name: 'how many' }).fill('4')
-		await screen.getByRole('button', { name: 'stash it' }).click()
-		await expect
-			.element(page.getByRole('heading', { name: 'frozen dumplings' }))
-			.toBeVisible()
-		expect(state.items.at(-1)).toMatchObject({
-			name: 'frozen dumplings',
-			quantity: 4,
-			location: 'freezer',
-		})
 	})
 
 	test('updates and removes the selected item on desktop and mobile', async () => {
@@ -105,6 +108,52 @@ describe('ingredients', () => {
 		await page.getByRole('button', { name: 'Increase quantity' }).click()
 		await expect.poll(() => state.items[0]?.quantity).toBe(3)
 		await page.getByRole('button', { name: 'use it up — remove it' }).click()
-		await expect.poll(() => state.items.length).toBe(0)
+		await expect
+			.poll(() => state.items.map((entry) => entry.id))
+			.toEqual(['eggs'])
+	})
+
+	test('bulk adds picked and typed items from a section', async () => {
+		const { screen } = await renderRoute({ path: '/ingredients', session })
+		await screen.getByRole('link', { name: 'add', exact: true }).click()
+		await screen.getByRole('link', { name: /spices/ }).click()
+
+		await screen.getByRole('button', { name: 'cumin', exact: true }).click()
+		const filter = screen.getByRole('searchbox', { name: 'filter' })
+		await filter.fill('smoked pap')
+		await userEvent.keyboard('{Enter}')
+		await filter.fill('aleppo pepper')
+		await userEvent.keyboard('{Enter}')
+		await expect
+			.element(screen.getByRole('button', { name: 'aleppo pepper' }))
+			.toHaveAttribute('aria-pressed', 'true')
+
+		await screen.getByRole('button', { name: 'add 3' }).click()
+		await expect
+			.element(screen.getByRole('link', { name: /spices/ }))
+			.toBeVisible()
+		expect(state.items.slice(2)).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({ name: 'cumin', category: 'spices' }),
+				expect.objectContaining({ name: 'smoked paprika' }),
+				expect.objectContaining({ name: 'aleppo pepper', category: 'spices' }),
+			]),
+		)
+	})
+
+	test('redirects the old add page to the section picker', async () => {
+		const { screen } = await renderRoute({ path: '/ingredients/new', session })
+		await screen.getByRole('link', { name: /dairy & eggs/ }).click()
+		await expect
+			.element(screen.getByRole('button', { name: /^eggs\W+already stashed$/ }))
+			.toBeDisabled()
+	})
+
+	test('opens bulk add straight into a category from its group', async () => {
+		const { screen } = await renderRoute({ path: '/ingredients', session })
+		await screen.getByRole('link', { name: 'Add vegetables & herbs' }).click()
+		await expect
+			.element(screen.getByRole('button', { name: /carrots/ }))
+			.toBeDisabled()
 	})
 })

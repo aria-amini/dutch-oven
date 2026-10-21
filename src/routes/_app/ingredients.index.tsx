@@ -10,12 +10,13 @@ import { useState, useSyncExternalStore } from 'react'
 import { toast } from 'sonner'
 
 import type { pantryItems } from '@/db/schema'
+import { categorySprites, findCatalogSection } from '@/lib/pantry/catalog'
 import {
-	pantrySearch,
+	pantryCategories,
+	pantryCategoryLabels,
 	pantryQuantityMax,
-	pantryLocations,
-	pantryLocationLabels,
-	type PantryLocation,
+	pantrySearch,
+	type PantryCategory,
 } from '@/lib/pantry/model'
 import {
 	deletePantryItem,
@@ -33,29 +34,15 @@ export const Route = createFileRoute('/_app/ingredients/')({
 
 type PantryItem = typeof pantryItems.$inferSelect
 
-const locationClasses: Record<PantryLocation, string> = {
-	fridge: 'bg-kitchen-eggplant text-white',
-	freezer: 'bg-kitchen-basil text-black',
-	pantry: 'bg-kitchen-yolk text-black',
-}
-
-const locationSprites: Record<PantryLocation, string> = {
-	fridge: 'milk',
-	freezer: 'ice-cube',
-	pantry: 'fallback-spice',
-}
-
-const locations = pantryLocations.map((id) => ({
-	id,
-	label: pantryLocationLabels[id],
-	tabClass: locationClasses[id],
-	sprite: `/sprites/pantry/${locationSprites[id]}.png`,
-}))
-
 const dateFormat = new Intl.DateTimeFormat('en', {
 	month: 'short',
 	day: 'numeric',
 })
+
+// Bulk add opens straight into a category when the catalog has one for it.
+function bulkSearch(category: PantryCategory | undefined) {
+	return { cat: findCatalogSection(category)?.id }
+}
 
 function Pantry() {
 	const navigate = useNavigate()
@@ -67,15 +54,21 @@ function Pantry() {
 	)
 
 	const items = Route.useLoaderData()
-	const { loc, item: selectedId } = Route.useSearch()
-	const activeLocation = locations.find((l) => l.id === loc) ?? locations[0]
-	const locationItems = items.filter((i) => i.location === activeLocation?.id)
+	const { cat, item: selectedId } = Route.useSearch()
+
+	const stocked = pantryCategories.filter((category) =>
+		items.some((item) => item.category === category),
+	)
+
+	const groups = (cat ? [cat] : stocked).map((category) => ({
+		category,
+		items: items.filter((item) => item.category === category),
+	}))
+
+	const visible = groups.flatMap((group) => group.items)
 
 	const selected =
-		locationItems.find((i) => i.id === selectedId) ?? locationItems[0] ?? null
-
-	const slotCount = Math.max(24, Math.ceil((locationItems.length + 1) / 8) * 8)
-	const emptySlots = slotCount - locationItems.length - 1
+		visible.find((i) => i.id === selectedId) ?? visible[0] ?? null
 
 	return (
 		<main className="flex-1">
@@ -93,79 +86,108 @@ function Pantry() {
 					</Link>
 				</header>
 
-				<nav aria-label="Locations" className="grid grid-cols-3 gap-2 sm:flex">
-					{locations.map((location) => {
-						const active = location.id === activeLocation?.id
+				<div className="flex flex-wrap items-center gap-2">
+					{stocked.length > 1 ? (
+						<nav aria-label="Categories" className="contents">
+							{stocked.map((category) => {
+								const active = category === cat
 
-						return (
-							<Link
-								key={location.id}
-								to="/ingredients"
-								search={{ loc: location.id }}
-								aria-current={active ? 'true' : undefined}
-								className={cn(
-									'focus-visible:outline-kitchen-eggplant flex shrink-0 items-center justify-center gap-1.5 border-2 px-2 py-2 sm:gap-2 sm:px-4 text-xs font-bold tracking-wide uppercase transition-transform focus-visible:outline-2 focus-visible:outline-offset-2',
-									active
-										? cn('border-foreground shadow-sm', location.tabClass)
-										: 'border-foreground/30 hover:border-foreground hover:-translate-y-0.5 hover:shadow-sm',
-								)}
-							>
-								<img
-									src={location.sprite}
-									alt=""
-									className="size-5 [image-rendering:pixelated]"
-								/>
-								{location.label}
-							</Link>
-						)
-					})}
-				</nav>
-
-				<div className="flex flex-col gap-4 lg:flex-row lg:items-start">
-					<section
-						aria-label={`${activeLocation?.label} inventory`}
-						className="border-foreground bg-card flex-1 border-2 p-3 shadow-md md:p-4"
+								return (
+									<Link
+										key={category}
+										to="/ingredients"
+										search={{ cat: active ? undefined : category }}
+										aria-current={active ? 'true' : undefined}
+										className={cn(
+											'focus-visible:outline-kitchen-eggplant flex items-center gap-1.5 border-2 px-2.5 py-1.5 text-xs font-bold tracking-wide uppercase transition-transform focus-visible:outline-2 focus-visible:outline-offset-2',
+											active
+												? 'border-foreground bg-kitchen-yolk shadow-sm'
+												: 'border-foreground/30 hover:border-foreground hover:-translate-y-0.5 hover:shadow-sm',
+										)}
+									>
+										<img
+											src={`/sprites/pantry/${categorySprites[category]}.png`}
+											alt=""
+											className="size-4 [image-rendering:pixelated]"
+										/>
+										{pantryCategoryLabels[category]}
+									</Link>
+								)
+							})}
+						</nav>
+					) : null}
+					<Link
+						to="/ingredients/bulk"
+						search={bulkSearch(cat)}
+						className="border-foreground bg-kitchen-basil focus-visible:outline-kitchen-eggplant ml-auto flex items-center gap-1.5 border-2 px-3 py-1.5 text-xs font-bold tracking-wide uppercase shadow-sm transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2"
 					>
-						<div className="grid grid-cols-4 gap-2 md:grid-cols-8">
-							{locationItems.map((item) => (
-								<Slot
-									key={item.id}
-									item={item}
-									location={activeLocation?.id ?? 'fridge'}
-									selected={item.id === selected?.id}
-								/>
-							))}
-							<Link
-								to="/ingredients/new"
-								search={{ loc: activeLocation?.id ?? 'fridge' }}
-								aria-label="Add an ingredient"
-								className="border-foreground/40 hover:border-foreground hover:text-foreground text-foreground/50 focus-visible:outline-kitchen-eggplant flex aspect-square items-center justify-center border-2 border-dashed transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
-							>
-								<Plus size={22} weight="bold" aria-hidden />
-							</Link>
-							{Array.from({ length: emptySlots }, (_, index) => (
-								<div
-									key={index}
-									aria-hidden
-									className="border-foreground/15 aspect-square border-2 border-dashed"
-								/>
+						<Plus size={14} weight="bold" aria-hidden />
+						add
+					</Link>
+				</div>
+
+				{groups.length === 0 ? (
+					<section className="border-foreground bg-card flex flex-col items-center gap-3 border-2 p-10 text-center shadow-md">
+						<p className="text-lg font-extrabold">your kitchen is empty</p>
+						<p className="text-muted-foreground text-sm">
+							stock your spices, meat, dairy and more in a few taps
+						</p>
+						<Link
+							to="/ingredients/bulk"
+							className="border-foreground bg-kitchen-yolk focus-visible:outline-kitchen-eggplant border-2 px-4 py-2 text-xs font-bold tracking-wide uppercase shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2"
+						>
+							add ingredients
+						</Link>
+					</section>
+				) : (
+					<div className="flex flex-col gap-4 lg:flex-row lg:items-start">
+						<div className="border-foreground bg-card flex flex-1 flex-col gap-5 border-2 p-3 shadow-md md:p-4">
+							{groups.map((group) => (
+								<section
+									key={group.category}
+									aria-label={pantryCategoryLabels[group.category]}
+								>
+									<h2 className="mb-2 flex items-center gap-2 text-xs font-bold tracking-wide uppercase">
+										{pantryCategoryLabels[group.category]}
+										<span className="text-muted-foreground font-mono">
+											{group.items.length}
+										</span>
+									</h2>
+									<div className="grid grid-cols-4 gap-2 md:grid-cols-8">
+										{group.items.map((item) => (
+											<Slot
+												key={item.id}
+												item={item}
+												cat={cat}
+												selected={item.id === selected?.id}
+											/>
+										))}
+										<Link
+											to="/ingredients/bulk"
+											search={bulkSearch(group.category)}
+											aria-label={`Add ${pantryCategoryLabels[group.category]}`}
+											className="border-foreground/40 hover:border-foreground hover:text-foreground text-foreground/50 focus-visible:outline-kitchen-eggplant flex aspect-square items-center justify-center border-2 border-dashed transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
+										>
+											<Plus size={22} weight="bold" aria-hidden />
+										</Link>
+									</div>
+								</section>
 							))}
 						</div>
-					</section>
 
-					<DetailPanel
-						item={selected}
-						locationLabel={activeLocation?.label ?? ''}
-						className="hidden lg:block lg:w-80 lg:shrink-0"
-					/>
-				</div>
+						<DetailPanel
+							item={selected}
+							className="hidden lg:block lg:w-80 lg:shrink-0"
+						/>
+					</div>
+				)}
 			</div>
 
 			{!wide && selectedId && selected ? (
 				<Dialog.Root
 					open
 					onOpenChange={(open) => {
-						if (!open) void navigate({ to: '/ingredients', search: { loc } })
+						if (!open) void navigate({ to: '/ingredients', search: { cat } })
 					}}
 				>
 					<Dialog.Portal>
@@ -183,10 +205,7 @@ function Pantry() {
 							>
 								<X size={18} aria-hidden />
 							</Dialog.Close>
-							<DetailPanel
-								item={selected}
-								locationLabel={activeLocation?.label ?? ''}
-							/>
+							<DetailPanel item={selected} />
 						</Dialog.Popup>
 					</Dialog.Portal>
 				</Dialog.Root>
@@ -204,17 +223,17 @@ function subscribeWide(notify: () => void) {
 
 function Slot({
 	item,
-	location,
+	cat,
 	selected,
 }: {
 	item: PantryItem
-	location: PantryLocation
+	cat: PantryCategory | undefined
 	selected: boolean
 }) {
 	return (
 		<Link
 			to="/ingredients"
-			search={{ loc: location, item: item.id }}
+			search={{ cat, item: item.id }}
 			aria-label={`${item.name}, quantity ${item.quantity}`}
 			aria-current={selected ? 'true' : undefined}
 			className={cn(
@@ -225,7 +244,7 @@ function Slot({
 			)}
 		>
 			<img
-				src={resolveSpriteSrc(item.name, item.spriteKey)}
+				src={resolveSpriteSrc(item.name, item.spriteKey, item.category)}
 				alt=""
 				className="size-10 object-contain [image-rendering:pixelated] md:size-12"
 			/>
@@ -239,11 +258,9 @@ function Slot({
 
 function DetailPanel({
 	item,
-	locationLabel,
 	className = '',
 }: {
 	item: PantryItem | null
-	locationLabel: string
 	className?: string
 }) {
 	const router = useRouter()
@@ -263,14 +280,14 @@ function DetailPanel({
 		}
 	}
 
-	async function remove(itemId: string, location: PantryLocation) {
+	async function remove(itemId: string) {
 		setPending(true)
 
 		try {
 			await deletePantryItem({ data: { id: itemId } })
 			await navigate({
 				to: '/ingredients',
-				search: { loc: location },
+				search: (prev) => ({ cat: prev.cat }),
 			})
 			await router.invalidate()
 		} catch {
@@ -291,7 +308,7 @@ function DetailPanel({
 			{item ? (
 				<div className="flex flex-col items-center gap-4">
 					<img
-						src={resolveSpriteSrc(item.name, item.spriteKey)}
+						src={resolveSpriteSrc(item.name, item.spriteKey, item.category)}
 						alt=""
 						className="size-20 object-contain [image-rendering:pixelated]"
 					/>
@@ -323,8 +340,10 @@ function DetailPanel({
 					</div>
 					<dl className="text-muted-foreground border-foreground/20 w-full border-t pt-3 text-xs">
 						<div className="flex justify-between py-0.5">
-							<dt>lives in</dt>
-							<dd className="text-foreground font-semibold">{locationLabel}</dd>
+							<dt>category</dt>
+							<dd className="text-foreground font-semibold">
+								{pantryCategoryLabels[item.category]}
+							</dd>
 						</div>
 						<div className="flex justify-between py-0.5">
 							<dt>stashed</dt>
@@ -336,7 +355,7 @@ function DetailPanel({
 					<button
 						type="button"
 						disabled={pending}
-						onClick={() => remove(item.id, item.location)}
+						onClick={() => remove(item.id)}
 						className="focus-visible:outline-kitchen-eggplant mt-1 text-xs font-bold underline underline-offset-4 focus-visible:outline-2 disabled:opacity-40"
 					>
 						use it up — remove it

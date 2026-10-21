@@ -4,7 +4,7 @@ import { db } from '@/db/connection'
 import { pantryItems } from '@/db/schema'
 
 import { pantryFields, type PantryItemInput } from './model'
-import { insertPantryItem } from './schema'
+import { insertPantryItem, insertPantryItems } from './schema'
 
 export async function listPantryForUser(
 	userId: string,
@@ -14,7 +14,7 @@ export async function listPantryForUser(
 		.select()
 		.from(pantryItems)
 		.where(eq(pantryItems.userId, userId))
-		.orderBy(asc(pantryItems.location), asc(pantryItems.createdAt))
+		.orderBy(asc(pantryItems.createdAt))
 }
 
 export async function createPantryItemForUser(
@@ -36,6 +36,28 @@ export async function createPantryItemForUser(
 		.returning()
 
 	return item
+}
+
+export async function createPantryItemsForUser(
+	userId: string,
+	inputs: PantryItemInput[],
+	database: typeof db = db,
+) {
+	const rows = insertPantryItems.parse(inputs)
+	const createdAt = new Date()
+
+	return database
+		.insert(pantryItems)
+		.values(
+			rows.map((data) => ({
+				id: crypto.randomUUID(),
+				userId,
+				...data,
+				spriteKey: data.spriteKey ?? null,
+				createdAt,
+			})),
+		)
+		.returning()
 }
 
 export async function setPantryItemQuantityForUser(

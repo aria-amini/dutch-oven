@@ -1,8 +1,9 @@
 import { createInsertSchema } from 'drizzle-orm/zod'
+import { z } from 'zod'
 
 import { pantryItems } from '@/db/schema'
 
-import { pantryFields } from './model'
+import { pantryBulkMax, pantryFields } from './model'
 
 export const insertPantryItem = createInsertSchema(
 	pantryItems,
@@ -10,6 +11,11 @@ export const insertPantryItem = createInsertSchema(
 ).pick({
 	name: true,
 	quantity: true,
-	location: true,
+	category: true,
 	spriteKey: true,
 })
+
+export const insertPantryItems = z
+	.array(insertPantryItem)
+	.min(1)
+	.max(pantryBulkMax)

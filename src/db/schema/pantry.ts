@@ -7,7 +7,7 @@ import {
 	timestamp,
 } from 'drizzle-orm/pg-core'
 
-import { pantryLocations } from '@/lib/pantry/model'
+import { pantryCategories } from '@/lib/pantry/model'
 
 import { user } from './auth'
 
@@ -18,7 +18,7 @@ export const pantryItems = snakeCase.table(
 		userId: text().notNull(),
 		name: text().notNull(),
 		quantity: integer().notNull(),
-		location: text({ enum: pantryLocations }).notNull(),
+		category: text({ enum: pantryCategories }).notNull(),
 		spriteKey: text(),
 		createdAt: timestamp({ withTimezone: true }).notNull(),
 	},

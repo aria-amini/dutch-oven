@@ -23,6 +23,20 @@ describe('ingredient sprites', () => {
 		expect(resolveSpriteSrc(name)).toBe(`/sprites/pantry/${key}.png`)
 	})
 
+	test.each([
+		['oregano', 'spices', 'fallback-spice'],
+		['oregano', undefined, 'fallback-vegetable'],
+		['peanut butter', 'cans', 'fallback-other'],
+		['coconut milk', 'cans', 'fallback-other'],
+		['cinnamon', 'spices', 'cinnamon'],
+		['tofu', 'meat', 'fallback-protein'],
+		['mystery jar', 'other', 'fallback-other'],
+	] as const)('resolves %s in %s to %s', (name, category, key) => {
+		expect(resolveSpriteSrc(name, null, category)).toBe(
+			`/sprites/pantry/${key}.png`,
+		)
+	})
+
 	test('honors only known explicit keys', () => {
 		expect(resolveSpriteSrc('apple', 'banana')).toBe(
 			'/sprites/pantry/banana.png',

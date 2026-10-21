@@ -11,13 +11,13 @@ describe('pantry schema parity', () => {
 	})
 
 	test.each([
-		{ name: ' carrots ', quantity: 2, location: 'fridge' },
-		{ name: 'salt', quantity: 9999, location: 'pantry', spriteKey: 'salt' },
-		{ name: '', quantity: 1, location: 'fridge' },
-		{ name: 'salt', quantity: 0, location: 'fridge' },
-		{ name: 'salt', quantity: 10000, location: 'fridge' },
-		{ name: 'salt', quantity: 1.5, location: 'fridge' },
-		{ name: 'salt', quantity: 1, location: 'outside' },
+		{ name: ' carrots ', quantity: 2, category: 'vegetables' },
+		{ name: 'salt', quantity: 9999, category: 'spices', spriteKey: 'salt' },
+		{ name: '', quantity: 1, category: 'vegetables' },
+		{ name: 'salt', quantity: 0, category: 'vegetables' },
+		{ name: 'salt', quantity: 10000, category: 'vegetables' },
+		{ name: 'salt', quantity: 1.5, category: 'vegetables' },
+		{ name: 'salt', quantity: 1, category: 'outside' },
 	])('validates the same input on both boundaries: %j', (input) => {
 		expect(pantryItemInput.safeParse(input)).toEqual(
 			insertPantryItem.safeParse(input),

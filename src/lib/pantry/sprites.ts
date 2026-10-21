@@ -1,5 +1,7 @@
 import { z } from 'zod'
 
+import type { PantryCategory } from './model'
+
 const spriteCategory = z.enum([
 	'vegetable',
 	'fruit',
@@ -436,9 +438,19 @@ const categoryKeywords: [SpriteCategory, string[]][] = [
 	],
 ]
 
+const categoryFallbacks: Partial<Record<PantryCategory, SpriteCategory>> = {
+	spices: 'spice',
+	meat: 'protein',
+	dairy: 'dairy',
+	vegetables: 'vegetable',
+	fruit: 'fruit',
+	grains: 'grain',
+}
+
 export function resolveSpriteSrc(
 	name: string,
 	spriteKey?: string | null,
+	category?: PantryCategory,
 ): string {
 	if (
 		spriteKey &&
@@ -454,7 +466,17 @@ export function resolveSpriteSrc(
 		normalized.includes(` ${alias} `),
 	)
 
-	return `/sprites/pantry/${match?.key ?? fallbackKeys.other}.png`
+	// A known category beats a keyword guess, but not a specific sprite.
+	const fallback = category && categoryFallbacks[category]
+
+	const key =
+		match && !match.guess
+			? match.key
+			: fallback
+				? fallbackKeys[fallback]
+				: (match?.key ?? fallbackKeys.other)
+
+	return `/sprites/pantry/${key}.png`
 }
 
 function normalizeName(name: string) {
@@ -468,12 +490,17 @@ function normalizeName(name: string) {
 
 const spriteMatches = [
 	...pantrySprites.flatMap(({ key, aliases }) =>
-		aliases.map((alias) => ({ key, alias: normalizeName(alias) })),
+		aliases.map((alias) => ({
+			key,
+			alias: normalizeName(alias),
+			guess: false,
+		})),
 	),
 	...categoryKeywords.flatMap(([category, keywords]) =>
 		keywords.map((alias) => ({
 			key: fallbackKeys[category],
 			alias: normalizeName(alias),
+			guess: true,
 		})),
 	),
 ].sort((a, b) => b.alias.length - a.alias.length)
