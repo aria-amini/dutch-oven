@@ -35,7 +35,7 @@ describe('shelf stats', () => {
 		await createRecipeForUser(userId, { title: 'miso soup' }, db)
 		await createPantryItemForUser(
 			userId,
-			{ name: 'carrots', quantity: 7, location: 'fridge' },
+			{ name: 'carrots', quantity: 7, category: 'vegetables' },
 			db,
 		)
 		await createRecipeForUser(otherId, { title: 'not yours' }, db)

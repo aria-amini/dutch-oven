@@ -4,12 +4,12 @@ test('a first ingredient save creates a guest shelf and shows its count at signu
 	page,
 }) => {
 	test.setTimeout(30_000)
-	await page.goto('/ingredients/bulk?section=fruit')
+	await page.goto('/ingredients/bulk?cat=fruit')
 	await expect(page.getByRole('button', { name: 'Guest account' })).toBeVisible(
 		{ timeout: 15_000 },
 	)
 	await page.getByRole('button', { name: 'pineapple', exact: true }).click()
-	await page.getByRole('button', { name: 'add 1 to the fridge' }).click()
+	await page.getByRole('button', { name: 'add 1' }).click()
 	await expect(
 		page.getByRole('link', { name: /fruit 1\/\d+ stashed/ }),
 	).toBeVisible()

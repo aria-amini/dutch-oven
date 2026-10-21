@@ -1,26 +1,33 @@
 import { z } from 'zod'
 
-import type { PantryLocation } from './model'
+import type { PantryCategory } from './model'
 
-type CatalogSection = {
-	id: string
-	label: string
-	location: PantryLocation
-	sprite: string
-	items: string[]
+export const categorySprites: Record<PantryCategory, string> = {
+	spices: 'cinnamon',
+	meat: 'meat',
+	dairy: 'milk',
+	vegetables: 'carrot',
+	fruit: 'apple',
+	grains: 'flour',
+	cans: 'tomato',
+	sauces: 'olive-oil',
+	frozen: 'ice-cube',
+	other: 'fallback-other',
 }
 
-const section = <const Id extends string>(
+type CatalogCategory = Exclude<PantryCategory, 'other'>
+
+const section = <const Id extends CatalogCategory>(
 	id: Id,
-	label: string,
-	location: PantryLocation,
-	sprite: string,
 	items: string[],
-) => ({ id, label, location, sprite, items }) satisfies CatalogSection
+) => ({
+	id,
+	items,
+})
 
 // Staples a cook can tap through to stock a kitchen in one pass.
 export const catalogSections = [
-	section('spices', 'spices', 'pantry', 'cinnamon', [
+	section('spices', [
 		'salt',
 		'black pepper',
 		'garlic powder',
@@ -61,7 +68,7 @@ export const catalogSections = [
 		'saffron',
 		'vanilla extract',
 	]),
-	section('meat', 'meat & seafood', 'fridge', 'meat', [
+	section('meat', [
 		'chicken breast',
 		'chicken thighs',
 		'whole chicken',
@@ -92,7 +99,7 @@ export const catalogSections = [
 		'tofu',
 		'tempeh',
 	]),
-	section('dairy', 'dairy & eggs', 'fridge', 'milk', [
+	section('dairy', [
 		'eggs',
 		'milk',
 		'butter',
@@ -116,7 +123,7 @@ export const catalogSections = [
 		'oat milk',
 		'almond milk',
 	]),
-	section('vegetables', 'vegetables & herbs', 'fridge', 'carrot', [
+	section('vegetables', [
 		'onions',
 		'red onion',
 		'garlic',
@@ -153,7 +160,7 @@ export const catalogSections = [
 		'fresh basil',
 		'fresh thyme',
 	]),
-	section('fruit', 'fruit', 'fridge', 'apple', [
+	section('fruit', [
 		'apples',
 		'bananas',
 		'lemons',
@@ -172,7 +179,7 @@ export const catalogSections = [
 		'kiwi',
 		'raisins',
 	]),
-	section('grains', 'grains & baking', 'pantry', 'flour', [
+	section('grains', [
 		'rice',
 		'brown rice',
 		'pasta',
@@ -201,7 +208,7 @@ export const catalogSections = [
 		'honey',
 		'maple syrup',
 	]),
-	section('cans', 'cans & dry goods', 'pantry', 'tomato', [
+	section('cans', [
 		'canned tomatoes',
 		'tomato paste',
 		'tomato sauce',
@@ -220,7 +227,7 @@ export const catalogSections = [
 		'olives',
 		'pickles',
 	]),
-	section('sauces', 'oils & sauces', 'pantry', 'olive-oil', [
+	section('sauces', [
 		'olive oil',
 		'vegetable oil',
 		'sesame oil',
@@ -246,7 +253,7 @@ export const catalogSections = [
 		'tahini',
 		'jam',
 	]),
-	section('frozen', 'frozen', 'freezer', 'ice-cube', [
+	section('frozen', [
 		'frozen peas',
 		'frozen corn',
 		'frozen spinach',
@@ -264,11 +271,9 @@ export const catalogSections = [
 	]),
 ] as const
 
-export type CatalogSectionId = (typeof catalogSections)[number]['id']
-
 export const catalogSectionId = z.enum(catalogSections.map((entry) => entry.id))
 
-export function findCatalogSection(id: CatalogSectionId | undefined) {
+export function findCatalogSection(id: PantryCategory | undefined) {
 	return catalogSections.find((entry) => entry.id === id)
 }
 

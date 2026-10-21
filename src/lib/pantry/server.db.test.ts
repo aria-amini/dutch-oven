@@ -29,26 +29,28 @@ async function seedUser(db: Database) {
 }
 
 describe('pantry', () => {
-	test('creates items and lists them grouped by location', async ({ db }) => {
+	test('creates items and lists them in the order they were added', async ({
+		db,
+	}) => {
 		const userId = await seedUser(db)
 
 		const carrots = await createPantryItemForUser(
 			userId,
-			{ name: 'carrots', quantity: 7, location: 'fridge' },
+			{ name: 'carrots', quantity: 7, category: 'vegetables' },
 			db,
 		)
 
 		await createPantryItemForUser(
 			userId,
-			{ name: 'salt', quantity: 1, location: 'pantry' },
+			{ name: 'salt', quantity: 1, category: 'spices' },
 			db,
 		)
 		expect(carrots?.quantity).toBe(7)
 
 		const items = await listPantryForUser(userId, db)
 		expect(items).toHaveLength(2)
-		expect(items[0]?.location).toBe('fridge')
-		expect(items[1]?.location).toBe('pantry')
+		expect(items[0]?.category).toBe('vegetables')
+		expect(items[1]?.category).toBe('spices')
 	})
 
 	test('rejects quantities outside the supported range', async ({ db }) => {
@@ -56,14 +58,14 @@ describe('pantry', () => {
 		await expect(
 			createPantryItemForUser(
 				userId,
-				{ name: 'eggs', quantity: 0, location: 'fridge' },
+				{ name: 'eggs', quantity: 0, category: 'dairy' },
 				db,
 			),
 		).rejects.toThrow()
 
 		const item = await createPantryItemForUser(
 			userId,
-			{ name: 'eggs', quantity: 1, location: 'fridge' },
+			{ name: 'eggs', quantity: 1, category: 'dairy' },
 			db,
 		)
 
@@ -84,9 +86,9 @@ describe('pantry', () => {
 		const created = await createPantryItemsForUser(
 			userId,
 			[
-				{ name: 'cumin', quantity: 1, location: 'pantry' },
-				{ name: ' paprika ', quantity: 1, location: 'pantry' },
-				{ name: 'eggs', quantity: 12, location: 'fridge' },
+				{ name: 'cumin', quantity: 1, category: 'spices' },
+				{ name: ' paprika ', quantity: 1, category: 'spices' },
+				{ name: 'eggs', quantity: 12, category: 'dairy' },
 			],
 			db,
 		)
@@ -103,8 +105,8 @@ describe('pantry', () => {
 			createPantryItemsForUser(
 				userId,
 				[
-					{ name: 'salt', quantity: 1, location: 'pantry' },
-					{ name: '', quantity: 1, location: 'pantry' },
+					{ name: 'salt', quantity: 1, category: 'spices' },
+					{ name: '', quantity: 1, category: 'spices' },
 				],
 				db,
 			),
@@ -117,7 +119,7 @@ describe('pantry', () => {
 
 		const item = await createPantryItemForUser(
 			userId,
-			{ name: 'carrots', quantity: 2, location: 'fridge' },
+			{ name: 'carrots', quantity: 2, category: 'vegetables' },
 			db,
 		)
 
@@ -136,7 +138,7 @@ describe('pantry', () => {
 
 		const item = await createPantryItemForUser(
 			userId,
-			{ name: 'milk', quantity: 1, location: 'fridge' },
+			{ name: 'milk', quantity: 1, category: 'dairy' },
 			db,
 		)
 

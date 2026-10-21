@@ -7,37 +7,33 @@ import {
 } from '@tanstack/react-router'
 import { useState } from 'react'
 import { toast } from 'sonner'
+import { z } from 'zod'
 
 import {
 	catalogSectionId,
 	catalogSections,
+	categorySprites,
 	filterCatalogItems,
 	findCatalogSection,
 	normalizeIngredientName,
 } from '@/lib/pantry/catalog'
-import {
-	pantryBulkMax,
-	pantryLocationLabels,
-	pantryLocations,
-	pantrySearch,
-	type PantryLocation,
-} from '@/lib/pantry/model'
+import { pantryBulkMax, pantryCategoryLabels } from '@/lib/pantry/model'
 import { createPantryItems, listPantry } from '@/lib/pantry/server'
 import { resolveSpriteSrc } from '@/lib/pantry/sprites'
 import { cn } from '@/lib/utils/ui'
 
 export const Route = createFileRoute('/_app/ingredients/bulk')({
-	validateSearch: pantrySearch
-		.pick({ loc: true })
-		.extend({ section: catalogSectionId.optional().catch(undefined) }),
+	validateSearch: z.object({
+		cat: catalogSectionId.optional().catch(undefined),
+	}),
 	loader: () => listPantry(),
 	component: BulkAdd,
 })
 
 function BulkAdd() {
-	const { loc, section: sectionId } = Route.useSearch()
+	const { cat } = Route.useSearch()
 	const items = Route.useLoaderData()
-	const section = findCatalogSection(sectionId)
+	const section = findCatalogSection(cat)
 	const owned = new Set(items.map((item) => normalizeIngredientName(item.name)))
 
 	return (
@@ -46,14 +42,13 @@ function BulkAdd() {
 				<div>
 					<Link
 						to={section ? '/ingredients/bulk' : '/ingredients'}
-						search={{ loc }}
 						className="focus-visible:outline-kitchen-eggplant mb-4 inline-flex items-center gap-1.5 text-xs font-bold uppercase underline focus-visible:outline-2 focus-visible:outline-offset-2"
 					>
 						<ArrowLeft size={14} weight="bold" aria-hidden />
 						{section ? 'all sections' : 'back to ingredients'}
 					</Link>
 					<h1 className="text-4xl font-extrabold tracking-tight md:text-5xl">
-						{section ? section.label : 'stock up fast'}
+						{section ? pantryCategoryLabels[section.id] : 'stock up fast'}
 					</h1>
 					<p className="text-muted-foreground mt-2 text-sm">
 						{section
@@ -63,27 +58,16 @@ function BulkAdd() {
 				</div>
 
 				{section ? (
-					<SectionPicker
-						key={section.id}
-						section={section}
-						owned={owned}
-						loc={loc}
-					/>
+					<SectionPicker key={section.id} section={section} owned={owned} />
 				) : (
-					<SectionGrid owned={owned} loc={loc} />
+					<SectionGrid owned={owned} />
 				)}
 			</div>
 		</main>
 	)
 }
 
-function SectionGrid({
-	owned,
-	loc,
-}: {
-	owned: Set<string>
-	loc: PantryLocation
-}) {
+function SectionGrid({ owned }: { owned: Set<string> }) {
 	return (
 		<>
 			<nav
@@ -97,17 +81,17 @@ function SectionGrid({
 						<Link
 							key={entry.id}
 							to="/ingredients/bulk"
-							search={{ loc, section: entry.id }}
+							search={{ cat: entry.id }}
 							className="border-foreground bg-card focus-visible:outline-kitchen-eggplant flex items-center gap-3 border-2 p-4 shadow-sm transition-transform hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2"
 						>
 							<img
-								src={`/sprites/pantry/${entry.sprite}.png`}
+								src={`/sprites/pantry/${categorySprites[entry.id]}.png`}
 								alt=""
 								className="size-10 shrink-0 [image-rendering:pixelated] md:size-12"
 							/>
 							<span className="flex min-w-0 flex-col">
 								<span className="font-extrabold lowercase md:text-lg">
-									{entry.label}
+									{pantryCategoryLabels[entry.id]}
 								</span>
 								<span className="text-muted-foreground font-mono text-xs">
 									{have}/{entry.items.length} stashed
@@ -119,7 +103,6 @@ function SectionGrid({
 			</nav>
 			<Link
 				to="/ingredients"
-				search={{ loc }}
 				className="border-foreground bg-kitchen-basil focus-visible:outline-kitchen-eggplant self-start border-2 px-4 py-2 text-xs font-bold tracking-wide uppercase shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2"
 			>
 				done
@@ -131,16 +114,14 @@ function SectionGrid({
 function SectionPicker({
 	section,
 	owned,
-	loc,
 }: {
 	section: NonNullable<ReturnType<typeof findCatalogSection>>
 	owned: Set<string>
-	loc: PantryLocation
 }) {
 	const router = useRouter()
 	const navigate = useNavigate()
 	const [query, setQuery] = useState('')
-	const [location, setLocation] = useState<PantryLocation>(section.location)
+	const label = pantryCategoryLabels[section.id]
 	const [custom, setCustom] = useState<string[]>([])
 	const [selected, setSelected] = useState<Set<string>>(() => new Set())
 	const [pending, setPending] = useState(false)
@@ -175,14 +156,16 @@ function SectionPicker({
 
 		try {
 			const created = await createPantryItems({
-				data: [...selected].map((name) => ({ name, quantity: 1, location })),
+				data: [...selected].map((name) => ({
+					name,
+					quantity: 1,
+					category: section.id,
+				})),
 			})
 
-			toast.success(
-				`added ${created.length} to the ${pantryLocationLabels[location]}`,
-			)
+			toast.success(`added ${created.length} to ${label}`)
 			await router.invalidate()
-			await navigate({ to: '/ingredients/bulk', search: { loc } })
+			await navigate({ to: '/ingredients/bulk', search: {} })
 		} catch {
 			toast.error("couldn't add those — try again")
 			setPending(false)
@@ -191,58 +174,33 @@ function SectionPicker({
 
 	return (
 		<>
-			<div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-				<label className="flex flex-1 flex-col gap-1.5">
-					<span className="text-xs font-bold uppercase">filter</span>
-					<input
-						type="search"
-						value={query}
-						autoComplete="off"
-						maxLength={80}
-						placeholder={`search ${section.label}`}
-						onChange={(event) => setQuery(event.target.value)}
-						onKeyDown={(event) => {
-							if (event.key !== 'Enter') return
-							event.preventDefault()
-							const [only] = shown
+			<label className="flex flex-col gap-1.5">
+				<span className="text-xs font-bold uppercase">filter</span>
+				<input
+					type="search"
+					value={query}
+					autoComplete="off"
+					maxLength={80}
+					placeholder={`search ${label}`}
+					onChange={(event) => setQuery(event.target.value)}
+					onKeyDown={(event) => {
+						if (event.key !== 'Enter') return
+						event.preventDefault()
+						const [only] = shown
 
-							if (shown.length === 1 && only && !owned.has(only)) {
-								toggle(only)
-								setQuery('')
-							} else if (canAddTyped) {
-								addTyped()
-							}
-						}}
-						className="border-foreground bg-background focus-visible:outline-kitchen-eggplant w-full border-2 px-3 py-2 text-lg font-bold placeholder:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2"
-					/>
-				</label>
-				<fieldset className="flex flex-col gap-1.5">
-					<legend className="mb-1.5 text-xs font-bold uppercase">
-						goes in the
-					</legend>
-					<div className="grid grid-cols-3 gap-2">
-						{pantryLocations.map((option) => (
-							<button
-								key={option}
-								type="button"
-								aria-pressed={location === option}
-								onClick={() => setLocation(option)}
-								className={cn(
-									'focus-visible:outline-kitchen-eggplant border-2 px-3 py-2.5 text-xs font-bold tracking-wide uppercase focus-visible:outline-2 focus-visible:outline-offset-2',
-									location === option
-										? 'border-foreground bg-kitchen-yolk shadow-sm'
-										: 'border-foreground/30 hover:border-foreground',
-								)}
-							>
-								{pantryLocationLabels[option]}
-							</button>
-						))}
-					</div>
-				</fieldset>
-			</div>
+						if (shown.length === 1 && only && !owned.has(only)) {
+							toggle(only)
+							setQuery('')
+						} else if (canAddTyped) {
+							addTyped()
+						}
+					}}
+					className="border-foreground bg-background focus-visible:outline-kitchen-eggplant w-full border-2 px-3 py-2 text-lg font-bold placeholder:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2"
+				/>
+			</label>
 
 			<ul
-				aria-label={`${section.label} to add`}
+				aria-label={`${label} to add`}
 				className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5"
 			>
 				{canAddTyped ? (
@@ -277,7 +235,7 @@ function SectionPicker({
 								)}
 							>
 								<img
-									src={resolveSpriteSrc(name)}
+									src={resolveSpriteSrc(name, null, section.id)}
 									alt=""
 									className="size-9 shrink-0 object-contain [image-rendering:pixelated]"
 								/>
@@ -326,9 +284,7 @@ function SectionPicker({
 						onClick={submit}
 						className="border-foreground bg-kitchen-basil focus-visible:outline-kitchen-eggplant border-2 px-4 py-2.5 text-xs font-bold tracking-wide uppercase shadow-sm transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50"
 					>
-						{pending
-							? 'adding…'
-							: `add ${selected.size} to the ${pantryLocationLabels[location]}`}
+						{pending ? 'adding…' : `add ${selected.size}`}
 					</button>
 				</div>
 			</div>

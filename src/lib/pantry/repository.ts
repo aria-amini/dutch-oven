@@ -14,7 +14,7 @@ export async function listPantryForUser(
 		.select()
 		.from(pantryItems)
 		.where(eq(pantryItems.userId, userId))
-		.orderBy(asc(pantryItems.location), asc(pantryItems.createdAt))
+		.orderBy(asc(pantryItems.createdAt))
 }
 
 export async function createPantryItemForUser(

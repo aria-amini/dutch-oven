@@ -11,7 +11,7 @@ export const insertPantryItem = createInsertSchema(
 ).pick({
 	name: true,
 	quantity: true,
-	location: true,
+	category: true,
 	spriteKey: true,
 })
 

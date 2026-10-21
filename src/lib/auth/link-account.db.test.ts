@@ -51,17 +51,17 @@ describe('guest account transfer', () => {
 		})
 		await createPantryItemForUser(
 			fromId,
-			{ name: 'carrots', quantity: 2, location: 'fridge' },
+			{ name: 'carrots', quantity: 2, category: 'vegetables' },
 			db,
 		)
 		await createPantryItemForUser(
 			toId,
-			{ name: 'salt', quantity: 1, location: 'pantry' },
+			{ name: 'salt', quantity: 1, category: 'spices' },
 			db,
 		)
 		await createPantryItemForUser(
 			otherId,
-			{ name: 'rice', quantity: 1, location: 'pantry' },
+			{ name: 'rice', quantity: 1, category: 'grains' },
 			db,
 		)
 
