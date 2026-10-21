@@ -36,8 +36,9 @@ cooking, feeds cook-count ranking), import-from-URL (slot built, parser
 pending), books (collections) as organization + AI scope, a home "what's
 tonight" decision surface, groceries (list from picked recipes, later).
 Decision-first, not calendar-first: week planning deferred. Undecided:
-nutrition/macro detail depth, sharing/social features. Rejected scope: pantry
-tracking (built, then removed 2026-08-14).
+nutrition/macro detail depth, sharing/social features. Pantry tracking returns
+on 2026-10-19: per-user ingredients, whole-item quantities, four storage
+locations, and pixel icons. The existing kitchen theme stays unchanged.
 
 ## Brand Commitments
 
