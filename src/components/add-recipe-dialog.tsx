@@ -10,6 +10,7 @@ import {
 import { useNavigate, useRouter } from '@tanstack/react-router'
 import { useEffect, useRef, useState } from 'react'
 
+import { RecipeSearch } from '@/components/recipe-search'
 import { parseNote, type NoteDraft } from '@/lib/import/note'
 import { importRecipe } from '@/lib/import/server'
 import { formField } from '@/lib/utils/form'
@@ -97,6 +98,12 @@ export function AddRecipeDialog({
 	const [open, setOpen] = useState(false)
 	const [step, setStep] = useState<'choose' | 'import' | 'note'>('choose')
 
+	function openImported(recipeId: string) {
+		void router.invalidate()
+		setOpen(false)
+		void navigate({ to: '/recipes/$recipeId', params: { recipeId } })
+	}
+
 	return (
 		<DialogPrimitive.Root
 			open={open}
@@ -134,41 +141,36 @@ export function AddRecipeDialog({
 						</DialogPrimitive.Close>
 					</div>
 					{step === 'choose' ? (
-						<div className="flex flex-col gap-2">
-							<ChoiceButton
-								icon={<Plus size={18} weight="bold" aria-hidden />}
-								iconClassName="bg-kitchen-tomato text-black"
-								title="write new recipe"
-								onClick={() => {
-									setOpen(false)
-									void navigate({ to: '/recipes/new' })
-								}}
-							/>
-							<ChoiceButton
-								icon={<LinkSimple size={18} weight="bold" aria-hidden />}
-								iconClassName="bg-kitchen-eggplant text-white"
-								title="paste a url"
-								subtext={<ImportSites />}
-								onClick={() => setStep('import')}
-							/>
-							<ChoiceButton
-								icon={<TextAlignLeft size={18} weight="bold" aria-hidden />}
-								iconClassName="bg-kitchen-yolk text-black"
-								title="paste text"
-								onClick={() => setStep('note')}
-							/>
-						</div>
+						<RecipeSearch onImported={openImported}>
+							<div className="flex flex-col gap-2">
+								<ChoiceButton
+									icon={<Plus size={18} weight="bold" aria-hidden />}
+									iconClassName="bg-kitchen-tomato text-black"
+									title="write new recipe"
+									onClick={() => {
+										setOpen(false)
+										void navigate({ to: '/recipes/new' })
+									}}
+								/>
+								<ChoiceButton
+									icon={<LinkSimple size={18} weight="bold" aria-hidden />}
+									iconClassName="bg-kitchen-eggplant text-white"
+									title="paste a url"
+									subtext={<ImportSites />}
+									onClick={() => setStep('import')}
+								/>
+								<ChoiceButton
+									icon={<TextAlignLeft size={18} weight="bold" aria-hidden />}
+									iconClassName="bg-kitchen-yolk text-black"
+									title="paste text"
+									onClick={() => setStep('note')}
+								/>
+							</div>
+						</RecipeSearch>
 					) : step === 'import' ? (
 						<ImportStep
 							onBack={() => setStep('choose')}
-							onImported={(recipeId) => {
-								void router.invalidate()
-								setOpen(false)
-								void navigate({
-									to: '/recipes/$recipeId',
-									params: { recipeId },
-								})
-							}}
+							onImported={openImported}
 						/>
 					) : (
 						<NoteStep

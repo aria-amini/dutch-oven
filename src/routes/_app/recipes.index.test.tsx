@@ -13,12 +13,54 @@ type ShelfState = {
 	recipes: Recipe[]
 	collections: Collection[]
 	created: { title: string; ingredients?: string[]; steps?: string[] }[]
+	imported: string[]
 }
 
 const shelfState = vi.hoisted<ShelfState>(() => ({
 	recipes: [],
 	collections: [],
 	created: [],
+	imported: [],
+}))
+
+const kimchi = vi.hoisted(() => ({
+	url: 'https://www.bbcgoodfood.com/recipes/quick-kimchi',
+	title: 'quick kimchi',
+	siteId: 'bbcgoodfood',
+	siteName: 'BBC Good Food',
+}))
+
+vi.mock('@/lib/discover/server', () => ({
+	searchRecipes: ({ data }: { data: { q: string } }) =>
+		Promise.resolve({
+			warming: false,
+			results: data.q.trim().startsWith('kim') ? [kimchi] : [],
+		}),
+}))
+
+vi.mock('@/lib/import/server', () => ({
+	importRecipe: async ({ data }: { data: { url: string } }) => {
+		shelfState.imported.push(data.url)
+
+		const recipe = {
+			id: 'recipe-imported',
+			userId: 'user-1',
+			collectionId: null,
+			title: 'Quick Kimchi',
+			imageUrl: null,
+			sourceUrl: data.url,
+			servings: null,
+			totalMinutes: null,
+			notes: null,
+			createdAt: new Date(),
+			cookCount: 0,
+			lastCookedAt: null,
+		}
+
+		shelfState.recipes.push(recipe)
+
+		return recipe
+	},
 }))
 
 vi.mock('@/lib/recipes/server', () => ({
@@ -59,6 +101,9 @@ vi.mock('@/lib/recipes/server', () => ({
 		})
 	},
 	listBooks: () => Promise.resolve(shelfState.collections),
+	deleteRecipe: () => Promise.resolve(),
+	moveRecipe: () => Promise.resolve(),
+	updateRecipe: () => Promise.resolve(),
 	createBook: async ({ data }: { data: { name: string } }) => {
 		const book = {
 			id: `col-${shelfState.collections.length + 1}`,
@@ -136,6 +181,7 @@ const dal: Recipe = {
 describe('recipes shelf', () => {
 	beforeEach(() => {
 		shelfState.created = []
+		shelfState.imported = []
 		shelfState.recipes = []
 		shelfState.collections = []
 	})
@@ -327,6 +373,45 @@ describe('recipes shelf', () => {
 		await expect.element(screen.getByText('paste a url')).toBeVisible()
 		await expect.element(screen.getByText('paste text')).toBeVisible()
 		await expect.element(screen.getByText('write new recipe')).toBeVisible()
+	})
+
+	test('searches recipe sites and saves a result in one tap', async () => {
+		const { router, screen } = await renderRoute({
+			path: '/recipes',
+			session: testSession,
+		})
+
+		await screen.getByRole('button', { name: /no recipes yet/ }).click()
+		await screen.getByRole('searchbox', { name: 'Search recipes' }).fill('kim')
+		await expect
+			.element(
+				screen.getByRole('link', {
+					name: 'Open quick kimchi on BBC Good Food',
+				}),
+			)
+			.toHaveAttribute('href', kimchi.url)
+		await screen.getByRole('button', { name: /quick kimchi/ }).click()
+
+		await expect
+			.poll(() => router.state.location.pathname)
+			.toBe('/recipes/recipe-imported')
+		expect(shelfState.imported).toEqual([kimchi.url])
+	})
+
+	test('says when a recipe search finds nothing', async () => {
+		const { screen } = await renderRoute({
+			path: '/recipes',
+			session: testSession,
+		})
+
+		await screen.getByRole('button', { name: /no recipes yet/ }).click()
+		await screen.getByRole('searchbox', { name: 'Search recipes' }).fill('zzz')
+		await expect
+			.element(screen.getByText('nothing yet', { exact: false }))
+			.toBeVisible()
+		await expect
+			.element(screen.getByText('paste a url'))
+			.not.toBeInTheDocument()
 	})
 
 	test('turns a pasted note into a reviewable draft and saves it', async () => {
