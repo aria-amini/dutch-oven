@@ -30,10 +30,10 @@ const navItems = [
 		match: ['/recipes'],
 	},
 	{
-		label: 'pantry',
+		label: 'ingredients',
 		icon: CarrotIcon,
-		to: '/pantry' as const,
-		match: ['/pantry'],
+		to: '/ingredients' as const,
+		match: ['/ingredients'],
 	},
 	{ label: 'start meal', icon: CookingPotIcon, disabled: true },
 	{
@@ -198,7 +198,7 @@ function NavItem({
 }: {
 	label: string
 	icon: typeof HouseIcon
-	to?: '/' | '/recipes' | '/pantry' | '/settings'
+	to?: '/' | '/recipes' | '/ingredients' | '/settings'
 	active?: boolean
 	disabled?: boolean
 }) {

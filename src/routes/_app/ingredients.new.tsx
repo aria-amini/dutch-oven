@@ -15,7 +15,7 @@ import { createPantryItem } from '@/lib/pantry/server'
 import { resolveSpriteSrc } from '@/lib/pantry/sprites'
 import { cn } from '@/lib/utils/ui'
 
-export const Route = createFileRoute('/_app/pantry/new')({
+export const Route = createFileRoute('/_app/ingredients/new')({
 	validateSearch: pantrySearch.pick({ loc: true }),
 	component: NewPantryItem,
 })
@@ -38,12 +38,12 @@ function NewPantryItem() {
 			<div className="flex max-w-2xl flex-col gap-8 p-6 md:p-10">
 				<div>
 					<Link
-						to="/pantry"
+						to="/ingredients"
 						search={{ loc }}
 						className="focus-visible:outline-kitchen-eggplant mb-4 inline-flex items-center gap-1.5 text-xs font-bold uppercase underline focus-visible:outline-2 focus-visible:outline-offset-2"
 					>
 						<ArrowLeft size={14} weight="bold" aria-hidden />
-						back to the pantry
+						back to ingredients
 					</Link>
 					<h1 className="text-4xl font-extrabold tracking-tight md:text-5xl">
 						stash something new
@@ -83,7 +83,7 @@ function NewPantryItem() {
 							})
 
 							await navigate({
-								to: '/pantry',
+								to: '/ingredients',
 								search: { loc: location, item: item?.id },
 							})
 						} catch {
@@ -156,7 +156,7 @@ function NewPantryItem() {
 							{pending ? 'stashing…' : 'stash it'}
 						</button>
 						<Link
-							to="/pantry"
+							to="/ingredients"
 							search={{ loc }}
 							className="border-foreground bg-background hover:bg-card border-2 px-4 py-2 text-xs font-bold tracking-wide uppercase"
 						>

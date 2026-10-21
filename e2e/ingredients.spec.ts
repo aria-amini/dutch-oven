@@ -1,10 +1,10 @@
 import { expect, test } from '@playwright/test'
 
-test('a first pantry save creates a guest shelf and shows its count at signup', async ({
+test('a first ingredient save creates a guest shelf and shows its count at signup', async ({
 	page,
 }) => {
 	test.setTimeout(30_000)
-	await page.goto('/pantry/new')
+	await page.goto('/ingredients/new')
 	await expect(
 		page.getByRole('link', { name: 'sign in', exact: true }),
 	).toBeVisible({ timeout: 15_000 })
@@ -24,7 +24,7 @@ test('a first pantry save creates a guest shelf and shows its count at signup', 
 	await page.getByRole('link', { name: /guest — save shelf/ }).click()
 	await expect(
 		page.getByText(
-			'Keep your 1 pantry item on any device when you create an account.',
+			'Keep your 1 ingredient on any device when you create an account.',
 		),
 	).toBeVisible()
 })
