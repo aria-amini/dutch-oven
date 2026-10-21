@@ -3,6 +3,7 @@ import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { motion, useReducedMotion } from 'framer-motion'
 import { useState } from 'react'
 
+import { IngredientListField } from '@/components/ingredient-list-field'
 import { createRecipe } from '@/lib/recipes/server'
 import { formField } from '@/lib/utils/form'
 
@@ -60,7 +61,6 @@ function ManualForm() {
 				const form = new FormData(event.currentTarget)
 				const title = formField(form, 'title')
 				const imageUrl = formField(form, 'imageUrl')
-				const ingredients = formField(form, 'ingredients')
 				const steps = formField(form, 'steps')
 
 				if (!title) {
@@ -77,7 +77,7 @@ function ManualForm() {
 						data: {
 							title,
 							imageUrl,
-							ingredients: ingredients.split('\n'),
+							ingredients: form.getAll('ingredient').map(String),
 							steps: steps.split('\n'),
 						},
 					})
@@ -105,16 +105,7 @@ function ManualForm() {
 				aria-label="Photo URL"
 				className="border-foreground bg-background border-2 px-3 py-2 text-sm font-semibold placeholder:opacity-50"
 			/>
-			<label className="text-xs font-bold uppercase" htmlFor="ingredients">
-				ingredients (one per line)
-			</label>
-			<textarea
-				id="ingredients"
-				name="ingredients"
-				rows={5}
-				placeholder="200g pasta\n1 tbsp miso"
-				className="border-foreground bg-background focus-visible:outline-kitchen-eggplant resize-y border-2 px-3 py-2 text-sm font-semibold placeholder:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2"
-			/>
+			<IngredientListField />
 			<label className="text-xs font-bold uppercase" htmlFor="steps">
 				steps (one per line)
 			</label>
