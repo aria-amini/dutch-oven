@@ -7,6 +7,10 @@ type Recipe = {
 	collectionId: string | null
 	title: string
 	imageUrl: string | null
+	sourceUrl: string | null
+	servings: number | null
+	totalMinutes: number | null
+	notes: string | null
 	createdAt: Date
 	ingredients: string[]
 	steps: string[]
@@ -16,28 +20,28 @@ const recipeState: { recipe: Recipe | null } = vi.hoisted(() => ({
 	recipe: null,
 }))
 
-const updateCalls = vi.hoisted(() => {
-	const calls: { ingredients: string[]; steps: string[] }[] = []
+type RecipeUpdate = Omit<
+	Recipe,
+	'userId' | 'collectionId' | 'imageUrl' | 'sourceUrl' | 'createdAt'
+>
 
-	return { calls }
+const updateCalls = vi.hoisted(() => {
+	const calls: RecipeUpdate[] = []
+	const deleted: string[] = []
+
+	return { calls, deleted }
 })
 
 vi.mock('@/lib/recipes/server', () => ({
 	listShelf: () => Promise.resolve({ recipes: [], collections: [] }),
 	getRecipe: () => Promise.resolve(recipeState.recipe),
-	updateRecipeContent: async ({
-		data,
-	}: {
-		data: { ingredients: string[]; steps: string[] }
-	}) => {
-		const ingredients = data.ingredients.filter(Boolean)
-		const steps = data.steps.filter(Boolean)
-		updateCalls.calls.push({ ingredients, steps })
+	updateRecipe: async ({ data }: { data: RecipeUpdate }) => {
+		updateCalls.calls.push(data)
 
-		if (recipeState.recipe) {
-			recipeState.recipe.ingredients = ingredients
-			recipeState.recipe.steps = steps
-		}
+		if (recipeState.recipe) Object.assign(recipeState.recipe, data)
+	},
+	deleteRecipe: async ({ data }: { data: { id: string } }) => {
+		updateCalls.deleted.push(data.id)
 	},
 }))
 
@@ -49,12 +53,17 @@ const session = {
 describe('recipe detail', () => {
 	beforeEach(() => {
 		updateCalls.calls.length = 0
+		updateCalls.deleted.length = 0
 		recipeState.recipe = {
 			id: 'recipe-1',
 			userId: 'user-1',
 			collectionId: null,
 			title: 'miso butter pasta',
 			imageUrl: null,
+			sourceUrl: null,
+			servings: null,
+			totalMinutes: null,
+			notes: null,
 			createdAt: new Date(),
 			ingredients: [],
 			steps: [],
@@ -106,9 +115,68 @@ describe('recipe detail', () => {
 
 		await expect.element(screen.getByText('2 tbsp butter')).toBeVisible()
 		await expect.element(screen.getByText('stir in the butter')).toBeVisible()
-		expect(updateCalls.calls.at(-1)).toEqual({
+		expect(updateCalls.calls.at(-1)).toMatchObject({
 			ingredients: ['200g pasta', '2 tbsp butter'],
 			steps: ['boil the pasta', 'stir in the butter'],
 		})
+	})
+
+	test('edits the name, servings, time, and notes', async () => {
+		const { screen } = await renderRoute({
+			path: '/recipes/recipe-1',
+			session,
+		})
+
+		await screen.getByRole('button', { name: 'edit' }).click()
+		await screen.getByLabelText('name').fill('brown butter pasta')
+		await screen.getByLabelText('servings').fill('2')
+		await screen.getByLabelText('total minutes').fill('75')
+		await screen.getByLabelText('notes').fill('more lemon')
+		await screen.getByRole('button', { name: 'save' }).click()
+
+		await expect
+			.element(screen.getByRole('heading', { name: 'brown butter pasta' }))
+			.toBeVisible()
+		await expect.element(screen.getByText('serves 2')).toBeVisible()
+		await expect.element(screen.getByText('1 hr 15 min')).toBeVisible()
+		await expect.element(screen.getByText('more lemon')).toBeVisible()
+		expect(updateCalls.calls.at(-1)).toMatchObject({
+			title: 'brown butter pasta',
+			servings: 2,
+			totalMinutes: 75,
+			notes: 'more lemon',
+		})
+	})
+
+	test('links to the site a recipe was imported from', async () => {
+		if (!recipeState.recipe) throw new Error('recipe was not seeded')
+		recipeState.recipe.sourceUrl = 'https://www.example.com/miso-pasta'
+
+		const { screen } = await renderRoute({
+			path: '/recipes/recipe-1',
+			session,
+		})
+
+		await expect
+			.element(screen.getByRole('link', { name: 'from example.com' }))
+			.toHaveAttribute('href', 'https://www.example.com/miso-pasta')
+	})
+
+	test('deletes only after confirming', async () => {
+		const { screen } = await renderRoute({
+			path: '/recipes/recipe-1',
+			session,
+		})
+
+		await screen.getByRole('button', { name: 'edit' }).click()
+		await screen.getByRole('button', { name: 'delete recipe' }).click()
+		await screen.getByRole('button', { name: 'keep it' }).click()
+		expect(updateCalls.deleted).toEqual([])
+
+		await screen.getByRole('button', { name: 'delete recipe' }).click()
+		await screen.getByRole('button', { name: 'really delete' }).click()
+
+		await expect.element(screen.getByText('your recipes')).toBeVisible()
+		expect(updateCalls.deleted).toEqual(['recipe-1'])
 	})
 })

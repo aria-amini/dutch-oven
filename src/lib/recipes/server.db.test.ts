@@ -7,12 +7,14 @@ import {
 
 import { user } from '@/db/schema'
 
+import { recipeUpdateInput } from './model'
 import {
 	createCollectionForUser,
 	createRecipeForUser,
+	deleteRecipeForUser,
 	getRecipeForUser,
 	listShelfForUser,
-	updateRecipeContentForUser,
+	updateRecipeForUser,
 } from './repository'
 
 async function seedUser(db: Database) {
@@ -99,7 +101,9 @@ describe('recipe shelf', () => {
 		})
 	})
 
-	test('replaces recipe content and checks ownership', async ({ db }) => {
+	test('updates recipe details and content and checks ownership', async ({
+		db,
+	}) => {
 		const userId = await seedUser(db)
 
 		const recipe = await createRecipeForUser(
@@ -110,32 +114,61 @@ describe('recipe shelf', () => {
 
 		if (!recipe) throw new Error('recipe was not created')
 
-		await updateRecipeContentForUser(
-			userId,
-			recipe.id,
-			{ ingredients: ['tomatoes'], steps: ['toast', '', 'serve'] },
-			db,
-		)
+		const update = recipeUpdateInput.parse({
+			id: recipe.id,
+			title: 'tomato dal',
+			servings: 4,
+			totalMinutes: 45,
+			notes: '  ',
+			ingredients: ['tomatoes'],
+			steps: ['toast', '', 'serve'],
+		})
+
+		await updateRecipeForUser(userId, update, db)
 		await expect(
 			getRecipeForUser(userId, recipe.id, db),
 		).resolves.toMatchObject({
+			title: 'tomato dal',
+			servings: 4,
+			totalMinutes: 45,
+			notes: null,
 			ingredients: ['tomatoes'],
 			steps: ['toast', 'serve'],
 		})
 		await expect(
-			updateRecipeContentForUser(
+			updateRecipeForUser(
 				'user-2',
-				recipe.id,
-				{ ingredients: [], steps: [] },
+				{ ...update, title: 'stolen', ingredients: [], steps: [] },
 				db,
 			),
 		).resolves.toBeNull()
 		await expect(
 			getRecipeForUser(userId, recipe.id, db),
 		).resolves.toMatchObject({
+			title: 'tomato dal',
 			ingredients: ['tomatoes'],
 			steps: ['toast', 'serve'],
 		})
+	})
+
+	test("deletes only the owner's recipe", async ({ db }) => {
+		const userId = await seedUser(db)
+
+		const recipe = await createRecipeForUser(
+			userId,
+			{ title: 'dal', ingredients: ['lentils'] },
+			db,
+		)
+
+		if (!recipe) throw new Error('recipe was not created')
+
+		await expect(
+			deleteRecipeForUser('user-2', recipe.id, db),
+		).resolves.toBeNull()
+		await expect(deleteRecipeForUser(userId, recipe.id, db)).resolves.toEqual({
+			id: recipe.id,
+		})
+		await expect(getRecipeForUser(userId, recipe.id, db)).resolves.toBeNull()
 	})
 
 	test('rejects collections owned by another user', async ({ db }) => {

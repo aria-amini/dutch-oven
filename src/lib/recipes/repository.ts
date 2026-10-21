@@ -7,6 +7,7 @@ import {
 	recipeSteps,
 	recipes,
 } from '@/db/schema'
+import type { RecipeUpdate } from '@/lib/recipes/model'
 
 type RecipeDatabase =
 	| typeof db
@@ -93,6 +94,7 @@ export async function createRecipeForUser(
 	input: {
 		title: string
 		imageUrl?: string | undefined
+		sourceUrl?: string | undefined
 		collectionId?: string | undefined
 		ingredients?: string[] | undefined
 		steps?: string[] | undefined
@@ -122,6 +124,7 @@ export async function createRecipeForUser(
 				collectionId: input.collectionId ?? null,
 				title: input.title,
 				imageUrl: input.imageUrl ?? null,
+				sourceUrl: input.sourceUrl ?? null,
 				createdAt: new Date(),
 			})
 			.returning()
@@ -169,23 +172,36 @@ async function insertRecipeContent(
 	}
 }
 
-export async function updateRecipeContentForUser(
+export async function updateRecipeForUser(
 	userId: string,
-	id: string,
-	input: { ingredients: string[]; steps: string[] },
+	{ id, ingredients, steps, ...details }: RecipeUpdate,
 	database: typeof db = db,
 ) {
 	return database.transaction(async (tx) => {
 		const [recipe] = await tx
-			.select({ id: recipes.id })
-			.from(recipes)
+			.update(recipes)
+			.set(details)
 			.where(and(eq(recipes.id, id), eq(recipes.userId, userId)))
+			.returning()
 
 		if (!recipe) return null
 		await tx.delete(recipeIngredients).where(eq(recipeIngredients.recipeId, id))
 		await tx.delete(recipeSteps).where(eq(recipeSteps.recipeId, id))
-		await insertRecipeContent(tx, id, input.ingredients, input.steps)
+		await insertRecipeContent(tx, id, ingredients, steps)
 
 		return recipe
 	})
+}
+
+export async function deleteRecipeForUser(
+	userId: string,
+	id: string,
+	database: typeof db = db,
+) {
+	const [recipe] = await database
+		.delete(recipes)
+		.where(and(eq(recipes.id, id), eq(recipes.userId, userId)))
+		.returning({ id: recipes.id })
+
+	return recipe ?? null
 }
