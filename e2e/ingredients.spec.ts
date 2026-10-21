@@ -21,7 +21,8 @@ test('a first ingredient save creates a guest shelf and shows its count at signu
 	const closeDetails = page.getByRole('button', { name: 'Close details' })
 
 	if (await closeDetails.isVisible()) await closeDetails.click()
-	await page.getByRole('link', { name: /guest — save shelf/ }).click()
+	await page.getByRole('button', { name: 'Guest account' }).click()
+	await page.getByRole('menuitem', { name: 'create an account' }).click()
 	await expect(
 		page.getByText(
 			'Keep your 1 ingredient on any device when you create an account.',
