@@ -82,4 +82,9 @@ export const recipeMoveInput = z.object({
 
 export const shelfSearch = z.object({
 	book: z.string().min(1).optional().catch(undefined),
+	q: z.string().trim().min(1).max(recipeTitleMax).optional().catch(undefined),
 })
+
+export function matchesRecipeQuery(title: string, query: string | undefined) {
+	return !query || title.toLocaleLowerCase().includes(query.toLocaleLowerCase())
+}

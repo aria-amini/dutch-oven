@@ -174,6 +174,43 @@ describe('recipes shelf', () => {
 		await expect.element(screen.getByText('dal')).not.toBeInTheDocument()
 	})
 
+	test('searches recipes by name inside the open book', async () => {
+		shelfState.recipes = [
+			misoButterPasta,
+			dal,
+			{
+				...dal,
+				id: 'recipe-3',
+				collectionId: 'col-1',
+				title: 'Red Lentil Dal',
+			},
+		]
+		shelfState.collections = [{ ...weeknight }]
+
+		const { screen } = await renderRoute({
+			path: '/recipes',
+			session: testSession,
+		})
+
+		await screen.getByLabelText('Search recipes').fill('dal')
+		await expect.element(screen.getByText('Red Lentil Dal')).toBeVisible()
+		await expect.element(screen.getByText('dal', { exact: true })).toBeVisible()
+		await expect
+			.element(screen.getByText('miso butter pasta'))
+			.not.toBeInTheDocument()
+
+		await screen.getByRole('link', { name: 'weeknight' }).click()
+		await expect.element(screen.getByText('Red Lentil Dal')).toBeVisible()
+		await expect
+			.element(screen.getByText('dal', { exact: true }))
+			.not.toBeInTheDocument()
+
+		await screen.getByLabelText('Search recipes').fill('ramen')
+		await expect
+			.element(screen.getByText('no recipes match', { exact: false }))
+			.toBeVisible()
+	})
+
 	test('adds a book and opens it', async () => {
 		shelfState.recipes = [dal]
 

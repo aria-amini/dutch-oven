@@ -1,12 +1,12 @@
-import { Plus } from '@phosphor-icons/react'
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { MagnifyingGlass, Plus } from '@phosphor-icons/react'
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { motion, useReducedMotion } from 'framer-motion'
 
 import { AddRecipeDialog } from '@/components/add-recipe-dialog'
 import { BookBar } from '@/components/book-bar'
 import { SaveShelfNudge } from '@/components/save-shelf-nudge'
 import type { recipes } from '@/db/schema'
-import { shelfSearch } from '@/lib/recipes/model'
+import { matchesRecipeQuery, shelfSearch } from '@/lib/recipes/model'
 import { listShelf } from '@/lib/recipes/server'
 import { cn } from '@/lib/utils/ui'
 
@@ -39,12 +39,15 @@ const dateFormat = new Intl.DateTimeFormat('en', {
 
 function Shelf() {
 	const { recipes: userRecipes, collections: books } = Route.useLoaderData()
-	const { book } = Route.useSearch()
+	const { book, q } = Route.useSearch()
+	const navigate = useNavigate({ from: Route.fullPath })
 	const activeBook = books.find((item) => item.id === book)
 
-	const shelved = activeBook
+	const inBook = activeBook
 		? userRecipes.filter((recipe) => recipe.collectionId === activeBook.id)
 		: userRecipes
+
+	const shelved = inBook.filter((recipe) => matchesRecipeQuery(recipe.title, q))
 
 	const reduce = useReducedMotion()
 
@@ -96,6 +99,25 @@ function Shelf() {
 				</h1>
 				<SaveShelfNudge recipeCount={userRecipes.length} />
 				<BookBar books={books} activeId={activeBook?.id} />
+				<label className="border-foreground bg-card focus-within:outline-kitchen-eggplant flex max-w-md items-center gap-2 border-2 px-3 py-2 shadow-sm focus-within:outline-2 focus-within:outline-offset-2">
+					<MagnifyingGlass weight="bold" aria-hidden />
+					<span className="sr-only">Search recipes</span>
+					<input
+						type="search"
+						defaultValue={q ?? ''}
+						placeholder="search recipes"
+						onChange={(event) =>
+							void navigate({
+								search: (prev) => ({
+									...prev,
+									q: event.target.value.trim() || undefined,
+								}),
+								replace: true,
+							})
+						}
+						className="w-full bg-transparent text-sm font-semibold outline-none placeholder:opacity-50"
+					/>
+				</label>
 				<div className="grid grid-cols-2 gap-4 md:auto-rows-[var(--spacing-tile)] md:grid-cols-[repeat(auto-fill,var(--spacing-tile))]">
 					<AddRecipeDialog>
 						<button
@@ -114,7 +136,12 @@ function Shelf() {
 						/>
 					))}
 				</div>
-				{activeBook && !shelved.length ? (
+				{q && inBook.length > 0 && !shelved.length ? (
+					<p className="border-foreground max-w-md border-2 border-dashed p-4 text-sm font-semibold">
+						no recipes match &ldquo;{q}&rdquo;.
+					</p>
+				) : null}
+				{activeBook && !inBook.length ? (
 					<p className="border-foreground max-w-md border-2 border-dashed p-4 text-sm font-semibold">
 						nothing in {activeBook.name} yet — open a recipe and move it here.
 					</p>

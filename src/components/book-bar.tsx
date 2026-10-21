@@ -81,7 +81,7 @@ export function BookBar({
 			<nav aria-label="Books" className="flex gap-2 overflow-x-auto pb-1">
 				<Link
 					to="/recipes"
-					search={{}}
+					search={(prev) => ({ q: prev.q })}
 					activeOptions={{ exact: true }}
 					className={cn(
 						tabClassName,
@@ -94,7 +94,7 @@ export function BookBar({
 					<Link
 						key={book.id}
 						to="/recipes"
-						search={{ book: book.id }}
+						search={(prev) => ({ ...prev, book: book.id })}
 						activeOptions={{ exact: true }}
 						className={cn(
 							tabClassName,
