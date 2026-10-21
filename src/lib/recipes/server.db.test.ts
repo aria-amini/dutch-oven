@@ -11,9 +11,13 @@ import { recipeUpdateInput } from './model'
 import {
 	createCollectionForUser,
 	createRecipeForUser,
+	deleteCollectionForUser,
 	deleteRecipeForUser,
 	getRecipeForUser,
+	listCollectionsForUser,
 	listShelfForUser,
+	moveRecipeForUser,
+	renameCollectionForUser,
 	updateRecipeForUser,
 } from './repository'
 
@@ -183,5 +187,62 @@ describe('recipe shelf', () => {
 				db,
 			),
 		).rejects.toThrow('collection not found')
+	})
+})
+
+describe('books', () => {
+	test('renames, moves recipes, and deletes without losing recipes', async ({
+		db,
+	}) => {
+		const userId = await seedUser(db)
+		const book = await createCollectionForUser(userId, 'weeknight', db)
+		const recipe = await createRecipeForUser(userId, { title: 'dal' }, db)
+
+		if (!book || !recipe) throw new Error('seed failed')
+
+		await expect(
+			renameCollectionForUser(userId, book.id, 'school nights', db),
+		).resolves.toMatchObject({ name: 'school nights' })
+		await expect(
+			moveRecipeForUser(userId, recipe.id, book.id, db),
+		).resolves.toMatchObject({ collectionId: book.id })
+
+		await expect(deleteCollectionForUser(userId, book.id, db)).resolves.toEqual(
+			{ id: book.id },
+		)
+		await expect(
+			getRecipeForUser(userId, recipe.id, db),
+		).resolves.toMatchObject({ title: 'dal', collectionId: null })
+	})
+
+	test("ignores other users' books and recipes", async ({ db }) => {
+		const userId = await seedUser(db)
+		const otherId = await seedUser(db)
+		const foreignBook = await createCollectionForUser(otherId, 'theirs', db)
+		const recipe = await createRecipeForUser(userId, { title: 'dal' }, db)
+
+		const foreignRecipe = await createRecipeForUser(
+			otherId,
+			{ title: 'stew' },
+			db,
+		)
+
+		if (!foreignBook || !recipe || !foreignRecipe) {
+			throw new Error('seed failed')
+		}
+
+		await expect(
+			moveRecipeForUser(userId, recipe.id, foreignBook.id, db),
+		).rejects.toThrow('collection not found')
+		await expect(
+			moveRecipeForUser(userId, foreignRecipe.id, null, db),
+		).resolves.toBeNull()
+		await expect(
+			renameCollectionForUser(userId, foreignBook.id, 'mine', db),
+		).resolves.toBeNull()
+		await expect(
+			deleteCollectionForUser(userId, foreignBook.id, db),
+		).resolves.toBeNull()
+		await expect(listCollectionsForUser(otherId, db)).resolves.toHaveLength(1)
 	})
 })

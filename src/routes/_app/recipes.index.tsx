@@ -3,12 +3,15 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { motion, useReducedMotion } from 'framer-motion'
 
 import { AddRecipeDialog } from '@/components/add-recipe-dialog'
+import { BookBar } from '@/components/book-bar'
 import { SaveShelfNudge } from '@/components/save-shelf-nudge'
 import type { recipes } from '@/db/schema'
+import { shelfSearch } from '@/lib/recipes/model'
 import { listShelf } from '@/lib/recipes/server'
 import { cn } from '@/lib/utils/ui'
 
 export const Route = createFileRoute('/_app/recipes/')({
+	validateSearch: shelfSearch,
 	loader: () => listShelf(),
 	component: Shelf,
 })
@@ -35,7 +38,14 @@ const dateFormat = new Intl.DateTimeFormat('en', {
 })
 
 function Shelf() {
-	const { recipes: userRecipes } = Route.useLoaderData()
+	const { recipes: userRecipes, collections: books } = Route.useLoaderData()
+	const { book } = Route.useSearch()
+	const activeBook = books.find((item) => item.id === book)
+
+	const shelved = activeBook
+		? userRecipes.filter((recipe) => recipe.collectionId === activeBook.id)
+		: userRecipes
+
 	const reduce = useReducedMotion()
 
 	const enter = reduce
@@ -85,6 +95,7 @@ function Shelf() {
 					your recipes
 				</h1>
 				<SaveShelfNudge recipeCount={userRecipes.length} />
+				<BookBar books={books} activeId={activeBook?.id} />
 				<div className="grid grid-cols-2 gap-4 md:auto-rows-[var(--spacing-tile)] md:grid-cols-[repeat(auto-fill,var(--spacing-tile))]">
 					<AddRecipeDialog>
 						<button
@@ -95,7 +106,7 @@ function Shelf() {
 							recipe
 						</button>
 					</AddRecipeDialog>
-					{userRecipes.map((recipe, index) => (
+					{shelved.map((recipe, index) => (
 						<RecipeTile
 							key={recipe.id}
 							recipe={recipe}
@@ -103,6 +114,11 @@ function Shelf() {
 						/>
 					))}
 				</div>
+				{activeBook && !shelved.length ? (
+					<p className="border-foreground max-w-md border-2 border-dashed p-4 text-sm font-semibold">
+						nothing in {activeBook.name} yet — open a recipe and move it here.
+					</p>
+				) : null}
 			</motion.div>
 		</main>
 	)

@@ -61,3 +61,25 @@ export function formatMinutes(minutes: number) {
 
 	return rest ? `${hours} hr ${rest} min` : `${hours} hr`
 }
+
+export const bookNameMax = 40
+
+export const bookName = z.string().trim().min(1).max(bookNameMax)
+
+export const bookInput = z.object({ name: bookName })
+
+export const bookIdInput = z.object({ id: z.string().min(1) })
+
+export const bookRenameInput = z.object({
+	id: z.string().min(1),
+	name: bookName,
+})
+
+export const recipeMoveInput = z.object({
+	id: z.string().min(1),
+	collectionId: z.string().min(1).nullable(),
+})
+
+export const shelfSearch = z.object({
+	book: z.string().min(1).optional().catch(undefined),
+})

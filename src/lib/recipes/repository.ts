@@ -18,11 +18,7 @@ export async function listShelfForUser(
 	database: typeof db = db,
 ) {
 	const [userCollections, userRecipes] = await Promise.all([
-		database
-			.select()
-			.from(collections)
-			.where(eq(collections.userId, userId))
-			.orderBy(asc(collections.position), asc(collections.createdAt)),
+		listCollectionsForUser(userId, database),
 		database
 			.select()
 			.from(recipes)
@@ -65,6 +61,77 @@ export async function getRecipeForUser(
 	}
 }
 
+async function assertOwnedCollection(
+	database: RecipeDatabase,
+	userId: string,
+	id: string,
+) {
+	const [owned] = await database
+		.select({ id: collections.id })
+		.from(collections)
+		.where(and(eq(collections.id, id), eq(collections.userId, userId)))
+
+	if (!owned) throw new Error('collection not found')
+}
+
+export async function listCollectionsForUser(
+	userId: string,
+	database: typeof db = db,
+) {
+	return database
+		.select()
+		.from(collections)
+		.where(eq(collections.userId, userId))
+		.orderBy(asc(collections.position), asc(collections.createdAt))
+}
+
+export async function renameCollectionForUser(
+	userId: string,
+	id: string,
+	name: string,
+	database: typeof db = db,
+) {
+	const [collection] = await database
+		.update(collections)
+		.set({ name })
+		.where(and(eq(collections.id, id), eq(collections.userId, userId)))
+		.returning()
+
+	return collection ?? null
+}
+
+export async function deleteCollectionForUser(
+	userId: string,
+	id: string,
+	database: typeof db = db,
+) {
+	const [collection] = await database
+		.delete(collections)
+		.where(and(eq(collections.id, id), eq(collections.userId, userId)))
+		.returning({ id: collections.id })
+
+	return collection ?? null
+}
+
+export async function moveRecipeForUser(
+	userId: string,
+	id: string,
+	collectionId: string | null,
+	database: typeof db = db,
+) {
+	return database.transaction(async (tx) => {
+		if (collectionId) await assertOwnedCollection(tx, userId, collectionId)
+
+		const [recipe] = await tx
+			.update(recipes)
+			.set({ collectionId })
+			.where(and(eq(recipes.id, id), eq(recipes.userId, userId)))
+			.returning()
+
+		return recipe ?? null
+	})
+}
+
 export async function createCollectionForUser(
 	userId: string,
 	name: string,
@@ -103,17 +170,7 @@ export async function createRecipeForUser(
 ) {
 	return database.transaction(async (tx) => {
 		if (input.collectionId) {
-			const [owned] = await tx
-				.select({ id: collections.id })
-				.from(collections)
-				.where(
-					and(
-						eq(collections.id, input.collectionId),
-						eq(collections.userId, userId),
-					),
-				)
-
-			if (!owned) throw new Error('collection not found')
+			await assertOwnedCollection(tx, userId, input.collectionId)
 		}
 
 		const [recipe] = await tx

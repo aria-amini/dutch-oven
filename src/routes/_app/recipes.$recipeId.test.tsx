@@ -40,6 +40,22 @@ vi.mock('@/lib/recipes/server', () => ({
 
 		if (recipeState.recipe) Object.assign(recipeState.recipe, data)
 	},
+	createBook: vi.fn(),
+	renameBook: vi.fn(),
+	deleteBook: vi.fn(),
+	listBooks: () => Promise.resolve([{ id: 'col-1', name: 'weeknight' }]),
+	moveRecipe: async ({
+		data,
+	}: {
+		data: { id: string; collectionId: string | null }
+	}) => {
+		if (recipeState.recipe) {
+			recipeState.recipe = {
+				...recipeState.recipe,
+				collectionId: data.collectionId,
+			}
+		}
+	},
 	deleteRecipe: async ({ data }: { data: { id: string } }) => {
 		updateCalls.deleted.push(data.id)
 	},
@@ -178,5 +194,21 @@ describe('recipe detail', () => {
 
 		await expect.element(screen.getByText('your recipes')).toBeVisible()
 		expect(updateCalls.deleted).toEqual(['recipe-1'])
+	})
+
+	test('moves the recipe into a book', async () => {
+		const { screen } = await renderRoute({
+			path: '/recipes/recipe-1',
+			session,
+		})
+
+		await screen
+			.getByLabelText('book', { exact: true })
+			.selectOptions('weeknight')
+
+		await expect.poll(() => recipeState.recipe?.collectionId).toBe('col-1')
+		await expect
+			.element(screen.getByLabelText('book', { exact: true }))
+			.toHaveDisplayValue('weeknight')
 	})
 })

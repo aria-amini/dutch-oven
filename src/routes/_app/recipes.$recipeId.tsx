@@ -9,6 +9,7 @@ import {
 import { useState } from 'react'
 import { toast } from 'sonner'
 
+import type { collections } from '@/db/schema'
 import {
 	formatMinutes,
 	recipeMinutesMax,
@@ -17,17 +18,26 @@ import {
 	recipeTitleMax,
 	recipeUpdateInput,
 } from '@/lib/recipes/model'
-import { deleteRecipe, getRecipe, updateRecipe } from '@/lib/recipes/server'
+import {
+	deleteRecipe,
+	getRecipe,
+	listBooks,
+	moveRecipe,
+	updateRecipe,
+} from '@/lib/recipes/server'
 import { formField } from '@/lib/utils/form'
 import { cn } from '@/lib/utils/ui'
 
 export const Route = createFileRoute('/_app/recipes/$recipeId')({
 	loader: async ({ params }) => {
-		const recipe = await getRecipe({ data: { id: params.recipeId } })
+		const [recipe, books] = await Promise.all([
+			getRecipe({ data: { id: params.recipeId } }),
+			listBooks(),
+		])
 
 		if (!recipe) throw notFound()
 
-		return recipe
+		return { recipe, books }
 	},
 	component: RecipeDetail,
 })
@@ -57,8 +67,10 @@ function hostOf(url: string) {
 
 type Recipe = NonNullable<Awaited<ReturnType<typeof getRecipe>>>
 
+type Book = typeof collections.$inferSelect
+
 function RecipeDetail() {
-	const recipe = Route.useLoaderData()
+	const { recipe, books } = Route.useLoaderData()
 	const [editing, setEditing] = useState(false)
 
 	return (
@@ -74,7 +86,11 @@ function RecipeDetail() {
 				{editing ? (
 					<RecipeEditor recipe={recipe} onDone={() => setEditing(false)} />
 				) : (
-					<RecipeView recipe={recipe} onEdit={() => setEditing(true)} />
+					<RecipeView
+						recipe={recipe}
+						books={books}
+						onEdit={() => setEditing(true)}
+					/>
 				)}
 			</div>
 		</main>
@@ -83,9 +99,11 @@ function RecipeDetail() {
 
 function RecipeView({
 	recipe,
+	books,
 	onEdit,
 }: {
 	recipe: Recipe
+	books: Book[]
 	onEdit: () => void
 }) {
 	return (
@@ -121,7 +139,7 @@ function RecipeView({
 					</a>
 				) : null}
 			</p>
-			<div className="mt-6">
+			<div className="mt-6 flex flex-wrap items-center gap-3">
 				<button
 					type="button"
 					className="border-foreground bg-background focus-visible:outline-kitchen-eggplant border-2 px-3 py-2 text-xs font-bold uppercase shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2"
@@ -129,6 +147,7 @@ function RecipeView({
 				>
 					edit
 				</button>
+				{books.length ? <BookPicker recipe={recipe} books={books} /> : null}
 			</div>
 			{recipe.imageUrl ? (
 				<img
@@ -199,6 +218,48 @@ function RecipeView({
 				</section>
 			) : null}
 		</>
+	)
+}
+
+function BookPicker({ recipe, books }: { recipe: Recipe; books: Book[] }) {
+	const router = useRouter()
+	const [pending, setPending] = useState(false)
+
+	const move = async (collectionId: string) => {
+		setPending(true)
+
+		try {
+			await moveRecipe({
+				data: { id: recipe.id, collectionId: collectionId || null },
+			})
+			await router.invalidate()
+		} catch {
+			toast.error("couldn't move that — try again")
+		} finally {
+			setPending(false)
+		}
+	}
+
+	return (
+		<div className="flex items-center gap-2">
+			<label htmlFor="recipe-book" className="text-xs font-bold uppercase">
+				book
+			</label>
+			<select
+				id="recipe-book"
+				value={recipe.collectionId ?? ''}
+				disabled={pending}
+				onChange={(event) => void move(event.target.value)}
+				className="border-foreground bg-card focus-visible:outline-kitchen-eggplant border-2 px-2 py-2 text-xs font-bold uppercase focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50"
+			>
+				<option value="">no book</option>
+				{books.map((book) => (
+					<option key={book.id} value={book.id}>
+						{book.name}
+					</option>
+				))}
+			</select>
+		</div>
 	)
 }
 
