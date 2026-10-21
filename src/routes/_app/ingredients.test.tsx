@@ -49,7 +49,7 @@ const session = {
 	session: { id: 'session-1', token: 'token' },
 }
 
-describe('pantry', () => {
+describe('ingredients', () => {
 	beforeEach(() => {
 		state.items = [
 			{
@@ -65,7 +65,7 @@ describe('pantry', () => {
 	})
 
 	test('shows location inventory and the empty state', async () => {
-		const { screen } = await renderRoute({ path: '/pantry', session })
+		const { screen } = await renderRoute({ path: '/ingredients', session })
 		await expect
 			.element(screen.getByRole('link', { name: 'carrots, quantity 2' }))
 			.toBeVisible()
@@ -80,7 +80,7 @@ describe('pantry', () => {
 
 	test('adds a custom ingredient with a quantity and location', async () => {
 		const { screen } = await renderRoute({
-			path: '/pantry/new?loc=freezer',
+			path: '/ingredients/new?loc=freezer',
 			session,
 		})
 
@@ -100,13 +100,11 @@ describe('pantry', () => {
 	})
 
 	test('updates and removes the selected item on desktop and mobile', async () => {
-		const { screen } = await renderRoute({ path: '/pantry', session })
+		const { screen } = await renderRoute({ path: '/ingredients', session })
 		await screen.getByRole('link', { name: 'carrots, quantity 2' }).click()
 		await page.getByRole('button', { name: 'Increase quantity' }).click()
 		await expect.poll(() => state.items[0]?.quantity).toBe(3)
-		await page
-			.getByRole('button', { name: 'use it up — remove from pantry' })
-			.click()
+		await page.getByRole('button', { name: 'use it up — remove it' }).click()
 		await expect.poll(() => state.items.length).toBe(0)
 	})
 })

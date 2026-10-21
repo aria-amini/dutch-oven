@@ -25,7 +25,7 @@ import {
 import { resolveSpriteSrc } from '@/lib/pantry/sprites'
 import { cn } from '@/lib/utils/ui'
 
-export const Route = createFileRoute('/_app/pantry/')({
+export const Route = createFileRoute('/_app/ingredients/')({
 	validateSearch: pantrySearch,
 	loader: () => listPantry(),
 	component: Pantry,
@@ -76,7 +76,7 @@ function Pantry() {
 			<div className="mx-auto flex max-w-6xl flex-col gap-5 p-6 md:p-10">
 				<header className="relative pr-14">
 					<h1 className="text-4xl font-extrabold tracking-tight md:text-5xl">
-						what&apos;s in your pantry?
+						what&apos;s in your kitchen?
 					</h1>
 					<Link
 						to="/"
@@ -94,7 +94,7 @@ function Pantry() {
 						return (
 							<Link
 								key={location.id}
-								to="/pantry"
+								to="/ingredients"
 								search={{ loc: location.id }}
 								aria-current={active ? 'true' : undefined}
 								className={cn(
@@ -125,7 +125,7 @@ function Pantry() {
 								/>
 							))}
 							<Link
-								to="/pantry/new"
+								to="/ingredients/new"
 								search={{ loc: activeLocation?.id ?? 'fridge' }}
 								aria-label="Add an ingredient"
 								className="border-foreground/40 hover:border-foreground hover:text-foreground text-foreground/50 focus-visible:outline-kitchen-eggplant flex aspect-square items-center justify-center border-2 border-dashed transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
@@ -154,7 +154,7 @@ function Pantry() {
 				<Dialog.Root
 					open
 					onOpenChange={(open) => {
-						if (!open) void navigate({ to: '/pantry', search: { loc } })
+						if (!open) void navigate({ to: '/ingredients', search: { loc } })
 					}}
 				>
 					<Dialog.Portal>
@@ -202,7 +202,7 @@ function Slot({
 }) {
 	return (
 		<Link
-			to="/pantry"
+			to="/ingredients"
 			search={{ loc: location, item: item.id }}
 			aria-label={`${item.name}, quantity ${item.quantity}`}
 			aria-current={selected ? 'true' : undefined}
@@ -258,7 +258,7 @@ function DetailPanel({
 		try {
 			await deletePantryItem({ data: { id: itemId } })
 			await navigate({
-				to: '/pantry',
+				to: '/ingredients',
 				search: { loc: location },
 			})
 			await router.invalidate()
@@ -328,7 +328,7 @@ function DetailPanel({
 						onClick={() => remove(item.id, item.location)}
 						className="focus-visible:outline-kitchen-eggplant mt-1 text-xs font-bold underline underline-offset-4 focus-visible:outline-2 disabled:opacity-40"
 					>
-						use it up — remove from pantry
+						use it up — remove it
 					</button>
 				</div>
 			) : (

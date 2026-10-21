@@ -36,7 +36,9 @@ export function formatShelfStats({ recipes, pantryItems }: ShelfStats) {
 		parts.push(`${recipes} ${recipes === 1 ? 'recipe' : 'recipes'}`)
 
 	if (pantryItems > 0)
-		parts.push(`${pantryItems} pantry ${pantryItems === 1 ? 'item' : 'items'}`)
+		parts.push(
+			`${pantryItems} ${pantryItems === 1 ? 'ingredient' : 'ingredients'}`,
+		)
 
 	return parts.join(' and ')
 }

@@ -6,7 +6,7 @@ vi.mock('@/lib/shelf/server', () => ({
 }))
 
 describe('guest signup', () => {
-	test('explains that recipes and pantry items transfer to the new account', async () => {
+	test('explains that recipes and ingredients transfer to the new account', async () => {
 		const { screen } = await renderRoute({
 			path: '/auth/signup',
 			session: {
@@ -23,7 +23,7 @@ describe('guest signup', () => {
 		await expect
 			.element(
 				screen.getByText(
-					'Keep your 2 recipes and 3 pantry items on any device when you create an account.',
+					'Keep your 2 recipes and 3 ingredients on any device when you create an account.',
 				),
 			)
 			.toBeVisible()

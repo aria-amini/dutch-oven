@@ -1,22 +1,13 @@
 import { renderRoute } from '@tests/support/render/route'
 import { beforeEach, describe, expect, test, vi } from 'vite-plus/test'
+import { page } from 'vitest/browser'
 
-type Recipe = {
-	id: string
-	userId: string
-	collectionId: string | null
-	title: string
-	imageUrl: string | null
-	createdAt: Date
-}
+import type { collections } from '@/db/schema'
+import type { listShelf } from '@/lib/recipes/server'
 
-type Collection = {
-	id: string
-	userId: string
-	name: string
-	position: number
-	createdAt: Date
-}
+type Recipe = Awaited<ReturnType<typeof listShelf>>['recipes'][number]
+
+type Collection = typeof collections.$inferSelect
 
 type ShelfState = {
 	recipes: Recipe[]
@@ -58,10 +49,54 @@ vi.mock('@/lib/recipes/server', () => ({
 			collectionId: data.collectionId ?? null,
 			title: data.title,
 			imageUrl: data.imageUrl ?? null,
+			sourceUrl: null,
+			servings: null,
+			totalMinutes: null,
+			notes: null,
 			createdAt: new Date(),
+			cookCount: 0,
+			lastCookedAt: null,
 		})
 	},
+	listBooks: () => Promise.resolve(shelfState.collections),
+	createBook: async ({ data }: { data: { name: string } }) => {
+		const book = {
+			id: `col-${shelfState.collections.length + 1}`,
+			userId: 'user-1',
+			name: data.name,
+			position: shelfState.collections.length,
+			createdAt: new Date(),
+		}
+
+		shelfState.collections = [...shelfState.collections, book]
+
+		return book
+	},
+	renameBook: async ({ data }: { data: { id: string; name: string } }) => {
+		shelfState.collections = shelfState.collections.map((item) =>
+			item.id === data.id ? { ...item, name: data.name } : item,
+		)
+	},
+	deleteBook: async ({ data }: { data: { id: string } }) => {
+		shelfState.collections = shelfState.collections.filter(
+			(item) => item.id !== data.id,
+		)
+
+		shelfState.recipes = shelfState.recipes.map((recipe) =>
+			recipe.collectionId === data.id
+				? { ...recipe, collectionId: null }
+				: recipe,
+		)
+	},
 }))
+
+const weeknight: Collection = {
+	id: 'col-1',
+	userId: 'user-1',
+	name: 'weeknight',
+	position: 0,
+	createdAt: new Date(),
+}
 
 const testSession = {
 	user: { id: 'user-1', name: 'Test User', email: 'test@example.com' },
@@ -74,7 +109,13 @@ const misoButterPasta: Recipe = {
 	collectionId: 'col-1',
 	title: 'miso butter pasta',
 	imageUrl: null,
+	sourceUrl: null,
+	servings: null,
+	totalMinutes: null,
+	notes: null,
 	createdAt: new Date(),
+	cookCount: 0,
+	lastCookedAt: null,
 }
 
 const dal: Recipe = {
@@ -83,7 +124,13 @@ const dal: Recipe = {
 	collectionId: null,
 	title: 'dal',
 	imageUrl: null,
+	sourceUrl: null,
+	servings: null,
+	totalMinutes: null,
+	notes: null,
 	createdAt: new Date(),
+	cookCount: 0,
+	lastCookedAt: null,
 }
 
 describe('recipes shelf', () => {
@@ -116,6 +163,158 @@ describe('recipes shelf', () => {
 		await expect.element(screen.getByText('dal')).toBeVisible()
 	})
 
+	test('filters the shelf by book', async () => {
+		shelfState.recipes = [misoButterPasta, dal]
+		shelfState.collections = [{ ...weeknight }]
+
+		const { screen } = await renderRoute({
+			path: '/recipes',
+			session: testSession,
+		})
+
+		await screen.getByRole('link', { name: 'weeknight' }).click()
+
+		await expect
+			.element(screen.getByRole('link', { name: 'all' }))
+			.not.toHaveAttribute('aria-current')
+
+		await expect.element(screen.getByText('miso butter pasta')).toBeVisible()
+		await expect.element(screen.getByText('dal')).not.toBeInTheDocument()
+	})
+
+	test('searches recipes by name inside the open book', async () => {
+		shelfState.recipes = [
+			misoButterPasta,
+			dal,
+			{
+				...dal,
+				id: 'recipe-3',
+				collectionId: 'col-1',
+				title: 'Red Lentil Dal',
+			},
+		]
+		shelfState.collections = [{ ...weeknight }]
+
+		const { screen } = await renderRoute({
+			path: '/recipes',
+			session: testSession,
+		})
+
+		await screen.getByLabelText('Search recipes').fill('dal')
+		await expect.element(screen.getByText('Red Lentil Dal')).toBeVisible()
+		await expect.element(screen.getByText('dal', { exact: true })).toBeVisible()
+		await expect
+			.element(screen.getByText('miso butter pasta'))
+			.not.toBeInTheDocument()
+
+		await screen.getByRole('link', { name: 'weeknight' }).click()
+		await expect.element(screen.getByText('Red Lentil Dal')).toBeVisible()
+		await expect
+			.element(screen.getByText('dal', { exact: true }))
+			.not.toBeInTheDocument()
+
+		await screen.getByLabelText('Search recipes').fill('ramen')
+		await expect
+			.element(screen.getByText('no recipes match', { exact: false }))
+			.toBeVisible()
+	})
+
+	test('sorts by most cooked and badges cooked recipes', async () => {
+		shelfState.recipes = [
+			misoButterPasta,
+			{ ...dal, cookCount: 3, lastCookedAt: new Date() },
+		]
+
+		const { screen } = await renderRoute({
+			path: '/recipes',
+			session: testSession,
+		})
+
+		const titles = () =>
+			screen
+				.getByRole('heading', { level: 3 })
+				.elements()
+				.map((element) => element.textContent)
+
+		await expect.poll(titles).toEqual(['miso butter pasta', 'dal'])
+		await expect.element(screen.getByTitle('cooked 3 times')).toBeVisible()
+
+		await screen.getByRole('link', { name: 'most cooked' }).click()
+		await expect.poll(titles).toEqual(['dal', 'miso butter pasta'])
+	})
+
+	test('starts a meal from regulars, long-ago cooks, and untried picks', async () => {
+		shelfState.recipes = [
+			{ ...dal, cookCount: 4, lastCookedAt: new Date() },
+			misoButterPasta,
+		]
+
+		const { screen, router } = await renderRoute({
+			path: '/recipes',
+			session: testSession,
+		})
+
+		await screen.getByRole('button', { name: 'start a meal' }).click()
+
+		const dialog = page.getByRole('dialog', { name: "what's tonight?" })
+		await expect.element(dialog.getByText('your regulars')).toBeVisible()
+		await expect.element(dialog.getByText("haven't tried yet")).toBeVisible()
+		await expect
+			.element(dialog.getByText('been a while'))
+			.not.toBeInTheDocument()
+
+		await dialog.getByRole('link', { name: /miso butter pasta/ }).click()
+		await expect
+			.poll(() => router.state.location.pathname)
+			.toBe('/recipes/recipe-1')
+	})
+
+	test('adds a book and opens it', async () => {
+		shelfState.recipes = [dal]
+
+		const { screen } = await renderRoute({
+			path: '/recipes',
+			session: testSession,
+		})
+
+		await screen.getByRole('button', { name: 'book' }).click()
+		await screen.getByLabelText('Book name').fill('slow sunday')
+		await screen.getByRole('button', { name: 'add' }).click()
+
+		await expect
+			.element(screen.getByRole('link', { name: 'slow sunday' }))
+			.toHaveAttribute('aria-current', 'page')
+		await expect
+			.element(screen.getByText('nothing in slow sunday yet', { exact: false }))
+			.toBeVisible()
+	})
+
+	test('renames a book and deletes it without losing recipes', async () => {
+		shelfState.recipes = [{ ...misoButterPasta }, dal]
+		shelfState.collections = [{ ...weeknight }]
+
+		const { screen } = await renderRoute({
+			path: '/recipes?book=col-1',
+			session: testSession,
+		})
+
+		await screen.getByRole('button', { name: 'rename book' }).click()
+		await screen.getByLabelText('Book name').fill('school nights')
+		await screen.getByRole('button', { name: 'rename' }).click()
+		await expect
+			.element(screen.getByRole('link', { name: 'school nights' }))
+			.toBeVisible()
+
+		await screen.getByRole('button', { name: 'delete book' }).click()
+		await screen.getByRole('button', { name: 'really delete' }).click()
+
+		await expect
+			.element(screen.getByRole('link', { name: 'school nights' }))
+			.not.toBeInTheDocument()
+		await expect.element(screen.getByText('miso butter pasta')).toBeVisible()
+		await expect.element(screen.getByText('dal')).toBeVisible()
+	})
+
 	test('offers the add fork when adding from the shelf', async () => {
 		shelfState.recipes = [misoButterPasta, dal]
 
@@ -125,9 +324,9 @@ describe('recipes shelf', () => {
 		})
 
 		await screen.getByRole('button', { name: 'recipe' }).click()
-		await expect.element(screen.getByText('from a link')).toBeVisible()
-		await expect.element(screen.getByText('from a note')).toBeVisible()
-		await expect.element(screen.getByText('my own two hands')).toBeVisible()
+		await expect.element(screen.getByText('paste a url')).toBeVisible()
+		await expect.element(screen.getByText('import ios notes')).toBeVisible()
+		await expect.element(screen.getByText('write new recipe')).toBeVisible()
 	})
 
 	test('turns a pasted note into a reviewable draft and saves it', async () => {
@@ -139,7 +338,7 @@ describe('recipes shelf', () => {
 		})
 
 		await screen.getByRole('button', { name: 'recipe' }).click()
-		await screen.getByText('from a note').click()
+		await screen.getByText('import ios notes').click()
 		await screen
 			.getByRole('textbox', { name: 'Recipe note' })
 			.fill('Dal\n\nIngredients\n• 1 cup lentils\n• 1 onion\n\nMethod\nSimmer.')
@@ -209,10 +408,10 @@ describe('recipes shelf', () => {
 		})
 
 		await screen.getByRole('button', { name: 'recipe' }).click()
-		await expect.element(screen.getByText('from a link')).toBeVisible()
+		await expect.element(screen.getByText('paste a url')).toBeVisible()
 		await screen.getByRole('button', { name: 'Close' }).click()
 		await expect
-			.element(screen.getByText('from a link'))
+			.element(screen.getByText('paste a url'))
 			.not.toBeInTheDocument()
 	})
 })

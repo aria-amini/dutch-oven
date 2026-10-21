@@ -46,6 +46,10 @@ export const recipes = snakeCase.table(
 		collectionId: text(),
 		title: text().notNull(),
 		imageUrl: text(),
+		sourceUrl: text(),
+		servings: integer(),
+		totalMinutes: integer(),
+		notes: text(),
 		createdAt: timestamp({ withTimezone: true }).notNull(),
 	},
 	(table) => [

@@ -2,9 +2,9 @@ import { Dialog as DialogPrimitive } from '@base-ui/react/dialog'
 import {
 	ArrowLeft,
 	ArrowRight,
-	ChefHat,
 	LinkSimple,
 	Note,
+	Plus,
 	X,
 } from '@phosphor-icons/react'
 import { useNavigate, useRouter } from '@tanstack/react-router'
@@ -16,7 +16,6 @@ import { formField } from '@/lib/utils/form'
 import { cn } from '@/lib/utils/ui'
 
 const descriptions = {
-	choose: "where's it coming from?",
 	import: 'paste the link, we pull it in',
 	note: 'copy a note, paste it here',
 }
@@ -25,36 +24,29 @@ function ChoiceButton({
 	icon,
 	iconClassName,
 	title,
-	hint,
 	onClick,
 }: {
 	icon: React.ReactNode
 	iconClassName: string
 	title: string
-	hint: string
 	onClick: () => void
 }) {
 	return (
 		<button
 			type="button"
 			onClick={onClick}
-			className="border-foreground bg-background focus-visible:outline-kitchen-eggplant flex items-center gap-3 border-2 px-3 py-2.5 text-left shadow-sm transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2"
+			className="border-foreground bg-background focus-visible:outline-kitchen-eggplant flex items-center gap-3 border-2 px-2.5 py-2 text-left shadow-sm transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2"
 		>
 			<span
 				className={cn(
-					'border-foreground grid size-10 shrink-0 place-items-center border-2',
+					'border-foreground grid size-8 shrink-0 place-items-center border-2',
 					iconClassName,
 				)}
 			>
 				{icon}
 			</span>
-			<span className="flex-1">
-				<span className="block text-base leading-tight font-extrabold">
-					{title}
-				</span>
-				<span className="text-muted-foreground text-xs font-semibold">
-					{hint}
-				</span>
+			<span className="flex-1 text-sm leading-tight font-extrabold">
+				{title}
 			</span>
 			<ArrowRight size={16} weight="bold" aria-hidden />
 		</button>
@@ -84,14 +76,21 @@ export function AddRecipeDialog({
 			<DialogPrimitive.Portal>
 				<DialogPrimitive.Backdrop className="bg-foreground/40 fixed inset-0 isolate z-50" />
 				<DialogPrimitive.Popup className="border-foreground bg-card text-foreground fixed top-1/2 left-1/2 z-50 w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 border-2 p-6 shadow-lg outline-none sm:max-w-md">
-					<div className="mb-5 flex items-start justify-between gap-4">
+					<div
+						className={cn(
+							'flex items-start justify-between gap-4',
+							step === 'choose' ? 'mb-4' : 'mb-5',
+						)}
+					>
 						<div>
 							<DialogPrimitive.Title className="text-2xl font-extrabold tracking-tight">
 								add a recipe
 							</DialogPrimitive.Title>
-							<DialogPrimitive.Description className="text-muted-foreground mt-1 text-sm font-semibold">
-								{descriptions[step]}
-							</DialogPrimitive.Description>
+							{step === 'choose' ? null : (
+								<DialogPrimitive.Description className="text-muted-foreground mt-1 text-sm font-semibold">
+									{descriptions[step]}
+								</DialogPrimitive.Description>
+							)}
 						</div>
 						<DialogPrimitive.Close
 							className="border-foreground bg-background focus-visible:outline-kitchen-eggplant -mt-1 -mr-1 border-2 p-1.5 focus-visible:outline-2 focus-visible:outline-offset-2"
@@ -101,26 +100,23 @@ export function AddRecipeDialog({
 						</DialogPrimitive.Close>
 					</div>
 					{step === 'choose' ? (
-						<div className="flex flex-col gap-3">
+						<div className="flex flex-col gap-2">
 							<ChoiceButton
 								icon={<LinkSimple size={18} weight="bold" aria-hidden />}
 								iconClassName="bg-kitchen-eggplant text-white"
-								title="from a link"
-								hint="paste a url, we pull it in"
+								title="paste a url"
 								onClick={() => setStep('import')}
 							/>
 							<ChoiceButton
 								icon={<Note size={18} weight="bold" aria-hidden />}
 								iconClassName="bg-kitchen-yolk text-black"
-								title="from a note"
-								hint="paste one from ios notes"
+								title="import ios notes"
 								onClick={() => setStep('note')}
 							/>
 							<ChoiceButton
-								icon={<ChefHat size={18} weight="bold" aria-hidden />}
+								icon={<Plus size={18} weight="bold" aria-hidden />}
 								iconClassName="bg-kitchen-tomato text-black"
-								title="my own two hands"
-								hint="write it yourself"
+								title="write new recipe"
 								onClick={() => {
 									setOpen(false)
 									void navigate({ to: '/recipes/new' })

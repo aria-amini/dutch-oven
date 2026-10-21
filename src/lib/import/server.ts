@@ -27,6 +27,7 @@ export const importRecipe = createServerFn({ method: 'POST' })
 			const input = recipeInput.safeParse({
 				title: clampRecipeTitle(page.recipe.title),
 				imageUrl: page.recipe.imageUrl,
+				sourceUrl: data.url,
 				ingredients: page.recipe.ingredients.map(({ raw }) => raw),
 				steps: page.recipe.steps,
 			})
