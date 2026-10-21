@@ -12,7 +12,7 @@ describe('pantry schema parity', () => {
 
 	test.each([
 		{ name: ' carrots ', quantity: 2, location: 'fridge' },
-		{ name: 'salt', quantity: 9999, location: 'spice-rack', spriteKey: 'salt' },
+		{ name: 'salt', quantity: 9999, location: 'pantry', spriteKey: 'salt' },
 		{ name: '', quantity: 1, location: 'fridge' },
 		{ name: 'salt', quantity: 0, location: 'fridge' },
 		{ name: 'salt', quantity: 10000, location: 'fridge' },

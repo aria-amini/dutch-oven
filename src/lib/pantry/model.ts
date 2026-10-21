@@ -1,11 +1,6 @@
 import { z } from 'zod'
 
-export const pantryLocations = [
-	'fridge',
-	'freezer',
-	'pantry-shelf',
-	'spice-rack',
-] as const
+export const pantryLocations = ['fridge', 'freezer', 'pantry'] as const
 
 export const pantryQuantityMax = 9999
 
@@ -30,6 +25,5 @@ export const pantrySearch = z.object({
 export const pantryLocationLabels: Record<PantryLocation, string> = {
 	fridge: 'fridge',
 	freezer: 'freezer',
-	'pantry-shelf': 'pantry shelf',
-	'spice-rack': 'spice rack',
+	pantry: 'pantry',
 }

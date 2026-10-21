@@ -39,7 +39,7 @@ describe('pantry', () => {
 
 		await createPantryItemForUser(
 			userId,
-			{ name: 'salt', quantity: 1, location: 'spice-rack' },
+			{ name: 'salt', quantity: 1, location: 'pantry' },
 			db,
 		)
 		expect(carrots?.quantity).toBe(7)
@@ -47,7 +47,7 @@ describe('pantry', () => {
 		const items = await listPantryForUser(userId, db)
 		expect(items).toHaveLength(2)
 		expect(items[0]?.location).toBe('fridge')
-		expect(items[1]?.location).toBe('spice-rack')
+		expect(items[1]?.location).toBe('pantry')
 	})
 
 	test('rejects quantities outside the supported range', async ({ db }) => {
