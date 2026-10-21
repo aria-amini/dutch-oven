@@ -9,6 +9,7 @@ import { user } from '@/db/schema'
 
 import {
 	createPantryItemForUser,
+	createPantryItemsForUser,
 	deletePantryItemForUser,
 	listPantryForUser,
 	setPantryItemQuantityForUser,
@@ -75,6 +76,40 @@ describe('pantry', () => {
 				setPantryItemQuantityForUser(userId, item.id, quantity, db),
 			).rejects.toThrow()
 		}
+	})
+
+	test('adds many items in one batch', async ({ db }) => {
+		const userId = await seedUser(db)
+
+		const created = await createPantryItemsForUser(
+			userId,
+			[
+				{ name: 'cumin', quantity: 1, location: 'pantry' },
+				{ name: ' paprika ', quantity: 1, location: 'pantry' },
+				{ name: 'eggs', quantity: 12, location: 'fridge' },
+			],
+			db,
+		)
+
+		expect(created.map((item) => item.name)).toEqual([
+			'cumin',
+			'paprika',
+			'eggs',
+		])
+		expect(await listPantryForUser(userId, db)).toHaveLength(3)
+
+		await expect(createPantryItemsForUser(userId, [], db)).rejects.toThrow()
+		await expect(
+			createPantryItemsForUser(
+				userId,
+				[
+					{ name: 'salt', quantity: 1, location: 'pantry' },
+					{ name: '', quantity: 1, location: 'pantry' },
+				],
+				db,
+			),
+		).rejects.toThrow()
+		expect(await listPantryForUser(userId, db)).toHaveLength(3)
 	})
 
 	test('scopes the pantry to the user', async ({ db }) => {

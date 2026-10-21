@@ -4,6 +4,8 @@ export const pantryLocations = ['fridge', 'freezer', 'pantry'] as const
 
 export const pantryQuantityMax = 9999
 
+export const pantryBulkMax = 100
+
 export const pantryFields = {
 	name: z.string().trim().min(1).max(80),
 	quantity: z.number().int().min(1).max(pantryQuantityMax),
