@@ -1,10 +1,11 @@
-import { MagnifyingGlass, Plus } from '@phosphor-icons/react'
+import { ForkKnife, MagnifyingGlass, Plus } from '@phosphor-icons/react'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { motion, useReducedMotion } from 'framer-motion'
 
 import { AddRecipeDialog } from '@/components/add-recipe-dialog'
 import { BookBar } from '@/components/book-bar'
 import { SaveShelfNudge } from '@/components/save-shelf-nudge'
+import { StartMealDialog } from '@/components/start-meal-dialog'
 import {
 	matchesRecipeQuery,
 	shelfSearch,
@@ -102,9 +103,20 @@ function Shelf() {
 	return (
 		<main className="flex-1">
 			<motion.div {...enter} className="flex flex-col gap-6 p-6 md:p-10">
-				<h1 className="text-4xl font-extrabold tracking-tight md:text-5xl">
-					your recipes
-				</h1>
+				<header className="flex flex-wrap items-center justify-between gap-4">
+					<h1 className="text-4xl font-extrabold tracking-tight md:text-5xl">
+						your recipes
+					</h1>
+					<StartMealDialog recipes={userRecipes}>
+						<button
+							type="button"
+							className="border-foreground bg-kitchen-yolk focus-visible:outline-kitchen-eggplant inline-flex items-center gap-2 border-2 px-4 py-2.5 text-sm font-extrabold uppercase shadow-md transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-2 focus-visible:outline-offset-2"
+						>
+							<ForkKnife size={18} weight="bold" aria-hidden />
+							start a meal
+						</button>
+					</StartMealDialog>
+				</header>
 				<SaveShelfNudge recipeCount={userRecipes.length} />
 				<BookBar books={books} activeId={activeBook?.id} />
 				<div className="flex flex-wrap items-center gap-3">

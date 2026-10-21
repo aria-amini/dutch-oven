@@ -120,3 +120,27 @@ export function sortShelf<T extends Rankable>(
 			newest(a, b),
 	)
 }
+
+const mealPickCount = 3
+
+export function suggestMeals<T extends Rankable & { id: string }>(
+	recipes: T[],
+) {
+	const cooked = recipes.filter((recipe) => recipe.cookCount > 0)
+	const regulars = sortShelf(cooked, 'most-cooked').slice(0, mealPickCount)
+	const regularIds = new Set(regulars.map((recipe) => recipe.id))
+
+	const longAgo = cooked
+		.filter((recipe) => !regularIds.has(recipe.id))
+		.sort(
+			(a, b) =>
+				(a.lastCookedAt?.getTime() ?? 0) - (b.lastCookedAt?.getTime() ?? 0),
+		)
+		.slice(0, mealPickCount)
+
+	const untried = sortShelf(
+		recipes.filter((recipe) => recipe.cookCount === 0),
+	).slice(0, mealPickCount)
+
+	return { regulars, longAgo, untried }
+}

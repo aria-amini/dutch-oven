@@ -1,5 +1,6 @@
 import { renderRoute } from '@tests/support/render/route'
 import { beforeEach, describe, expect, test, vi } from 'vite-plus/test'
+import { page } from 'vitest/browser'
 
 import type { collections } from '@/db/schema'
 import type { listShelf } from '@/lib/recipes/server'
@@ -240,6 +241,32 @@ describe('recipes shelf', () => {
 
 		await screen.getByRole('link', { name: 'most cooked' }).click()
 		await expect.poll(titles).toEqual(['dal', 'miso butter pasta'])
+	})
+
+	test('starts a meal from regulars, long-ago cooks, and untried picks', async () => {
+		shelfState.recipes = [
+			{ ...dal, cookCount: 4, lastCookedAt: new Date() },
+			misoButterPasta,
+		]
+
+		const { screen, router } = await renderRoute({
+			path: '/recipes',
+			session: testSession,
+		})
+
+		await screen.getByRole('button', { name: 'start a meal' }).click()
+
+		const dialog = page.getByRole('dialog', { name: "what's tonight?" })
+		await expect.element(dialog.getByText('your regulars')).toBeVisible()
+		await expect.element(dialog.getByText("haven't tried yet")).toBeVisible()
+		await expect
+			.element(dialog.getByText('been a while'))
+			.not.toBeInTheDocument()
+
+		await dialog.getByRole('link', { name: /miso butter pasta/ }).click()
+		await expect
+			.poll(() => router.state.location.pathname)
+			.toBe('/recipes/recipe-1')
 	})
 
 	test('adds a book and opens it', async () => {
