@@ -6,10 +6,19 @@ import {
 	HouseIcon,
 	SignOutIcon,
 	SquaresFourIcon,
+	UserIcon,
 } from '@phosphor-icons/react'
-import { Link, useNavigate, useRouterState } from '@tanstack/react-router'
+import {
+	Link,
+	useNavigate,
+	useRouter,
+	useRouterState,
+} from '@tanstack/react-router'
+import { useEffect, useState } from 'react'
+import { toast } from 'sonner'
 
 import { authClient } from '@/lib/auth/client'
+import { useShelfStats } from '@/lib/use-shelf-stats'
 import { cn } from '@/lib/utils/ui'
 
 const navItems = [
@@ -32,7 +41,6 @@ const navItems = [
 		icon: GearIcon,
 		to: '/settings' as const,
 		match: ['/settings', '/profile'],
-		bottom: true,
 	},
 ]
 
@@ -40,10 +48,6 @@ export function AppNav() {
 	const pathname = useRouterState({
 		select: (state) => state.location.pathname,
 	})
-
-	const session = authClient.useSession()
-	const user = session.data?.user
-	const isGuest = Boolean(user?.isAnonymous)
 
 	return (
 		<nav
@@ -60,7 +64,6 @@ export function AppNav() {
 				<NavItem
 					key={item.label}
 					{...item}
-					bottom={'bottom' in item && item.bottom && !user}
 					active={
 						'match' in item &&
 						item.match?.some(
@@ -70,47 +73,119 @@ export function AppNav() {
 					}
 				/>
 			))}
-			{isGuest ? <GuestSticker /> : null}
-			{user && !isGuest ? <AccountControls name={user.name} /> : null}
+			<AccountSection />
 		</nav>
 	)
 }
 
-function AccountControls({ name }: { name: string }) {
+function AccountSection() {
+	const session = authClient.useSession()
+	const router = useRouter()
+	const refetchSession = session.refetch
+	useEffect(
+		() =>
+			router.subscribe('onResolved', () => {
+				void refetchSession()
+			}),
+		[router, refetchSession],
+	)
 	const navigate = useNavigate()
+	const [signingOut, setSigningOut] = useState(false)
+	const user = session.data?.user
+	const stats = useShelfStats(user?.isAnonymous ? user.id : undefined)
 
 	const signOut = async () => {
-		await authClient.signOut()
-		await navigate({ to: '/' })
+		setSigningOut(true)
+
+		try {
+			const { error } = await authClient.signOut()
+
+			if (error) throw new Error(error.message)
+			await navigate({ to: '/' })
+		} catch {
+			toast.error('Could not sign out. Try again.')
+		} finally {
+			setSigningOut(false)
+		}
+	}
+
+	const baseClassName =
+		'order-first flex shrink-0 items-center gap-2.5 border-2 px-2.5 py-2 text-xs font-bold tracking-wide whitespace-nowrap uppercase md:order-none md:mt-auto md:w-full'
+
+	if (session.isPending) {
+		return (
+			<div
+				aria-hidden
+				className={cn(baseClassName, 'animate-pulse border-transparent')}
+			>
+				<UserIcon size={18} />
+				account
+			</div>
+		)
+	}
+
+	if (!user) {
+		return (
+			<Link
+				to="/auth/login"
+				className={cn(
+					baseClassName,
+					'hover:bg-card hover:border-foreground focus-visible:outline-kitchen-eggplant border-transparent hover:shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2',
+				)}
+			>
+				<UserIcon size={18} aria-hidden />
+				sign in
+			</Link>
+		)
+	}
+
+	if (user.isAnonymous) {
+		const itemCount = stats ? stats.recipes + stats.pantryItems : 0
+
+		return (
+			<Link
+				to="/auth/signup"
+				title={
+					itemCount > 0
+						? `${itemCount} ${itemCount === 1 ? 'item' : 'items'} on your guest shelf — sign up to keep them`
+						: 'Sign up to keep your shelf'
+				}
+				className={cn(
+					baseClassName,
+					'border-foreground hover:bg-card focus-visible:outline-kitchen-eggplant border-dashed hover:shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2',
+				)}
+			>
+				<FingerprintIcon size={18} aria-hidden />
+				<span className="min-w-0 flex-1 truncate">guest — save shelf</span>
+				{itemCount > 0 ? (
+					<span className="bg-foreground text-background px-1 font-mono text-xs leading-4 font-bold">
+						{itemCount}
+					</span>
+				) : null}
+			</Link>
+		)
 	}
 
 	return (
-		<div className="order-first flex items-center gap-2.5 px-2.5 py-2 md:order-none md:mt-auto md:w-full">
-			<span className="text-muted-foreground min-w-0 flex-1 truncate text-xs font-bold tracking-wide uppercase">
-				{name}
-			</span>
+		<div className={cn(baseClassName, 'border-transparent')}>
+			<Link
+				to="/profile"
+				title="Profile"
+				className="text-muted-foreground hover:text-foreground focus-visible:outline-kitchen-eggplant min-w-0 flex-1 truncate focus-visible:outline-2 focus-visible:outline-offset-2"
+			>
+				{user.name}
+			</Link>
 			<button
 				type="button"
 				onClick={signOut}
+				disabled={signingOut}
 				aria-label="Sign out"
 				title="Sign out"
-				className="border-foreground hover:bg-card focus-visible:outline-kitchen-eggplant border-2 p-1.5 transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2"
+				className="border-foreground hover:bg-card focus-visible:outline-kitchen-eggplant border-2 p-1.5 transition-transform not-disabled:hover:-translate-x-0.5 not-disabled:hover:-translate-y-0.5 not-disabled:hover:shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50"
 			>
 				<SignOutIcon size={16} weight="bold" aria-hidden />
 			</button>
 		</div>
-	)
-}
-
-function GuestSticker() {
-	return (
-		<Link
-			to="/auth/signup"
-			className="border-foreground hover:bg-card focus-visible:outline-kitchen-eggplant order-first flex items-center gap-2.5 border-2 border-dashed px-2.5 py-2 text-xs font-bold tracking-wide uppercase hover:shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 md:order-none md:mt-auto md:w-full"
-		>
-			<FingerprintIcon size={18} aria-hidden />
-			guest — save shelf
-		</Link>
 	)
 }
 
@@ -120,21 +195,18 @@ function NavItem({
 	to,
 	active,
 	disabled,
-	bottom,
 }: {
 	label: string
 	icon: typeof HouseIcon
 	to?: '/' | '/recipes' | '/pantry' | '/settings'
 	active?: boolean
 	disabled?: boolean
-	bottom?: boolean
 }) {
 	const className = cn(
 		'flex items-center gap-2.5 border-2 px-2.5 py-2 text-xs font-bold tracking-wide uppercase md:w-full',
-		bottom && 'md:mt-auto',
 		active
 			? 'border-foreground bg-kitchen-yolk shadow-sm'
-			: 'hover:border-foreground hover:bg-card focus-visible:border-foreground border-transparent hover:shadow-sm',
+			: 'hover:border-foreground hover:bg-card hover:shadow-sm focus-visible:border-foreground border-transparent',
 		disabled && 'opacity-35',
 	)
 
