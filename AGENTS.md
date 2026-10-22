@@ -3,14 +3,29 @@
 Full-stack TanStack Start app: React 19, Vite+, Drizzle, Postgres, Better Auth,
 Tailwind v4, shadcn, Varlock. Docker Compose runs Postgres and MinIO.
 
-Google sign-in is optional in development. Set `GOOGLE_CLIENT_ID` and
-`GOOGLE_CLIENT_SECRET` in `.env.local` to enable it. Use a "Desktop app" OAuth
-client, so any loopback port works. Deployed environments resolve secrets from
-Infisical through `.env.preview` and `.env.production`.
+Secrets come from OpenBao, set up by
+[aria-amini/infra](https://github.com/aria-amini/infra). Deployed builds read
+`secret/dutch-oven/<env>` with an AppRole that infra sets in Railway, then
+freeze the resolved env (`varlock freeze`), so running apps, restarts, and
+rollbacks never contact OpenBao. Local dev reads `secret/shared/development`
+with the per-machine token in `~/.config/openbao/.env.dev`, from
+`mise run dev-token` in infra; bootstrap stops if it is missing. Tests and CI
+never load the development env, so they never use OpenBao.
+
+`railway.toml` runs the deploy and migrations with `varlock run --frozen`, not
+`vp run`: `vp run` loads the Vite config, which would resolve the env live
+again.
 
 Error monitoring is wired through Sentry (`@sentry/tanstackstart-react`).
 
 Product analytics run through PostHog behind a `/api/ingest` proxy.
+
+## Environment
+
+Varlock resolves the env from `.env.schema` and detects `APP_ENV`. Secrets are
+checked where the code uses them; deploys also require `BETTER_AUTH_SECRET` and
+`DATABASE_URL`. Railway's PR previews run the real build, so CI doesn't build.
+`vp i` regenerates `env.d.ts`.
 
 ## Local development
 
