@@ -1,12 +1,12 @@
 [build]
 builder = "RAILPACK"
-buildCommand = "vp run build"
+buildCommand = "vp run build:deploy"
 
 [deploy]
-preDeployCommand = "vp run db:migrate"
+preDeployCommand = "pnpm run db:migrate:deploy"
 runtime = "V2"
 numReplicas = 1
-startCommand = "vp run start"
+startCommand = "pnpm run start"
 healthcheckPath = "/"
 useLegacyStacker = false
 restartPolicyType = "ALWAYS"

@@ -5,11 +5,15 @@ Tailwind v4, shadcn, Varlock. Docker Compose runs Postgres and MinIO.
 
 Secrets come from OpenBao, set up by
 [aria-amini/infra](https://github.com/aria-amini/infra). Deployed builds read
-`secret/dutch-oven/<env>` with an AppRole that infra sets in Railway. Local dev
-reads `secret/shared/development` with the per-machine token in
-`~/.config/openbao/.env.dev`, from `mise run dev-token` in infra; bootstrap
-stops if it is missing. Tests and CI never load the development env, so they
-never use OpenBao.
+`secret/dutch-oven/<env>` with an AppRole that infra sets in Railway, then
+freeze the resolved env (`varlock freeze`), so running apps, restarts, and
+rollbacks never contact OpenBao. Local dev reads `secret/shared/development`
+with the per-machine token in `~/.config/openbao/.env.dev`, from
+`mise run dev-token` in infra; bootstrap stops if it is missing. Tests and CI
+never load the development env, so they never use OpenBao.
+
+Railway runs `pnpm run start` and `pnpm run db:migrate:deploy`, not `vp run`:
+`vp run` loads the Vite config, which would resolve the env live again.
 
 Error monitoring is wired through Sentry (`@sentry/tanstackstart-react`).
 

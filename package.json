@@ -9,8 +9,9 @@
 	"scripts": {
 		"dev": "vp dev",
 		"build": "vp build && cp instrument.server.mjs .output/server",
+		"build:deploy": "vp run build && varlock freeze",
 		"preview": "vp preview",
-		"start": "varlock run -- node --import ./.output/server/instrument.server.mjs .output/server/index.mjs",
+		"start": "varlock run --frozen -- node --import ./.output/server/instrument.server.mjs .output/server/index.mjs",
 		"check": "vp check",
 		"test": "vp test run --passWithNoTests",
 		"test:unit": "vp test run --project unit --passWithNoTests",
@@ -28,6 +29,7 @@
 		"db:push": "varlock run -- drizzle-kit push",
 		"db:generate": "varlock run -- drizzle-kit generate",
 		"db:migrate": "varlock run -- tsx mise-tasks/migrate.ts",
+		"db:migrate:deploy": "varlock run --frozen -- tsx mise-tasks/migrate.ts",
 		"prepare": "vp config --no-hooks",
 		"update-pnpm": "corepack use pnpm@12",
 		"dead-code": "fallow dead-code",
