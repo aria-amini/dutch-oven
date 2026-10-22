@@ -39,16 +39,6 @@ export type CoercedEnvSchema = {
   BASE_URL?: string;
   
   /**
-   * **INFISICAL_CLIENT_ID**  
-   * Deployed environments resolve secrets from Infisical through  
-   * .env.preview and .env.production.  
-   * ![icon](data:image/svg+xml;utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22%23808080%22%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%20512%20512%22%3E%3Cpath%20d%3D%22M477.8%20173.6c-22.1-22.2-51.5-34.5-82.7-34.5c-29.5%200-59.5%2012.8-89.4%2038.1c-21.2%2017.9-38%2038.6-49.7%2055.2c-10.2-13.7-26.2-33.2-46.6-51.3c-14.9-13.4-29.8-23.9-44.2-31.2c-16.7-8.5-32.9-12.8-48-12.8c-31.3%200-60.8%2012.2-82.9%2034.5S0%20223.5%200%20255s12.2%2061.2%2034.3%2083.5c22.2%2022.2%2051.6%2034.5%2082.9%2034.5c35.4%200%2070.7-25.2%2094.1-46.3c20.5-18.6%2035.9-37.5%2045-49.7c16.2%2022.3%2035%2046.1%2055.4%2063.9c26.7%2023.3%2053.2%2034.1%2083.4%2034.1c31.2%200%2060.5-12.3%2082.7-34.6c22.1-22.2%2034.3-51.9%2034.3-83.4s-12.2-61.1-34.3-83.4M180.8%20293c-24.4%2022-47.5%2034.6-63.6%2034.6c-39.6%200-71.8-32.6-71.8-72.6s32.2-72.6%2071.8-72.6c16.5%200%2038.5%2011.6%2062%2032.5c12.6%2011.2%2025.5%2025.3%2036.9%2040c-10.5%2013.4-23%2027-35.3%2038.1M395%20329.5c-18.8%200-35.4-7-53.6-22.9C328%20295%20314.1%20279%20296%20254.5c12.1-16.6%2025.4-31.2%2039-42.9c21.1-17.8%2041.9-27.3%2060-27.3c39.5%200%2071.6%2032.6%2071.6%2072.6s-32.1%2072.6-71.6%2072.6%22%2F%3E%3C%2Fsvg%3E)   
-   *   
-   * 📚 {@link https://infisical.com/docs/documentation/platform/identities/machine-identities | Infisical Machine Identities}  
-   */
-  INFISICAL_CLIENT_ID?: string;
-  
-  /**
    * **BETTER_AUTH_URL**  
    * ![icon](data:image/svg+xml;utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cpath%20fill%3D%22%23808080%22%20d%3D%22M24%2021V9h-2v14h8v-2zm-4-6v-4c0-1.103-.897-2-2-2h-6v14h2v-6h1.48l2.335%206h2.145l-2.333-6H18c1.103%200%202-.897%202-2m-6-4h4v4h-4zM8%2023H4c-1.103%200-2-.897-2-2V9h2v12h4V9h2v12c0%201.103-.897%202-2%202%22%2F%3E%3C%2Fsvg%3E)   
    */
@@ -81,8 +71,8 @@ export type CoercedEnvSchema = {
   
   /**
    * **GOOGLE_CLIENT_ID**  
-   * Google sign-in is optional in development. Set both values in .env.local to  
-   * enable it with a "Desktop app" OAuth client, which accepts any loopback port.  
+   * Google sign-in is optional in development. OpenBao's secret/shared/development  
+   * supplies a "Desktop app" OAuth client, which accepts any loopback port.  
    * ![icon](data:image/svg+xml;utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cpath%20fill%3D%22%23808080%22%20d%3D%22M29%2022h-5a2.003%202.003%200%200%201-2-2v-6a2%202%200%200%201%202-2h5v2h-5v6h5ZM18%2012h-4V8h-2v14h6a2.003%202.003%200%200%200%202-2v-6a2%202%200%200%200-2-2m-4%208v-6h4v6Zm-6-8H3v2h5v2H4a2%202%200%200%200-2%202v2a2%202%200%200%200%202%202h6v-8a2%202%200%200%200-2-2m0%208H4v-2h4Z%22%2F%3E%3C%2Fsvg%3E)   
    */
   GOOGLE_CLIENT_ID?: string;
@@ -152,11 +142,11 @@ export type CoercedEnvSchema = {
   
 };
 
-type _CoercedEnvSchema_88d0cb2d = CoercedEnvSchema;
+type _CoercedEnvSchema_52140f36 = CoercedEnvSchema;
 
 declare module 'varlock/env' {
-  export interface TypedEnvSchema extends Readonly<_CoercedEnvSchema_88d0cb2d> {}
-  export interface PublicTypedEnvSchema extends Readonly<Pick<_CoercedEnvSchema_88d0cb2d, 'RAILWAY_ENVIRONMENT_NAME' | 'APP_ENV' | 'APP_PORT' | 'BASE_URL' | 'INFISICAL_CLIENT_ID' | 'BETTER_AUTH_URL' | 'GOOGLE_CLIENT_ID' | 'AWS_S3_BUCKET_NAME' | 'AWS_REGION' | 'AWS_ENDPOINT_URL' | 'VITE_POSTHOG_PROJECT_TOKEN' | 'VITE_POSTHOG_HOST' | 'VITE_PUBLIC_SENTRY_DSN'>> {}
+  export interface TypedEnvSchema extends Readonly<_CoercedEnvSchema_52140f36> {}
+  export interface PublicTypedEnvSchema extends Readonly<Pick<_CoercedEnvSchema_52140f36, 'RAILWAY_ENVIRONMENT_NAME' | 'APP_ENV' | 'APP_PORT' | 'BASE_URL' | 'BETTER_AUTH_URL' | 'GOOGLE_CLIENT_ID' | 'AWS_S3_BUCKET_NAME' | 'AWS_REGION' | 'AWS_ENDPOINT_URL' | 'VITE_POSTHOG_PROJECT_TOKEN' | 'VITE_POSTHOG_HOST' | 'VITE_PUBLIC_SENTRY_DSN'>> {}
 }
 
 
@@ -166,11 +156,11 @@ export type EnvSchemaAsStrings = {
       : (NonNullable<CoercedEnvSchema[Property]> extends boolean ? ('true' | 'false') : string)
 };
 
-type _EnvSchemaAsStrings_88d0cb2d = EnvSchemaAsStrings;
+type _EnvSchemaAsStrings_52140f36 = EnvSchemaAsStrings;
 declare global {
 
   // add types for global process.env
   namespace NodeJS {
-    interface ProcessEnv extends _EnvSchemaAsStrings_88d0cb2d {}
+    interface ProcessEnv extends _EnvSchemaAsStrings_52140f36 {}
   }
 }

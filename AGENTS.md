@@ -3,10 +3,13 @@
 Full-stack TanStack Start app: React 19, Vite+, Drizzle, Postgres, Better Auth,
 Tailwind v4, shadcn, Varlock. Docker Compose runs Postgres and MinIO.
 
-Google sign-in is optional in development. Set `GOOGLE_CLIENT_ID` and
-`GOOGLE_CLIENT_SECRET` in `.env.local` to enable it. Use a "Desktop app" OAuth
-client, so any loopback port works. Deployed environments resolve secrets from
-Infisical through `.env.preview` and `.env.production`.
+Secrets come from OpenBao, set up by
+[aria-amini/infra](https://github.com/aria-amini/infra). Deployed builds read
+`secret/dutch-oven/<env>` with an AppRole that infra sets in Railway. Local dev
+reads `secret/shared/development` with the per-machine token in
+`~/.config/openbao/.env.dev`, from `mise run dev-token` in infra; bootstrap
+stops if it is missing. Tests and CI never load the development env, so they
+never use OpenBao.
 
 Error monitoring is wired through Sentry (`@sentry/tanstackstart-react`).
 
