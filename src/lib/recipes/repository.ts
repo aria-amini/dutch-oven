@@ -1,6 +1,6 @@
 import { and, asc, desc, eq, max } from 'drizzle-orm'
 
-import { db } from '@/db/connection'
+import { type Database, getDb } from '@/db/connection'
 import {
 	collections,
 	recipeIngredients,
@@ -10,12 +10,12 @@ import {
 } from '@/db/schema'
 
 type RecipeDatabase =
-	| typeof db
-	| Parameters<Parameters<typeof db.transaction>[0]>[0]
+	| Database
+	| Parameters<Parameters<Database['transaction']>[0]>[0]
 
 export async function listShelfForUser(
 	userId: string,
-	database: typeof db = db,
+	database: Database = getDb(),
 ) {
 	const [userCollections, userRecipes] = await Promise.all([
 		database
@@ -36,7 +36,7 @@ export async function listShelfForUser(
 export async function getRecipeForUser(
 	userId: string,
 	id: string,
-	database: typeof db = db,
+	database: Database = getDb(),
 ) {
 	const [recipe] = await database
 		.select()
@@ -68,7 +68,7 @@ export async function getRecipeForUser(
 export async function createCollectionForUser(
 	userId: string,
 	name: string,
-	database: typeof db = db,
+	database: Database = getDb(),
 ) {
 	const [row] = await database
 		.select({ value: max(collections.position) })
@@ -98,7 +98,7 @@ export async function createRecipeForUser(
 		ingredients?: string[] | RecipeIngredient[] | undefined
 		steps?: string[] | undefined
 	},
-	database: typeof db = db,
+	database: Database = getDb(),
 ) {
 	return database.transaction(async (tx) => {
 		if (input.collectionId) {
@@ -176,7 +176,7 @@ export async function updateRecipeContentForUser(
 	userId: string,
 	id: string,
 	input: { ingredients: string[]; steps: string[] },
-	database: typeof db = db,
+	database: Database = getDb(),
 ) {
 	return database.transaction(async (tx) => {
 		const [recipe] = await tx

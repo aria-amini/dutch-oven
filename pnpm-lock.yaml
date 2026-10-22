@@ -188,9 +188,9 @@ importers:
 
   .:
     dependencies:
-      '@varlock/infisical-plugin':
-        specifier: ^2.1.0
-        version: 2.1.3(varlock@1.23.0)
+      '@varlock/hashicorp-vault-plugin':
+        specifier: ^2.1.2
+        version: 2.1.2(varlock@1.23.0)
       drizzle-orm:
         specifier: 1.0.0-rc.4
         version: 1.0.0-rc.4(@opentelemetry/api@1.9.1)(@types/pg@8.23.1)(pg@8.23.1)(zod@4.6.7)
@@ -202,8 +202,8 @@ importers:
         version: 1.23.0
     devDependencies:
       '@aamini/config':
-        specifier: ^0.2.0
-        version: 0.2.0(b55059ffea05941ce10371a12636f28a)
+        specifier: ^0.2.1
+        version: 0.2.2(b55059ffea05941ce10371a12636f28a)
       '@aws-sdk/client-s3':
         specifier: ^3.1073.0
         version: 3.1151.0
@@ -384,8 +384,9 @@ importers:
 
 packages:
 
-  '@aamini/config@0.2.0':
-    resolution: {integrity: sha512-MCAXN/CBLlE1EdEv7XQNbPpTKfQhHmme6cWpFopVwaQ8yQhUVgGFuzRzW77X2p0+JFHUrsKpMqYL/SOSBtJH2g==}
+  '@aamini/config@0.2.2':
+    resolution: {integrity: sha512-K1L/3H2aMF0KNgeHqfPT5Ai8BGfanwOuHAXV5cxQ0e5zPA6QevrcsPD0dBGFN9H/hINJm06Gp5jHXw9K94Xq0w==}
+    hasBin: true
     peerDependencies:
       '@playwright/test': ^1.61.0
       '@rolldown/plugin-babel': ^0.2.4
@@ -2946,8 +2947,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@varlock/infisical-plugin@2.1.3':
-    resolution: {integrity: sha512-Hb/PVOMSA08/L1WOteYXLZuzl7O2Pq7fy+nrFUgYilPfBCXAoTxWmQqcEY60nafonUPt/+fj8PD8Cx1MJD7tkg==}
+  '@varlock/hashicorp-vault-plugin@2.1.2':
+    resolution: {integrity: sha512-3STtmx9dJvA47k3e6ay+hKi9VmGD+Wg3b5bG6SYAY31bDPv67oTdpN5HLwJw6xiRRHqZyOUS5JB3+XUU3WleXQ==}
     engines: {node: '>=22'}
     peerDependencies:
       varlock: ^1.22.0
@@ -6208,8 +6209,9 @@ packages:
 
 snapshots:
 
-  '@aamini/config@0.2.0(b55059ffea05941ce10371a12636f28a)':
+  '@aamini/config@0.2.2(b55059ffea05941ce10371a12636f28a)':
     dependencies:
+      execa: 10.1.1
       vite-plus: 1.1.0(@opentelemetry/api@1.9.1)(@types/node@26.6.5)(@vitest/browser-playwright@5.0.3)(@vitest/ui@5.0.3)(esbuild@0.28.2)(jiti@2.7.0)(msw@2.15.0(@types/node@26.6.5)(typescript@6.0.3))(playwright@1.64.0)(tsx@4.23.15)(typescript@6.0.3)(yaml@2.9.1)
     optionalDependencies:
       '@playwright/test': 1.64.0
@@ -8447,7 +8449,7 @@ snapshots:
   '@typescript/typescript-win32-x64@7.0.2':
     optional: true
 
-  '@varlock/infisical-plugin@2.1.3(varlock@1.23.0)':
+  '@varlock/hashicorp-vault-plugin@2.1.2(varlock@1.23.0)':
     dependencies:
       varlock: 1.23.0
 

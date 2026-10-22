@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm'
 
-import { db } from '@/db/connection'
+import { type Database, getDb } from '@/db/connection'
 import { collections, mealLogs, recipes } from '@/db/schema'
 
 interface LinkAccountParams {
@@ -12,7 +12,7 @@ interface LinkAccountParams {
 // re-pointed at the real account first or the shelf vanishes at signup.
 export async function moveGuestDataToNewUser(
 	{ anonymousUser, newUser }: LinkAccountParams,
-	database: typeof db = db,
+	database: Database = getDb(),
 ) {
 	const fromId = anonymousUser.user.id
 	const toId = newUser.user.id

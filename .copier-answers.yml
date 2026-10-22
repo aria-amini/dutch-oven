@@ -1,5 +1,5 @@
 # Changes here will be overwritten by Copier; do not edit manually
-_commit: v0.0.43-11-g88914f2
+_commit: '@aamini/config@0.2.1'
 _src_path: https://github.com/aria-amini/toolkit
 app_name: dutch-oven
 google_auth: true

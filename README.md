@@ -9,7 +9,7 @@
   TypeScript; use `vp` instead of `npm`/`vite`
 - **Drizzle, Postgres** — database
 - **Varlock** — environment variable management, loaded via
-  `varlock run -- <command>`; secrets resolve from Infisical
+  `varlock run -- <command>`; secrets resolve from OpenBao
 - **mise** — runtime and tool version manager (`mise.toml`)
 
 ## Local Development
@@ -45,10 +45,15 @@ vp dev
 
 Managed by [varlock](https://varlock.dev); `.env.schema` defines what is
 required per environment. Deployed environments (`.env.preview`,
-`.env.production`) resolve secrets from Infisical — set `INFISICAL_CLIENT_ID`
-and `INFISICAL_CLIENT_SECRET` in `.env.local` (gitignored, prompted on first
-bootstrap). Local development points at the docker services via
-`.env.development.local`, regenerated per jj workspace by `mise-tasks/setup.ts`.
+`.env.production`) read secrets from OpenBao at build time (`vaultSecret()`) and
+freeze them with `varlock freeze`. Railway needs `OPENBAO_ADDR`, `VAULT_ROLE_ID`
+and `VAULT_SECRET_ID` (from `mise run onboard dutch-oven` in
+[aria-amini/infra](https://github.com/aria-amini/infra)) plus
+`_VARLOCK_ENV_KEY`. Local development reads the shared development Google client
+from OpenBao: run `mise run dev-token` in infra to write
+`~/.config/openbao/.env.dev`; bootstrap stops if it is missing. Everything else
+points at the docker services via `.env.development.local`, regenerated per jj
+workspace by `mise-tasks/setup.ts`.
 
 ## Services
 
@@ -57,4 +62,4 @@ bootstrap). Local development points at the docker services via
 - **Cloudflare** — DNS/CDN
 - **PostHog** — product analytics
 - **Sentry** — error monitoring
-- **Infisical** — secrets manager
+- **OpenBao** — secrets manager (self-hosted, see aria-amini/infra)

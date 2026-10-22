@@ -20,3 +20,4 @@ pitchfork.local.toml
 src/components/__screenshots__/
 **/__screenshots__/**/*-1.png
 .vitest/
+.varlock-frozen-env
