@@ -3,7 +3,7 @@ import { betterAuth } from 'better-auth'
 import { anonymous, oAuthProxy } from 'better-auth/plugins'
 import { tanstackStartCookies } from 'better-auth/tanstack-start'
 
-import { db } from '@/db/connection'
+import { getDb } from '@/db/connection'
 import { account, session, user, verification } from '@/db/schema'
 import { serverEnv as env } from '@/env.server'
 
@@ -27,6 +27,18 @@ export const allowedHosts = [
 ]
 
 function createAuth() {
+	// Preview and production must share this secret, or Google sign-in fails.
+	if (
+		env.GOOGLE_CLIENT_ID &&
+		env.GOOGLE_CLIENT_SECRET &&
+		!env.OAUTH_PROXY_SECRET &&
+		env.APP_ENV !== 'development'
+	) {
+		throw new Error(
+			'OAUTH_PROXY_SECRET is not set. Google sign-in needs the same value in preview and production.',
+		)
+	}
+
 	return betterAuth({
 		appName: 'dutch-oven',
 		baseURL: {
@@ -35,7 +47,7 @@ function createAuth() {
 			fallback: appOrigin,
 		},
 		secret: env.BETTER_AUTH_SECRET,
-		database: drizzleAdapter(db, {
+		database: drizzleAdapter(getDb(), {
 			provider: 'pg',
 			schema: { account, session, user, verification },
 		}),

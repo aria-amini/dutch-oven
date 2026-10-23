@@ -229,9 +229,13 @@ function readEnvFile(path: string): Record<string, string> {
 		readFileSync(path, 'utf8')
 			.split(/\r?\n/)
 			.flatMap((line) => {
-				const match = line.match(/^\s*([^#=\s]+)\s*=\s*"?([^"]*)"?$/)
+				const match = line.match(
+					/^\s*([^#=\s]+)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^#]*?))\s*(?:#.*)?$/,
+				)
 
-				return match ? [[match[1]!, match[2]!]] : []
+				return match
+					? [[match[1]!, match[2] ?? match[3] ?? match[4] ?? '']]
+					: []
 			}),
 	)
 }
@@ -327,7 +331,8 @@ function registerSlug(slug: string, dir: string): void {
 // this workspace's ports. Re-running setup must not move this workspace's
 // existing database or registered OAuth redirect URIs out from under it.
 // The whole file is owned by setup and fully rewritten when foreign; human
-// values live in .env.development.local, which setup never touches.
+// values live in .env.development.local, where setup only adds a missing
+// BETTER_AUTH_SECRET.
 function existingPorts(worktree: string): Record<string, string> {
 	const entries = readEnvFile('.env.workspace.local')
 
@@ -440,28 +445,32 @@ export function setupWorkspace() {
 	}
 }
 
-// Seeds the human-owned local file so a fresh clone runs before secrets are
-// set up. Skips files that already hold values; an empty file counts as
-// unseeded, so a truncation accident self-heals on the next setup run.
+// Adds a BETTER_AUTH_SECRET to .env.development.local unless a local file
+// already sets one.
 function seedDevLocalFile(): boolean {
-	if (existsSync('.env.development.local')) {
-		const hasValues = readFileSync('.env.development.local', 'utf8')
-			.split(/\r?\n/)
-			.some((line) => {
-				const trimmed = line.trim()
+	const path = '.env.development.local'
 
-				return trimmed !== '' && !trimmed.startsWith('#')
-			})
-
-		if (hasValues) return false
+	if (
+		[path, '.env.local'].some((file) => readEnvFile(file)['BETTER_AUTH_SECRET'])
+	) {
+		return false
 	}
 
+	// Drops an empty BETTER_AUTH_SECRET= line so the new value isn't a duplicate.
+	const existing = existsSync(path)
+		? readFileSync(path, 'utf8')
+				.split(/\r?\n/)
+				.filter((line) => !/^\s*BETTER_AUTH_SECRET\s*=/.test(line))
+				.join('\n')
+				.trimEnd()
+		: ''
+
 	writeFileSync(
-		'.env.development.local',
+		path,
 		[
-			'# Local overrides; setup seeds this once and leaves existing values alone.',
-			'# Read by BETTER_AUTH_SECRET_LOCAL in .env.schema, development only.',
-			`BETTER_AUTH_SECRET_LOCAL="${randomBytes(32).toString('base64url')}"`,
+			existing ||
+				'# Local overrides; setup adds missing defaults and leaves existing values alone.',
+			`BETTER_AUTH_SECRET="${randomBytes(32).toString('base64url')}"`,
 			'',
 		].join('\n'),
 	)

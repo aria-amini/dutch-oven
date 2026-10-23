@@ -19,6 +19,13 @@ Error monitoring is wired through Sentry (`@sentry/tanstackstart-react`).
 
 Product analytics run through PostHog behind a `/api/ingest` proxy.
 
+## Environment
+
+Varlock resolves the env from `.env.schema` and detects `APP_ENV`. Secrets are
+checked where the code uses them; deploys also require `BETTER_AUTH_SECRET` and
+`DATABASE_URL`. Railway's PR previews run the real build, so CI doesn't build.
+`vp i` regenerates `env.d.ts`.
+
 ## Local development
 
 Run `mise run bootstrap` for each checkout or workspace. It installs
