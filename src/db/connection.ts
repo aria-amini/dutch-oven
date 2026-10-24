@@ -3,6 +3,25 @@ import { Pool } from 'pg'
 
 import { serverEnv as env } from '@/env.server'
 
-const pool = new Pool({ connectionString: env.DATABASE_URL })
+function connect(connectionString: string) {
+	return drizzle({ client: new Pool({ connectionString }) })
+}
 
-export const db = drizzle({ client: pool })
+export type Database = ReturnType<typeof connect>
+
+let database: Database | undefined
+
+// Connects on first use, so pages without queries need no DATABASE_URL.
+export function getDb() {
+	if (database) return database
+
+	if (!env.DATABASE_URL) {
+		throw new Error(
+			'DATABASE_URL is not set. Run `mise run bootstrap` to start the local database.',
+		)
+	}
+
+	database = connect(env.DATABASE_URL)
+
+	return database
+}

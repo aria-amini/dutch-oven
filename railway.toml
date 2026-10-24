@@ -1,12 +1,12 @@
 [build]
 builder = "RAILPACK"
-buildCommand = "vp run build"
+buildCommand = "vp run build && pnpm exec varlock freeze"
 
 [deploy]
-preDeployCommand = "vp run db:migrate"
+preDeployCommand = "pnpm exec varlock run --frozen -- tsx mise-tasks/migrate.ts"
 runtime = "V2"
 numReplicas = 1
-startCommand = "vp run start"
+startCommand = "pnpm exec varlock run --frozen -- node --import ./.output/server/instrument.server.mjs .output/server/index.mjs"
 healthcheckPath = "/"
 useLegacyStacker = false
 restartPolicyType = "ALWAYS"
