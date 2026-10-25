@@ -202,7 +202,7 @@ importers:
         version: 1.23.0
     devDependencies:
       '@aamini/config':
-        specifier: ^0.2.1
+        specifier: ^0.2.2
         version: 0.2.2(b55059ffea05941ce10371a12636f28a)
       '@aws-sdk/client-s3':
         specifier: ^3.1073.0
@@ -312,9 +312,6 @@ importers:
       drizzle-seed:
         specifier: 1.0.0-rc.4
         version: 1.0.0-rc.4(drizzle-orm@1.0.0-rc.4(@opentelemetry/api@1.9.1)(@types/pg@8.23.1)(pg@8.23.1)(zod@4.6.7))
-      execa:
-        specifier: ^10.0.1
-        version: 10.1.1
       fallow:
         specifier: ^3.6.0
         version: 3.33.1
