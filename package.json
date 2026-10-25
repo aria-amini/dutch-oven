@@ -71,7 +71,7 @@
 		"zod": "^4.4.3"
 	},
 	"devDependencies": {
-		"@aamini/config": "^0.2.1",
+		"@aamini/config": "https://pkg.pr.new/@aamini/config@14",
 		"@playwright/test": "^1.61.0",
 		"@shadcn/lint": "^0.2.1",
 		"@tailwindcss/vite": "^4.3.1",
@@ -87,7 +87,6 @@
 		"babel-plugin-react-compiler": "^1.0.0",
 		"drizzle-kit": "1.0.0-rc.4",
 		"drizzle-seed": "1.0.0-rc.4",
-		"execa": "^10.0.1",
 		"fallow": "^3.6.0",
 		"msw": "^2.14.6",
 		"oxlint-plugin-eslint": "^1.73.0",

@@ -295,8 +295,8 @@ importers:
         version: 4.6.7
     devDependencies:
       '@aamini/config':
-        specifier: ^0.2.1
-        version: 0.2.1(b55059ffea05941ce10371a12636f28a)
+        specifier: https://pkg.pr.new/@aamini/config@14
+        version: https://pkg.pr.new/@aamini/config@14(b55059ffea05941ce10371a12636f28a)
       '@playwright/test':
         specifier: ^1.61.0
         version: 1.64.0
@@ -342,9 +342,6 @@ importers:
       drizzle-seed:
         specifier: 1.0.0-rc.4
         version: 1.0.0-rc.4(drizzle-orm@1.0.0-rc.4(@opentelemetry/api@1.9.1)(@types/pg@8.23.1)(pg@8.23.1)(zod@4.6.7))
-      execa:
-        specifier: ^10.0.1
-        version: 10.1.1
       fallow:
         specifier: ^3.6.0
         version: 3.33.1
@@ -387,8 +384,10 @@ importers:
 
 packages:
 
-  '@aamini/config@0.2.1':
-    resolution: {integrity: sha512-5mtXmkRJmeZiikcdkZxQtddH+HpT8nxSNVVQfbhjL2BOb6ZgGArXEroeWgU2KHVHvqoPXHPbjKoeTsqRz4XpJg==}
+  '@aamini/config@https://pkg.pr.new/@aamini/config@14':
+    resolution: {integrity: sha512-nQGhBOM4KeCM1BNKFMaAbRVuPEO83H5muM/MWq5EmK8TFA9csfD2Uk/sGAmvQk+N8/HcJszqP0S2Nn2Q4BkSNw==, tarball: https://pkg.pr.new/@aamini/config@14}
+    version: 0.2.1
+    hasBin: true
     peerDependencies:
       '@playwright/test': ^1.61.0
       '@rolldown/plugin-babel': ^0.2.4
@@ -6211,8 +6210,9 @@ packages:
 
 snapshots:
 
-  '@aamini/config@0.2.1(b55059ffea05941ce10371a12636f28a)':
+  '@aamini/config@https://pkg.pr.new/@aamini/config@14(b55059ffea05941ce10371a12636f28a)':
     dependencies:
+      execa: 10.1.1
       vite-plus: 1.1.0(@opentelemetry/api@1.9.1)(@types/node@26.6.5)(@vitest/browser-playwright@5.0.3)(@vitest/ui@5.0.3)(esbuild@0.28.2)(jiti@2.7.0)(msw@2.15.0(@types/node@26.6.5)(typescript@6.0.3))(playwright@1.64.0)(tsx@4.23.15)(typescript@6.0.3)(yaml@2.9.1)
     optionalDependencies:
       '@playwright/test': 1.64.0
