@@ -2,7 +2,6 @@ import { Plus } from '@phosphor-icons/react'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { motion, useReducedMotion } from 'framer-motion'
 
-import { AddRecipeDialog } from '@/components/add-recipe-dialog'
 import { SaveShelfNudge } from '@/components/save-shelf-nudge'
 import type { recipes } from '@/db/schema'
 import { listShelf } from '@/lib/recipes/server'
@@ -55,24 +54,22 @@ function Shelf() {
 					<h1 className="mb-8 text-4xl font-extrabold tracking-tight md:text-5xl">
 						your recipes
 					</h1>
-					<AddRecipeDialog>
-						<button
-							type="button"
-							className="border-foreground bg-kitchen-tomato focus-visible:outline-kitchen-eggplant relative block aspect-square w-full max-w-md border-2 text-left text-black shadow-md transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-2 focus-visible:outline-offset-2 md:aspect-auto md:h-[calc(var(--spacing-tile)*2+16px)] md:w-[calc(var(--spacing-tile)*2+16px)]"
-						>
-							<span className="border-foreground bg-kitchen-yolk absolute top-3 left-4 inline-block border-2 px-2 py-0.5 text-xs leading-5 font-bold uppercase">
-								no recipes yet
-							</span>
-							<span className="absolute right-4 bottom-3 left-4 text-3xl leading-none font-extrabold md:text-4xl">
-								save your first recipe
-							</span>
-							<Plus
-								weight="bold"
-								className="absolute top-3 right-4 size-8"
-								aria-hidden
-							/>
-						</button>
-					</AddRecipeDialog>
+					<Link
+						to="/recipes/new"
+						className="border-foreground bg-kitchen-tomato focus-visible:outline-kitchen-eggplant relative block aspect-square w-full max-w-md border-2 text-left text-black shadow-md transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-2 focus-visible:outline-offset-2 md:aspect-auto md:h-[calc(var(--spacing-tile)*2+16px)] md:w-[calc(var(--spacing-tile)*2+16px)]"
+					>
+						<span className="border-foreground bg-kitchen-yolk absolute top-3 left-4 inline-block border-2 px-2 py-0.5 text-xs leading-5 font-bold uppercase">
+							no recipes yet
+						</span>
+						<span className="absolute right-4 bottom-3 left-4 text-3xl leading-none font-extrabold md:text-4xl">
+							save your first recipe
+						</span>
+						<Plus
+							weight="bold"
+							className="absolute top-3 right-4 size-8"
+							aria-hidden
+						/>
+					</Link>
 				</motion.div>
 			</main>
 		)
@@ -86,15 +83,13 @@ function Shelf() {
 				</h1>
 				<SaveShelfNudge recipeCount={userRecipes.length} />
 				<div className="grid grid-cols-2 gap-4 md:auto-rows-[var(--spacing-tile)] md:grid-cols-[repeat(auto-fill,var(--spacing-tile))]">
-					<AddRecipeDialog>
-						<button
-							type="button"
-							className="border-foreground text-foreground focus-visible:outline-kitchen-eggplant hover:bg-card relative flex aspect-square flex-col items-center justify-center gap-2 border-2 border-dashed text-xs font-bold uppercase transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 md:aspect-auto"
-						>
-							<Plus weight="bold" className="size-6" aria-hidden />
-							recipe
-						</button>
-					</AddRecipeDialog>
+					<Link
+						to="/recipes/new"
+						className="border-foreground text-foreground focus-visible:outline-kitchen-eggplant hover:bg-card relative flex aspect-square flex-col items-center justify-center gap-2 border-2 border-dashed text-xs font-bold uppercase transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 md:aspect-auto"
+					>
+						<Plus weight="bold" className="size-6" aria-hidden />
+						recipe
+					</Link>
 					{userRecipes.map((recipe, index) => (
 						<RecipeTile
 							key={recipe.id}

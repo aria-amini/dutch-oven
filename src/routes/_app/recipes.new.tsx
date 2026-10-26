@@ -1,10 +1,12 @@
-import { ArrowLeft } from '@phosphor-icons/react'
+import { ArrowLeft, ChefHat, LinkSimple } from '@phosphor-icons/react'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { motion, useReducedMotion } from 'framer-motion'
 import { useState } from 'react'
 
+import { ImportRecipeForm } from '@/components/import-recipe-form'
 import { createRecipe } from '@/lib/recipes/server'
 import { formField } from '@/lib/utils/form'
+import { cn } from '@/lib/utils/ui'
 
 export const Route = createFileRoute('/_app/recipes/new')({
 	component: NewRecipe,
@@ -38,12 +40,61 @@ function NewRecipe() {
 						back to the shelf
 					</Link>
 					<h1 className="text-4xl font-extrabold tracking-tight md:text-5xl">
-						what's it called?
+						add a recipe
 					</h1>
 				</div>
-				<ManualForm />
+				<Option
+					icon={<LinkSimple size={18} weight="bold" aria-hidden />}
+					iconClassName="bg-kitchen-eggplant text-white"
+					title="from a link"
+					hint="paste a url, we pull it in"
+				>
+					<ImportRecipeForm />
+				</Option>
+				<Option
+					icon={<ChefHat size={18} weight="bold" aria-hidden />}
+					iconClassName="bg-kitchen-tomato text-black"
+					title="my own two hands"
+					hint="write it yourself"
+				>
+					<ManualForm />
+				</Option>
 			</motion.div>
 		</main>
+	)
+}
+
+function Option({
+	icon,
+	iconClassName,
+	title,
+	hint,
+	children,
+}: {
+	icon: React.ReactNode
+	iconClassName: string
+	title: string
+	hint: string
+	children: React.ReactNode
+}) {
+	return (
+		<section className="border-foreground bg-card flex flex-col gap-4 border-2 p-5 shadow-md">
+			<header className="flex items-center gap-3">
+				<span
+					className={cn(
+						'border-foreground grid size-10 shrink-0 place-items-center border-2',
+						iconClassName,
+					)}
+				>
+					{icon}
+				</span>
+				<div>
+					<h2 className="text-lg leading-tight font-extrabold">{title}</h2>
+					<p className="text-muted-foreground text-xs font-semibold">{hint}</p>
+				</div>
+			</header>
+			{children}
+		</section>
 	)
 }
 
@@ -54,7 +105,7 @@ function ManualForm() {
 
 	return (
 		<form
-			className="border-foreground bg-card flex flex-col gap-3 border-2 p-5 shadow-md"
+			className="flex flex-col gap-3"
 			onSubmit={async (event) => {
 				event.preventDefault()
 				const form = new FormData(event.currentTarget)
