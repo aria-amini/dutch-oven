@@ -1,5 +1,8 @@
 import { defineToolkit } from '@aamini/config/tanstack'
 import { sentryTanstackStart } from '@sentry/tanstackstart-react/vite'
+// Loading the Varlock plugin resolves the env into process.env, so the
+// SENTRY_AUTH_TOKEN read below sees deployed secrets.
+import '@varlock/vite-integration'
 
 export default defineToolkit({
 	root: import.meta.dirname,

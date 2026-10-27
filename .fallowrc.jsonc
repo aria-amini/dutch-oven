@@ -11,4 +11,10 @@
 		"execa",
 		"shadcn",
 	],
+	"rules": {
+		// Nitro bundles app code into .output, so packages the app imports are
+		// devDependencies. dependencies holds only what runs outside the bundle:
+		// varlock for `start`, and drizzle-orm and pg for migrations.
+		"dev-dependencies-in-production": "off",
+	},
 }
