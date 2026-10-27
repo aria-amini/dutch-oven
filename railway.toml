@@ -1,12 +1,15 @@
 [build]
 builder = "RAILPACK"
-buildCommand = "vp run build"
+# Prune devDependencies after the build so the runtime image carries only
+# production packages. Nitro already bundles the server into .output.
+buildCommand = "vp run build && pnpm prune --prod --ignore-scripts"
 
 [deploy]
-preDeployCommand = "vp run db:migrate"
+# vite-plus is a devDependency and is pruned, so run scripts through pnpm.
+preDeployCommand = "pnpm run db:migrate"
 runtime = "V2"
 numReplicas = 1
-startCommand = "vp run start"
+startCommand = "pnpm run start"
 healthcheckPath = "/"
 useLegacyStacker = false
 restartPolicyType = "ALWAYS"

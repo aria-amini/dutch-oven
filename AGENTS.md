@@ -57,6 +57,11 @@ TLS edge.
 Use `pnpm` through Vite+ (`vp i`, `vp run <script>`). Secrets resolve through
 Varlock; never commit generated or local secret files.
 
+Nitro bundles app code into `.output`, and Railway prunes devDependencies after
+the build. Add packages as devDependencies. Keep `dependencies` to what runs
+outside the bundle: Varlock for `start`, and `drizzle-orm` and `pg` for
+migrations.
+
 ## Tests
 
 Use the smallest test scope that covers the behavior. Test regressions and
