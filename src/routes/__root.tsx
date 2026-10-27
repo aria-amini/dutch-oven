@@ -27,7 +27,17 @@ export const Route = createRootRoute({
 			{ name: 'viewport', content: 'width=device-width, initial-scale=1' },
 			{ title: 'dutch-oven' },
 		],
-		links: [{ rel: 'stylesheet', href: appCss }],
+		links: [
+			{ rel: 'stylesheet', href: appCss },
+			{ rel: 'icon', href: '/favicon.ico', sizes: '48x48' },
+			{
+				rel: 'icon',
+				type: 'image/png',
+				href: '/icon-192.png',
+				sizes: '192x192',
+			},
+			{ rel: 'apple-touch-icon', href: '/apple-touch-icon.png' },
+		],
 	}),
 	component: RootComponent,
 })

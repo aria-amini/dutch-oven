@@ -1,6 +1,7 @@
 import { z } from 'zod'
 
 import type { RecipeIngredient } from '@/db/schema'
+import { recipeImageUrl } from '@/lib/recipes/model'
 
 export type ImportedRecipe = {
 	title: string
@@ -325,12 +326,12 @@ function resolveImageUrl(
 	value: string | undefined,
 	baseUrl: string | undefined,
 ) {
-	if (!value || !baseUrl) return value
+	if (!value) return undefined
 
 	try {
-		return new URL(value, baseUrl).toString()
+		return recipeImageUrl.safeParse(new URL(value, baseUrl).toString()).data
 	} catch {
-		return value
+		return undefined
 	}
 }
 

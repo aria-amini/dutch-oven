@@ -1,42 +1,18 @@
-import {
-	CookingPotIcon,
-	FingerprintIcon,
-	GearIcon,
-	HouseIcon,
-	SignOutIcon,
-	SquaresFourIcon,
-} from '@phosphor-icons/react'
-import { Link, useNavigate, useRouterState } from '@tanstack/react-router'
+import { CarrotIcon, CookingPotIcon } from '@phosphor-icons/react'
+import { Link, useRouterState } from '@tanstack/react-router'
 
-import { authClient } from '@/lib/auth/client'
+import { AccountMenu } from '@/components/account-menu'
 import { cn } from '@/lib/utils/ui'
 
 const navItems = [
-	{ label: 'home', icon: HouseIcon, to: '/' as const, match: ['/'] },
-	{
-		label: 'recipes',
-		icon: SquaresFourIcon,
-		to: '/recipes' as const,
-		match: ['/recipes'],
-	},
-	{ label: 'start meal', icon: CookingPotIcon, disabled: true },
-	{
-		label: 'settings',
-		icon: GearIcon,
-		to: '/settings' as const,
-		match: ['/settings', '/profile'],
-		bottom: true,
-	},
-]
+	{ label: 'recipes', icon: CookingPotIcon, to: '/recipes' },
+	{ label: 'ingredients', icon: CarrotIcon, to: '/ingredients' },
+] as const
 
 export function AppNav() {
 	const pathname = useRouterState({
 		select: (state) => state.location.pathname,
 	})
-
-	const session = authClient.useSession()
-	const user = session.data?.user
-	const isGuest = Boolean(user?.isAnonymous)
 
 	return (
 		<nav
@@ -44,122 +20,38 @@ export function AppNav() {
 			className="border-foreground/20 bg-background sticky top-0 z-10 flex items-center gap-1 overflow-x-auto border-b px-3 py-2 md:h-dvh md:w-48 md:shrink-0 md:flex-col md:items-stretch md:gap-1.5 md:overflow-visible md:border-r md:border-b-0 md:py-6"
 		>
 			<Link
-				to="/"
-				className="mr-auto shrink-0 px-2 py-1 font-mono text-sm font-extrabold tracking-tight whitespace-nowrap lowercase md:mr-0 md:mb-6"
+				to="/recipes"
+				aria-label="dutch-oven"
+				className="border-foreground/20 focus-visible:outline-kitchen-eggplant mr-auto flex shrink-0 items-center justify-center gap-2 border bg-white px-3 py-2 font-mono text-sm font-extrabold tracking-tight whitespace-nowrap lowercase focus-visible:outline-2 focus-visible:outline-offset-2 md:mr-0 md:mb-6 md:w-full md:self-center"
 			>
-				dutch-oven
-			</Link>
-			{navItems.map((item) => (
-				<NavItem
-					key={item.label}
-					{...item}
-					bottom={'bottom' in item && item.bottom && !user}
-					active={
-						'match' in item &&
-						item.match?.some(
-							(prefix) =>
-								pathname === prefix || pathname.startsWith(`${prefix}/`),
-						)
-					}
+				<img
+					src="/icon-192.png"
+					alt=""
+					className="size-7 shrink-0 [image-rendering:pixelated]"
 				/>
-			))}
-			{isGuest ? <GuestSticker /> : null}
-			{user && !isGuest ? <AccountControls name={user.name} /> : null}
+				<span className="hidden sm:inline">dutch-oven</span>
+			</Link>
+			{navItems.map(({ label, icon: Icon, to }) => {
+				const active = pathname === to || pathname.startsWith(`${to}/`)
+
+				return (
+					<Link
+						key={to}
+						to={to}
+						aria-current={active ? 'page' : undefined}
+						className={cn(
+							'focus-visible:outline-kitchen-eggplant flex shrink-0 items-center gap-2 border px-2 py-2 text-xs md:gap-2 md:px-2.5 md:py-1.5 font-semibold tracking-wide uppercase focus-visible:outline-2 focus-visible:outline-offset-2 md:w-full',
+							active
+								? 'border-foreground/15 bg-kitchen-yolk/30'
+								: 'border-transparent hover:bg-card focus-visible:border-foreground',
+						)}
+					>
+						<Icon size={18} weight={active ? 'fill' : 'regular'} aria-hidden />
+						{label}
+					</Link>
+				)
+			})}
+			<AccountMenu />
 		</nav>
-	)
-}
-
-function AccountControls({ name }: { name: string }) {
-	const navigate = useNavigate()
-
-	const signOut = async () => {
-		await authClient.signOut()
-		await navigate({ to: '/' })
-	}
-
-	return (
-		<div className="order-first flex items-center gap-2.5 px-2.5 py-2 md:order-none md:mt-auto md:w-full">
-			<span className="text-muted-foreground min-w-0 flex-1 truncate text-xs font-bold tracking-wide uppercase">
-				{name}
-			</span>
-			<button
-				type="button"
-				onClick={signOut}
-				aria-label="Sign out"
-				title="Sign out"
-				className="border-foreground hover:bg-card focus-visible:outline-kitchen-eggplant border-2 p-1.5 transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2"
-			>
-				<SignOutIcon size={16} weight="bold" aria-hidden />
-			</button>
-		</div>
-	)
-}
-
-function GuestSticker() {
-	return (
-		<Link
-			to="/auth/signup"
-			className="border-foreground hover:bg-card focus-visible:outline-kitchen-eggplant order-first flex items-center gap-2.5 border-2 border-dashed px-2.5 py-2 text-xs font-bold tracking-wide uppercase hover:shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 md:order-none md:mt-auto md:w-full"
-		>
-			<FingerprintIcon size={18} aria-hidden />
-			guest — save shelf
-		</Link>
-	)
-}
-
-function NavItem({
-	label,
-	icon: Icon,
-	to,
-	active,
-	disabled,
-	bottom,
-}: {
-	label: string
-	icon: typeof HouseIcon
-	to?: '/' | '/recipes' | '/settings'
-	active?: boolean
-	disabled?: boolean
-	bottom?: boolean
-}) {
-	const className = cn(
-		'flex items-center gap-2.5 border-2 px-2.5 py-2 text-xs font-bold tracking-wide uppercase md:w-full',
-		bottom && 'md:mt-auto',
-		active
-			? 'border-foreground bg-kitchen-yolk shadow-sm'
-			: 'hover:border-foreground hover:bg-card focus-visible:border-foreground border-transparent hover:shadow-sm',
-		disabled && 'opacity-35',
-	)
-
-	const content = (
-		<>
-			<Icon size={18} weight={active ? 'fill' : 'regular'} aria-hidden />
-			{label}
-		</>
-	)
-
-	if (disabled || !to) {
-		return (
-			<span
-				aria-disabled="true"
-				title="Not in this prototype"
-				className={className}
-			>
-				{content}
-			</span>
-		)
-	}
-
-	return (
-		<Link
-			to={to}
-			aria-current={active ? 'page' : undefined}
-			className={cn(
-				className,
-				'focus-visible:outline-kitchen-eggplant focus-visible:outline-2 focus-visible:outline-offset-2',
-			)}
-		>
-			{content}
-		</Link>
 	)
 }

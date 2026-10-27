@@ -46,7 +46,13 @@ export const recipes = snakeCase.table(
 		collectionId: text(),
 		title: text().notNull(),
 		imageUrl: text(),
+		sourceUrl: text(),
+		servings: integer(),
+		totalMinutes: integer(),
+		notes: text(),
 		createdAt: timestamp({ withTimezone: true }).notNull(),
+		// Null while an imported recipe is still a draft being checked over.
+		finalizedAt: timestamp({ withTimezone: true }),
 	},
 	(table) => [
 		index('recipes_user_id_index').on(table.userId),

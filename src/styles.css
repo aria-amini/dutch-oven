@@ -194,6 +194,12 @@
 	--shadow-2xl: var(--shadow-2xl);
 }
 
+/* The hairline around data surfaces (lists, tiles, fields); chunky 2px stays
+   on things you press. */
+@utility border-line {
+	border-width: 1.5px;
+}
+
 @layer base {
 	* {
 		@apply border-border outline-ring/50;

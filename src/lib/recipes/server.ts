@@ -1,50 +1,98 @@
 import { createServerFn } from '@tanstack/react-start'
-import { z } from 'zod'
 
 import { requireUserId } from '@/lib/auth/session'
+import { resolveStoredImage } from '@/lib/s3'
 
 import {
+	bookIdInput,
+	bookInput,
+	bookRenameInput,
+	recipeIdInput,
+	recipeInput,
+	recipeMoveInput,
+	recipeUpdateInput,
+} from './model'
+import {
+	createCollectionForUser,
 	createRecipeForUser,
+	deleteCollectionForUser,
+	deleteRecipeForUser,
 	getRecipeForUser,
+	listCollectionsForUser,
 	listShelfForUser,
-	updateRecipeContentForUser,
+	moveRecipeForUser,
+	renameCollectionForUser,
+	updateRecipeForUser,
 } from './repository'
 
-const contentLines = z
-	.array(z.string())
-	.transform((lines) => lines.map((line) => line.trim()).filter(Boolean))
+// Uploaded photos are stored as bucket keys; clients need a fetchable URL.
+async function withSignedImage<T extends { imageUrl: string | null }>(
+	recipe: T,
+): Promise<T> {
+	if (!recipe.imageUrl) return recipe
 
-export const listShelf = createServerFn({ method: 'GET' }).handler(async () =>
-	listShelfForUser(await requireUserId()),
-)
+	try {
+		return { ...recipe, imageUrl: await resolveStoredImage(recipe.imageUrl) }
+	} catch {
+		return { ...recipe, imageUrl: null }
+	}
+}
+
+export const listShelf = createServerFn({ method: 'GET' }).handler(async () => {
+	const shelf = await listShelfForUser(await requireUserId())
+
+	return {
+		...shelf,
+		recipes: await Promise.all(shelf.recipes.map(withSignedImage)),
+	}
+})
 
 export const getRecipe = createServerFn({ method: 'GET' })
-	.validator(z.object({ id: z.string().min(1) }))
-	.handler(async ({ data }) => getRecipeForUser(await requireUserId(), data.id))
+	.validator(recipeIdInput)
+	.handler(async ({ data }) => {
+		const recipe = await getRecipeForUser(await requireUserId(), data.id)
+
+		return recipe ? withSignedImage(recipe) : recipe
+	})
 
 export const createRecipe = createServerFn({ method: 'POST' })
-	.validator(
-		z.object({
-			title: z.string().trim().min(1).max(120),
-			imageUrl: z.preprocess(
-				(value) => (value === '' ? undefined : value),
-				z.url().max(500).optional(),
-			),
-			collectionId: z.string().min(1).optional(),
-			ingredients: contentLines.optional(),
-			steps: contentLines.optional(),
-		}),
-	)
+	.validator(recipeInput)
 	.handler(async ({ data }) => createRecipeForUser(await requireUserId(), data))
 
-export const updateRecipeContent = createServerFn({ method: 'POST' })
-	.validator(
-		z.object({
-			id: z.string().min(1),
-			ingredients: contentLines,
-			steps: contentLines,
-		}),
-	)
+export const updateRecipe = createServerFn({ method: 'POST' })
+	.validator(recipeUpdateInput)
+	.handler(async ({ data }) => updateRecipeForUser(await requireUserId(), data))
+
+export const deleteRecipe = createServerFn({ method: 'POST' })
+	.validator(recipeIdInput)
 	.handler(async ({ data }) =>
-		updateRecipeContentForUser(await requireUserId(), data.id, data),
+		deleteRecipeForUser(await requireUserId(), data.id),
+	)
+
+export const moveRecipe = createServerFn({ method: 'POST' })
+	.validator(recipeMoveInput)
+	.handler(async ({ data }) =>
+		moveRecipeForUser(await requireUserId(), data.id, data.collectionId),
+	)
+
+export const listBooks = createServerFn({ method: 'GET' }).handler(async () =>
+	listCollectionsForUser(await requireUserId()),
+)
+
+export const createBook = createServerFn({ method: 'POST' })
+	.validator(bookInput)
+	.handler(async ({ data }) =>
+		createCollectionForUser(await requireUserId(), data.name),
+	)
+
+export const renameBook = createServerFn({ method: 'POST' })
+	.validator(bookRenameInput)
+	.handler(async ({ data }) =>
+		renameCollectionForUser(await requireUserId(), data.id, data.name),
+	)
+
+export const deleteBook = createServerFn({ method: 'POST' })
+	.validator(bookIdInput)
+	.handler(async ({ data }) =>
+		deleteCollectionForUser(await requireUserId(), data.id),
 	)

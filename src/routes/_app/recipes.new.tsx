@@ -3,6 +3,10 @@ import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { motion, useReducedMotion } from 'framer-motion'
 import { useState } from 'react'
 
+import { IngredientListField } from '@/components/ingredient-list-field'
+import { RecipeFinder } from '@/components/recipe-finder'
+import { RecipePhotoField } from '@/components/recipe-photo-field'
+import { authClient } from '@/lib/auth/client'
 import { createRecipe } from '@/lib/recipes/server'
 import { formField } from '@/lib/utils/form'
 
@@ -13,6 +17,7 @@ export const Route = createFileRoute('/_app/recipes/new')({
 const ease = [0.16, 1, 0.3, 1] as const
 
 function NewRecipe() {
+	const navigate = useNavigate()
 	const reduce = useReducedMotion()
 
 	const enter = reduce
@@ -27,7 +32,7 @@ function NewRecipe() {
 		<main className="flex-1">
 			<motion.div
 				{...enter}
-				className="flex max-w-2xl flex-col gap-8 p-6 md:p-10"
+				className="flex max-w-2xl flex-col gap-6 p-6 md:p-10"
 			>
 				<div>
 					<Link
@@ -35,11 +40,21 @@ function NewRecipe() {
 						className="focus-visible:outline-kitchen-eggplant mb-4 inline-flex items-center gap-1.5 text-xs font-bold uppercase underline focus-visible:outline-2 focus-visible:outline-offset-2"
 					>
 						<ArrowLeft size={14} weight="bold" aria-hidden />
-						back to the shelf
+						recipes
 					</Link>
 					<h1 className="text-4xl font-extrabold tracking-tight md:text-5xl">
-						what's it called?
+						add a recipe
 					</h1>
+				</div>
+				<RecipeFinder
+					onImported={(recipeId) =>
+						void navigate({ to: '/recipes/$recipeId', params: { recipeId } })
+					}
+				/>
+				<div className="flex items-center gap-3 text-xs font-bold uppercase">
+					<span aria-hidden className="bg-foreground h-0.5 flex-1" />
+					or write your own
+					<span aria-hidden className="bg-foreground h-0.5 flex-1" />
 				</div>
 				<ManualForm />
 			</motion.div>
@@ -49,18 +64,21 @@ function NewRecipe() {
 
 function ManualForm() {
 	const navigate = useNavigate()
+	const user = authClient.useSession().data?.user
+	// Uploads need a real account, same as avatars.
+	const canAddPhoto = Boolean(user && !user.isAnonymous)
+	const [photoBusy, setPhotoBusy] = useState(false)
 	const [error, setError] = useState<string>()
 	const [pending, setPending] = useState(false)
 
 	return (
 		<form
-			className="border-foreground bg-card flex flex-col gap-3 border-2 p-5 shadow-md"
+			className="flex flex-col gap-3"
 			onSubmit={async (event) => {
 				event.preventDefault()
 				const form = new FormData(event.currentTarget)
 				const title = formField(form, 'title')
 				const imageUrl = formField(form, 'imageUrl')
-				const ingredients = formField(form, 'ingredients')
 				const steps = formField(form, 'steps')
 
 				if (!title) {
@@ -77,7 +95,7 @@ function ManualForm() {
 						data: {
 							title,
 							imageUrl,
-							ingredients: ingredients.split('\n'),
+							ingredients: form.getAll('ingredient').map(String),
 							steps: steps.split('\n'),
 						},
 					})
@@ -88,33 +106,18 @@ function ManualForm() {
 				}
 			}}
 		>
-			<p className="text-xs font-bold uppercase">new recipe</p>
-			<input
-				name="title"
-				required
-				maxLength={120}
-				placeholder="miso butter pasta"
-				aria-label="Recipe name"
-				className="border-foreground bg-background border-2 px-3 py-3 text-lg font-bold placeholder:opacity-50"
-			/>
-			<input
-				name="imageUrl"
-				type="url"
-				maxLength={500}
-				placeholder="photo url (optional)"
-				aria-label="Photo URL"
-				className="border-foreground bg-background border-2 px-3 py-2 text-sm font-semibold placeholder:opacity-50"
-			/>
-			<label className="text-xs font-bold uppercase" htmlFor="ingredients">
-				ingredients (one per line)
-			</label>
-			<textarea
-				id="ingredients"
-				name="ingredients"
-				rows={5}
-				placeholder="200g pasta\n1 tbsp miso"
-				className="border-foreground bg-background focus-visible:outline-kitchen-eggplant resize-y border-2 px-3 py-2 text-sm font-semibold placeholder:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2"
-			/>
+			<div className="flex items-stretch gap-3">
+				{canAddPhoto ? <RecipePhotoField onBusyChange={setPhotoBusy} /> : null}
+				<input
+					name="title"
+					required
+					maxLength={120}
+					placeholder="miso butter pasta"
+					aria-label="Recipe name"
+					className="border-foreground bg-background border-line min-w-0 flex-1 px-3 py-3 text-2xl font-bold placeholder:opacity-50"
+				/>
+			</div>
+			<IngredientListField />
 			<label className="text-xs font-bold uppercase" htmlFor="steps">
 				steps (one per line)
 			</label>
@@ -122,8 +125,8 @@ function ManualForm() {
 				id="steps"
 				name="steps"
 				rows={6}
-				placeholder="boil the pasta\nstir in the miso"
-				className="border-foreground bg-background focus-visible:outline-kitchen-eggplant resize-y border-2 px-3 py-2 text-sm font-semibold placeholder:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2"
+				placeholder={'boil the pasta\nstir in the miso'}
+				className="border-foreground bg-background focus-visible:outline-kitchen-eggplant border-line resize-y px-3 py-2 text-sm font-semibold placeholder:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2"
 			/>
 			{error ? (
 				<p role="alert" className="text-kitchen-tomato text-xs font-bold">
@@ -133,7 +136,7 @@ function ManualForm() {
 			<div className="flex gap-2">
 				<button
 					type="submit"
-					disabled={pending}
+					disabled={pending || photoBusy}
 					className="border-foreground bg-kitchen-basil border-2 px-4 py-2 text-xs font-bold uppercase shadow-sm transition-transform hover:-translate-y-0.5 disabled:opacity-50"
 				>
 					{pending ? 'saving…' : 'save to shelf'}

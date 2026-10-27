@@ -4,10 +4,12 @@ import {
 	S3Client,
 } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
-import { createServerFn } from '@tanstack/react-start'
+import { createServerFn, createServerOnlyFn } from '@tanstack/react-start'
 import { z } from 'zod'
 
 import { serverEnv as env } from '@/env.server'
+import { getCurrentSession } from '@/lib/auth/session'
+import { recipePhotoKey } from '@/lib/recipes/model'
 
 // Storage settings are optional in development and required in production.
 const storageConfig = z.object({
@@ -35,36 +37,73 @@ function getStorage() {
 	}
 }
 
-export const getAvatarUrl = createServerFn({ method: 'GET' })
-	.validator(z.object({ image: z.string().nullish() }))
-	.handler(async ({ data }): Promise<string | undefined> => {
-		if (!data.image) return undefined
+export const resolveStoredImage = createServerOnlyFn(
+	async (image: string): Promise<string> => {
+		const isPublicUrl = /^https?:\/\//.test(image)
 
-		const isPublicUrl = /^https?:\/\//.test(data.image)
-
-		if (isPublicUrl) return data.image
+		if (isPublicUrl) return image
 
 		const { bucket, client } = getStorage()
 
-		const command = new GetObjectCommand({ Bucket: bucket, Key: data.image })
+		const command = new GetObjectCommand({ Bucket: bucket, Key: image })
 
 		return getSignedUrl(client, command, { expiresIn: 60 * 60 })
+	},
+)
+
+export const getAvatarUrl = createServerFn({ method: 'GET' })
+	.validator(z.object({ image: z.string().nullish() }))
+	.handler(async ({ data }): Promise<string | undefined> =>
+		data.image ? resolveStoredImage(data.image) : undefined,
+	)
+
+async function signImageUpload(key: string) {
+	const { bucket, client } = getStorage()
+
+	const command = new PutObjectCommand({
+		Bucket: bucket,
+		Key: key,
+		ContentType: 'image/*',
 	})
+
+	return {
+		url: await getSignedUrl(client, command, {
+			expiresIn: 900,
+		}),
+	}
+}
 
 export const getAvatarUploadUrl = createServerFn({ method: 'POST' })
 	.validator(z.object({ key: z.string().min(1).max(200) }))
-	.handler(async ({ data }) => {
-		const { bucket, client } = getStorage()
+	.handler(({ data }) => createAvatarUploadUrl(data.key))
 
-		const command = new PutObjectCommand({
-			Bucket: bucket,
-			Key: data.key,
-			ContentType: 'image/*',
-		})
+export const createAvatarUploadUrl = createServerOnlyFn(async (key: string) => {
+	const session = await getCurrentSession()
 
-		return {
-			url: await getSignedUrl(client, command, {
-				expiresIn: 900,
-			}),
-		}
-	})
+	if (!session || session.user.isAnonymous) {
+		throw new Error('Sign in to upload an avatar')
+	}
+
+	if (!key.startsWith(`avatars/${session.user.id}-`)) {
+		throw new Error('Invalid avatar key')
+	}
+
+	return signImageUpload(key)
+})
+
+// The server picks the key so a client can only upload under its own prefix.
+export const getRecipePhotoUploadUrl = createServerFn({
+	method: 'POST',
+}).handler(() => createRecipePhotoUpload())
+
+export const createRecipePhotoUpload = createServerOnlyFn(async () => {
+	const session = await getCurrentSession()
+
+	if (!session || session.user.isAnonymous) {
+		throw new Error('Sign in to upload a recipe photo')
+	}
+
+	const key = recipePhotoKey(session.user.id)
+
+	return { key, ...(await signImageUpload(key)) }
+})

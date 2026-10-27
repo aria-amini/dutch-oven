@@ -1,29 +1,31 @@
 import { renderRoute } from '@tests/support/render/route'
 import { beforeEach, describe, expect, test, vi } from 'vite-plus/test'
 
-type Recipe = {
-	id: string
-	userId: string
-	collectionId: string | null
-	title: string
-	imageUrl: string | null
-	createdAt: Date
-}
+import type { collections } from '@/db/schema'
+import type { listShelf } from '@/lib/recipes/server'
 
-type Collection = {
-	id: string
-	userId: string
-	name: string
-	position: number
-	createdAt: Date
-}
+type Recipe = Awaited<ReturnType<typeof listShelf>>['recipes'][number]
 
-type ShelfState = { recipes: Recipe[]; collections: Collection[] }
+type Collection = typeof collections.$inferSelect
+
+type ShelfState = {
+	recipes: Recipe[]
+	collections: Collection[]
+}
 
 const shelfState = vi.hoisted<ShelfState>(() => ({
 	recipes: [],
 	collections: [],
 }))
+
+const discovery = vi.hoisted(() => ({
+	search: vi.fn(),
+	import: vi.fn(),
+}))
+
+vi.mock('@/lib/discover/server', () => ({ searchRecipes: discovery.search }))
+
+vi.mock('@/lib/import/server', () => ({ importRecipe: discovery.import }))
 
 vi.mock('@/lib/recipes/server', () => ({
 	listShelf: () =>
@@ -31,24 +33,17 @@ vi.mock('@/lib/recipes/server', () => ({
 			recipes: shelfState.recipes,
 			collections: shelfState.collections,
 		}),
-	getRecipe: ({ data }: { data: { id: string } }) =>
-		Promise.resolve(
-			shelfState.recipes.find((recipe) => recipe.id === data.id) ?? null,
-		),
-	createRecipe: async ({
-		data,
-	}: {
-		data: { title: string; imageUrl?: string; collectionId?: string }
-	}) => {
-		shelfState.recipes.push({
-			id: crypto.randomUUID(),
-			userId: 'user-1',
-			collectionId: data.collectionId ?? null,
-			title: data.title,
-			imageUrl: data.imageUrl ?? null,
-			createdAt: new Date(),
-		})
+	getRecipe: ({ data }: { data: { id: string } }) => {
+		const recipe = shelfState.recipes.find((recipe) => recipe.id === data.id)
+
+		return Promise.resolve(
+			recipe ? { ...recipe, ingredients: [], steps: [] } : null,
+		)
 	},
+	listBooks: () => Promise.resolve(shelfState.collections),
+	deleteRecipe: () => Promise.resolve(),
+	moveRecipe: () => Promise.resolve(),
+	updateRecipe: () => Promise.resolve(),
 }))
 
 const testSession = {
@@ -62,7 +57,14 @@ const misoButterPasta: Recipe = {
 	collectionId: 'col-1',
 	title: 'miso butter pasta',
 	imageUrl: null,
+	sourceUrl: null,
+	servings: null,
+	totalMinutes: null,
+	notes: null,
 	createdAt: new Date(),
+	finalizedAt: new Date(),
+	cookCount: 0,
+	lastCookedAt: null,
 }
 
 const dal: Recipe = {
@@ -71,13 +73,34 @@ const dal: Recipe = {
 	collectionId: null,
 	title: 'dal',
 	imageUrl: null,
+	sourceUrl: null,
+	servings: null,
+	totalMinutes: null,
+	notes: null,
 	createdAt: new Date(),
+	finalizedAt: new Date(),
+	cookCount: 0,
+	lastCookedAt: null,
 }
 
 describe('recipes shelf', () => {
 	beforeEach(() => {
 		shelfState.recipes = []
 		shelfState.collections = []
+		discovery.search.mockReset().mockResolvedValue({
+			results: [
+				{
+					title: 'online ramen',
+					url: 'https://example.com/ramen',
+					siteName: 'Example',
+					siteId: 'example',
+				},
+			],
+			warming: false,
+		})
+		discovery.import
+			.mockReset()
+			.mockRejectedValue(new Error('Import failed. Please retry.'))
 	})
 
 	test('invites the first save when the shelf is empty', async () => {
@@ -91,7 +114,7 @@ describe('recipes shelf', () => {
 			.toBeVisible()
 	})
 
-	test('lists every recipe in one grid', async () => {
+	test('shows only search and the recipe cards', async () => {
 		shelfState.recipes = [misoButterPasta, dal]
 
 		const { screen } = await renderRoute({
@@ -101,34 +124,151 @@ describe('recipes shelf', () => {
 
 		await expect.element(screen.getByText('miso butter pasta')).toBeVisible()
 		await expect.element(screen.getByText('dal')).toBeVisible()
-	})
-
-	test('offers the add fork when adding from the shelf', async () => {
-		shelfState.recipes = [misoButterPasta, dal]
-
-		const { screen } = await renderRoute({
-			path: '/recipes',
-			session: testSession,
-		})
-
-		await screen.getByRole('button', { name: 'recipe' }).click()
-		await expect.element(screen.getByText('from a link')).toBeVisible()
-		await expect.element(screen.getByText('my own two hands')).toBeVisible()
-	})
-
-	test('closes the add fork from its close button', async () => {
-		shelfState.recipes = [misoButterPasta, dal]
-
-		const { screen } = await renderRoute({
-			path: '/recipes',
-			session: testSession,
-		})
-
-		await screen.getByRole('button', { name: 'recipe' }).click()
-		await expect.element(screen.getByText('from a link')).toBeVisible()
-		await screen.getByRole('button', { name: 'Close' }).click()
 		await expect
-			.element(screen.getByText('from a link'))
+			.element(screen.getByRole('link', { name: 'add recipe' }))
+			.toHaveAttribute('href', '/recipes/new')
+		await expect.element(screen.getByLabelText('Search recipes')).toBeVisible()
+
+		for (const name of ['start a meal', 'newest', 'most cooked']) {
+			await expect
+				.element(screen.getByText(name, { exact: true }))
+				.not.toBeInTheDocument()
+		}
+	})
+
+	test('puts the title beside a recipe photo, not over it', async () => {
+		shelfState.recipes = [{ ...dal, imageUrl: '/sprites/pantry/apple.png' }]
+
+		const { screen } = await renderRoute({
+			path: '/recipes',
+			session: testSession,
+		})
+
+		const card = screen.getByRole('link', { name: 'dal' })
+		const photo = card.element().querySelector('img')
+		const title = card.element().querySelector('h3')
+
+		if (!photo || !title) throw new Error('card is missing its photo or title')
+		await expect.element(screen.getByText('dal')).toBeVisible()
+		expect(photo.getBoundingClientRect().bottom).toBeLessThanOrEqual(
+			title.getBoundingClientRect().top + 1,
+		)
+	})
+
+	test('searches recipes by name', async () => {
+		shelfState.recipes = [
+			misoButterPasta,
+			dal,
+			{ ...dal, id: 'recipe-3', title: 'Red Lentil Dal' },
+		]
+
+		const { screen } = await renderRoute({
+			path: '/recipes',
+			session: testSession,
+		})
+
+		await screen.getByLabelText('Search recipes').fill('dal')
+		await expect.element(screen.getByText('Red Lentil Dal')).toBeVisible()
+		await expect.element(screen.getByText('dal', { exact: true })).toBeVisible()
+		await expect
+			.element(screen.getByText('miso butter pasta'))
 			.not.toBeInTheDocument()
+
+		await screen.getByLabelText('Search recipes').fill('ramen')
+		await expect
+			.element(screen.getByText('no recipes match', { exact: false }))
+			.toBeVisible()
+	})
+	test('only searches online after an explicit request, and clears results when typing', async () => {
+		shelfState.recipes = [dal]
+
+		const { screen } = await renderRoute({
+			path: '/recipes',
+			session: testSession,
+		})
+
+		await screen.getByLabelText('Search recipes').fill('ramen')
+		await expect
+			.element(screen.getByText('no recipes match', { exact: false }))
+			.toBeVisible()
+		expect(discovery.search).not.toHaveBeenCalled()
+		await screen.getByRole('button', { name: 'find “ramen” online' }).click()
+		await expect
+			.element(screen.getByText('online ramen', { exact: true }))
+			.toBeVisible()
+		expect(discovery.search).toHaveBeenCalledWith({ data: { q: 'ramen' } })
+		await screen.getByRole('button', { name: /online ramen/ }).click()
+		await expect
+			.element(screen.getByRole('alert'))
+			.toHaveTextContent('Import failed. Please retry.')
+		expect(discovery.import).toHaveBeenCalledWith({
+			data: { url: 'https://example.com/ramen' },
+		})
+		await screen.getByLabelText('Search recipes').fill('dal')
+		await expect
+			.element(screen.getByRole('region', { name: 'Online recipes' }))
+			.not.toBeInTheDocument()
+	})
+
+	test('imports a pasted link from an empty shelf without searching online', async () => {
+		const { screen } = await renderRoute({
+			path: '/recipes',
+			session: testSession,
+		})
+
+		await screen
+			.getByLabelText('Search recipes')
+			.fill('https://example.com/ramen')
+		expect(discovery.search).not.toHaveBeenCalled()
+		expect(discovery.import).not.toHaveBeenCalled()
+		await screen.getByRole('button', { name: 'import this link' }).click()
+		await expect
+			.element(screen.getByRole('alert'))
+			.toHaveTextContent('Import failed. Please retry.')
+		await screen.getByRole('button', { name: 'import this link' }).click()
+		expect(discovery.import).toHaveBeenCalledTimes(2)
+	})
+
+	test('keeps a recipe color when filtering', async () => {
+		shelfState.recipes = [misoButterPasta, dal]
+
+		const { screen } = await renderRoute({
+			path: '/recipes',
+			session: testSession,
+		})
+
+		const color = screen
+			.getByRole('link', { name: 'dal', exact: true })
+			.element().className
+
+		await screen.getByLabelText('Search recipes').fill('dal')
+		await expect
+			.element(screen.getByText('miso butter pasta'))
+			.not.toBeInTheDocument()
+		expect(
+			screen.getByRole('link', { name: 'dal', exact: true }).element()
+				.className,
+		).toBe(color)
+	})
+
+	test('opens an imported recipe for review', async () => {
+		shelfState.recipes = [{ ...dal, finalizedAt: null }]
+		discovery.import.mockResolvedValue({ id: dal.id })
+
+		const { screen, router } = await renderRoute({
+			path: '/recipes',
+			session: testSession,
+		})
+
+		await screen
+			.getByLabelText('Search recipes')
+			.fill('https://example.com/dal')
+		await screen.getByRole('button', { name: 'import this link' }).click()
+		await expect
+			.poll(() => router.state.location.pathname)
+			.toBe('/recipes/recipe-2')
+		await expect
+			.element(screen.getByRole('textbox', { name: 'name', exact: true }))
+			.toBeVisible()
 	})
 })
