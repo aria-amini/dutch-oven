@@ -5,9 +5,16 @@ import { useState } from 'react'
 
 import { IngredientListField } from '@/components/ingredient-list-field'
 import { RecipeFinder } from '@/components/recipe-finder'
+import {
+	FormActions,
+	primaryActionClassName,
+	quietActionClassName,
+	RecipeNameField,
+} from '@/components/recipe-form'
 import { RecipePhotoField } from '@/components/recipe-photo-field'
 import { StepsField, stepsFrom } from '@/components/steps-field'
 import { authClient } from '@/lib/auth/client'
+import { recipeTitleMax } from '@/lib/recipes/model'
 import { createRecipe } from '@/lib/recipes/server'
 import { formField } from '@/lib/utils/form'
 
@@ -33,17 +40,17 @@ function NewRecipe() {
 		<main className="flex-1">
 			<motion.div
 				{...enter}
-				className="flex max-w-2xl flex-col gap-6 p-6 md:p-10"
+				className="flex max-w-2xl flex-col gap-8 p-6 md:p-10"
 			>
 				<div>
 					<Link
 						to="/recipes"
-						className="focus-visible:outline-kitchen-eggplant mb-4 inline-flex items-center gap-1.5 text-xs font-semibold underline focus-visible:outline-2 focus-visible:outline-offset-2"
+						className="text-muted-foreground hover:text-foreground focus-visible:outline-kitchen-eggplant mb-3 inline-flex items-center gap-1.5 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-2"
 					>
 						<ArrowLeft size={14} weight="bold" aria-hidden />
 						recipes
 					</Link>
-					<h1 className="text-4xl font-bold tracking-tight md:text-5xl">
+					<h1 className="text-2xl font-bold tracking-tight md:text-3xl">
 						add a recipe
 					</h1>
 				</div>
@@ -52,10 +59,10 @@ function NewRecipe() {
 						void navigate({ to: '/recipes/$recipeId', params: { recipeId } })
 					}
 				/>
-				<div className="flex items-center gap-3 text-xs font-semibold">
-					<span aria-hidden className="bg-foreground h-0.5 flex-1" />
+				<div className="text-muted-foreground flex items-center gap-3 text-sm font-semibold">
+					<span aria-hidden className="bg-border h-px flex-1" />
 					or write your own
-					<span aria-hidden className="bg-foreground h-0.5 flex-1" />
+					<span aria-hidden className="bg-border h-px flex-1" />
 				</div>
 				<ManualForm />
 			</motion.div>
@@ -74,7 +81,7 @@ function ManualForm() {
 
 	return (
 		<form
-			className="flex flex-col gap-3"
+			className="flex flex-col gap-8"
 			onSubmit={async (event) => {
 				event.preventDefault()
 				const form = new FormData(event.currentTarget)
@@ -106,39 +113,33 @@ function ManualForm() {
 				}
 			}}
 		>
-			<div className="flex items-stretch gap-3">
-				{canAddPhoto ? <RecipePhotoField onBusyChange={setPhotoBusy} /> : null}
-				<input
-					name="title"
-					required
-					maxLength={120}
+			<div className="flex flex-col gap-4">
+				<RecipeNameField
+					label="Recipe name"
+					maxLength={recipeTitleMax}
 					placeholder="miso butter pasta"
-					aria-label="Recipe name"
-					className="border-input bg-background min-w-0 flex-1 border px-3 py-3 text-2xl font-semibold placeholder:opacity-50"
 				/>
+				{canAddPhoto ? <RecipePhotoField onBusyChange={setPhotoBusy} /> : null}
 			</div>
 			<IngredientListField />
 			<StepsField />
 			{error ? (
-				<p role="alert" className="text-kitchen-tomato text-xs font-semibold">
+				<p role="alert" className="text-kitchen-tomato text-sm font-semibold">
 					{error}
 				</p>
 			) : null}
-			<div className="flex gap-2">
+			<FormActions>
 				<button
 					type="submit"
 					disabled={pending || photoBusy}
-					className="bg-kitchen-basil px-4 py-2 text-xs font-semibold disabled:opacity-50"
+					className={primaryActionClassName}
 				>
 					{pending ? 'saving…' : 'save to shelf'}
 				</button>
-				<Link
-					to="/recipes"
-					className="border-input bg-background border px-4 py-2 text-xs font-semibold"
-				>
+				<Link to="/recipes" className={quietActionClassName}>
 					cancel
 				</Link>
-			</div>
+			</FormActions>
 		</form>
 	)
 }

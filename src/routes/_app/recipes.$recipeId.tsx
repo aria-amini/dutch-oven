@@ -10,6 +10,14 @@ import { Fragment, useMemo, useState, useSyncExternalStore } from 'react'
 import { toast } from 'sonner'
 
 import { IngredientListField } from '@/components/ingredient-list-field'
+import {
+	FormActions,
+	placeholderClassName,
+	primaryActionClassName,
+	quietActionClassName,
+	RecipeNameField,
+	fieldLabelClassName,
+} from '@/components/recipe-form'
 import { RecipePhotoField } from '@/components/recipe-photo-field'
 import { StepsField, stepsFrom } from '@/components/steps-field'
 import type { collections } from '@/db/schema'
@@ -494,7 +502,7 @@ function RecipeEditor({
 
 	return (
 		<form
-			className="flex flex-col gap-3"
+			className="flex flex-col gap-8"
 			onSubmit={(event) => {
 				event.preventDefault()
 				void save(new FormData(event.currentTarget))
@@ -505,7 +513,13 @@ function RecipeEditor({
 					draft — check it over, then finalize
 				</p>
 			) : null}
-			<div className="flex items-start gap-3">
+			<div className="flex flex-col gap-4">
+				<RecipeNameField
+					id="edit-title"
+					label="name"
+					maxLength={recipeTitleMax}
+					defaultValue={recipe.title}
+				/>
 				{canAddPhoto ? (
 					<RecipePhotoField
 						current={recipe.imageUrl}
@@ -515,47 +529,36 @@ function RecipeEditor({
 					<img
 						src={recipe.imageUrl}
 						alt=""
-						className="border-border size-24 shrink-0 object-cover"
+						className="border-border size-24 shrink-0 border object-cover"
 					/>
 				) : null}
-				<div className="flex min-w-0 flex-1 flex-col gap-3">
-					<label className="text-xs font-semibold" htmlFor="edit-title">
-						name
-					</label>
-					<input
-						id="edit-title"
-						name="title"
-						required
-						maxLength={recipeTitleMax}
-						defaultValue={recipe.title}
-						className={cn(fieldClassName, 'text-2xl font-bold')}
-					/>
-				</div>
 			</div>
 			<IngredientListField defaultValue={recipe.ingredients} />
 			<StepsField defaultValue={recipe.steps} />
-			<label className="text-xs font-semibold" htmlFor="edit-notes">
-				notes
-			</label>
-			<textarea
-				id="edit-notes"
-				name="notes"
-				maxLength={recipeNotesMax}
-				defaultValue={recipe.notes ?? ''}
-				rows={3}
-				placeholder="less salt next time"
-				className={cn(fieldClassName, 'resize-y placeholder:opacity-50')}
-			/>
+			<div className="flex flex-col gap-2">
+				<label className={fieldLabelClassName} htmlFor="edit-notes">
+					notes
+				</label>
+				<textarea
+					id="edit-notes"
+					name="notes"
+					maxLength={recipeNotesMax}
+					defaultValue={recipe.notes ?? ''}
+					rows={3}
+					placeholder="less salt next time"
+					className={cn(fieldClassName, 'resize-y', placeholderClassName)}
+				/>
+			</div>
 			{error ? (
 				<p role="alert" className="text-kitchen-tomato text-sm font-semibold">
 					{error}
 				</p>
 			) : null}
-			<div className="flex flex-wrap gap-2">
+			<FormActions>
 				<button
 					type="submit"
 					disabled={pending || photoBusy}
-					className="bg-kitchen-basil px-4 py-2 text-xs font-semibold disabled:opacity-50"
+					className={primaryActionClassName}
 				>
 					{pending ? 'saving…' : isDraft ? 'save & finalize' : 'save'}
 				</button>
@@ -564,7 +567,7 @@ function RecipeEditor({
 						type="button"
 						disabled={pending}
 						onClick={onDone}
-						className="border-input bg-background border px-4 py-2 text-xs font-semibold"
+						className={quietActionClassName}
 					>
 						cancel
 					</button>
@@ -576,7 +579,7 @@ function RecipeEditor({
 								type="button"
 								disabled={pending}
 								onClick={() => void remove()}
-								className="bg-kitchen-tomato px-4 py-2 text-xs font-semibold disabled:opacity-50"
+								className="bg-kitchen-tomato/40 hover:bg-kitchen-tomato/60 focus-visible:outline-kitchen-eggplant px-4 py-2.5 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50"
 							>
 								really delete
 							</button>
@@ -584,7 +587,7 @@ function RecipeEditor({
 								type="button"
 								disabled={pending}
 								onClick={() => setConfirmingDelete(false)}
-								className="border-input bg-background border px-4 py-2 text-xs font-semibold"
+								className={quietActionClassName}
 							>
 								keep it
 							</button>
@@ -594,13 +597,13 @@ function RecipeEditor({
 							type="button"
 							disabled={pending}
 							onClick={() => setConfirmingDelete(true)}
-							className="border-input bg-background hover:bg-kitchen-tomato/30 px-4 py-2 text-xs font-semibold"
+							className={cn(quietActionClassName, 'hover:bg-kitchen-tomato/20')}
 						>
 							delete recipe
 						</button>
 					)}
 				</span>
-			</div>
+			</FormActions>
 		</form>
 	)
 }

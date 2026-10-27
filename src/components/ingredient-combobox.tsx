@@ -3,6 +3,7 @@
    a native datalist cannot style or fully control the suggestion list. */
 import { useId, useRef, useState } from 'react'
 
+import { placeholderClassName } from '@/components/recipe-form'
 import { pantrySprites, resolveSpriteSrc } from '@/lib/pantry/sprites'
 import { cn } from '@/lib/utils/ui'
 
@@ -116,7 +117,8 @@ export function IngredientCombobox({
 					if (!event.defaultPrevented) onKeyDown?.(event)
 				}}
 				className={cn(
-					'border-input bg-background focus-visible:outline-kitchen-eggplant w-full border placeholder:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2',
+					'border-input bg-background focus-visible:outline-kitchen-eggplant w-full border focus-visible:outline-2 focus-visible:outline-offset-2',
+					placeholderClassName,
 					compact
 						? 'px-3 py-2 text-sm font-semibold'
 						: 'px-3 py-3 text-lg font-semibold',

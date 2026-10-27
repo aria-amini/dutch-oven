@@ -19,6 +19,10 @@ import { DotsSixVertical, Plus, X } from '@phosphor-icons/react'
 import { useEffect, useRef, useState } from 'react'
 
 import { IngredientCombobox } from '@/components/ingredient-combobox'
+import {
+	placeholderClassName,
+	fieldLabelClassName,
+} from '@/components/recipe-form'
 import { resolveSpriteSrc } from '@/lib/pantry/sprites'
 import {
 	formatIngredientLine,
@@ -55,7 +59,7 @@ function lineOf(row: Row) {
 }
 
 const iconButtonClassName =
-	'text-foreground/60 hover:text-foreground hover:bg-card focus-visible:outline-kitchen-eggplant p-2.5 focus-visible:outline-2 focus-visible:outline-offset-2'
+	'text-muted-foreground hover:text-foreground hover:bg-card focus-visible:outline-kitchen-eggplant grid size-11 place-items-center focus-visible:outline-2 focus-visible:outline-offset-2 sm:size-10'
 
 // One draggable row; `children` receives the drag handle to place in the grid.
 function SortableRow({
@@ -108,8 +112,10 @@ function SortableRow({
 	)
 }
 
-const controlClassName =
-	'border-input bg-background focus-visible:outline-kitchen-eggplant w-full border px-3 py-2 text-sm font-semibold placeholder:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2'
+const controlClassName = cn(
+	'border-input bg-background focus-visible:outline-kitchen-eggplant w-full border px-3 py-2 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-2',
+	placeholderClassName,
+)
 
 // Each row submits as one `ingredient` field holding "1½ cup flour"; read the
 // rows with `getAll`.
@@ -170,7 +176,7 @@ export function IngredientListField({
 
 	return (
 		<fieldset className="flex flex-col gap-2">
-			<legend className="mb-1 text-xs font-semibold">ingredients</legend>
+			<legend className={cn(fieldLabelClassName, 'mb-2')}>ingredients</legend>
 			<DndContext
 				sensors={sensors}
 				collisionDetection={closestCenter}
@@ -224,14 +230,18 @@ export function IngredientListField({
 											))}
 										</select>
 										<div className="col-span-3 col-start-2 row-start-2 flex items-center gap-2 sm:col-span-1 sm:col-start-auto sm:row-start-auto">
-											<img
-												src={resolveSpriteSrc(row.name)}
-												alt=""
-												className={cn(
-													'size-8 shrink-0 object-contain [image-rendering:pixelated]',
-													!row.name.trim() && 'opacity-30 grayscale',
-												)}
-											/>
+											{row.name.trim() ? (
+												<img
+													src={resolveSpriteSrc(row.name)}
+													alt=""
+													className="size-8 shrink-0 object-contain [image-rendering:pixelated]"
+												/>
+											) : (
+												<span
+													aria-hidden
+													className="border-border size-8 shrink-0 border border-dashed"
+												/>
+											)}
 											<div className="min-w-0 flex-1">
 												<IngredientCombobox
 													compact

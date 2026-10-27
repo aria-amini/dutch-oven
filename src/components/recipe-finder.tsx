@@ -5,6 +5,7 @@ import {
 } from '@phosphor-icons/react'
 import { useEffect, useRef, useState } from 'react'
 
+import { placeholderClassName } from '@/components/recipe-form'
 import { searchRecipes } from '@/lib/discover/server'
 import { recipeSites } from '@/lib/discover/sites'
 import { importRecipe } from '@/lib/import/server'
@@ -136,7 +137,10 @@ export function RecipeFinder({
 									setQuery(event.target.value)
 									setError(undefined)
 								}}
-								className="w-full bg-transparent text-sm font-semibold outline-none placeholder:opacity-50"
+								className={cn(
+									'w-full bg-transparent text-sm font-semibold outline-none',
+									placeholderClassName,
+								)}
 							/>
 						</label>
 					) : null}
