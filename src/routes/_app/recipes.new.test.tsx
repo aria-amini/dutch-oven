@@ -185,6 +185,25 @@ describe('add a recipe', () => {
 			)
 	})
 
+	test('saves free-form steps one per line', async () => {
+		const { screen } = await renderRoute({
+			path: '/recipes/new',
+			session: testSession,
+		})
+
+		await screen.getByRole('textbox', { name: 'Recipe name' }).fill('Toast')
+		await screen
+			.getByRole('textbox', { name: 'steps (one per line)' })
+			.fill('slice the bread\n\ntoast it')
+		await screen.getByRole('button', { name: 'save to shelf' }).click()
+
+		await expect
+			.poll(() => state.created.at(-1))
+			.toEqual(
+				expect.objectContaining({ steps: ['slice the bread', '', 'toast it'] }),
+			)
+	})
+
 	test('uploads a photo and saves its key with the recipe', async () => {
 		const realFetch = globalThis.fetch.bind(globalThis)
 

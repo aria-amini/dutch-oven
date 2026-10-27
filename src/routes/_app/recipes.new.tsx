@@ -6,6 +6,7 @@ import { useState } from 'react'
 import { IngredientListField } from '@/components/ingredient-list-field'
 import { RecipeFinder } from '@/components/recipe-finder'
 import { RecipePhotoField } from '@/components/recipe-photo-field'
+import { StepsField, stepsFrom } from '@/components/steps-field'
 import { authClient } from '@/lib/auth/client'
 import { createRecipe } from '@/lib/recipes/server'
 import { formField } from '@/lib/utils/form'
@@ -79,7 +80,6 @@ function ManualForm() {
 				const form = new FormData(event.currentTarget)
 				const title = formField(form, 'title')
 				const imageUrl = formField(form, 'imageUrl')
-				const steps = formField(form, 'steps')
 
 				if (!title) {
 					setError('give the recipe a name')
@@ -96,7 +96,7 @@ function ManualForm() {
 							title,
 							imageUrl,
 							ingredients: form.getAll('ingredient').map(String),
-							steps: steps.split('\n'),
+							steps: stepsFrom(form),
 						},
 					})
 					await navigate({ to: '/recipes' })
@@ -118,16 +118,7 @@ function ManualForm() {
 				/>
 			</div>
 			<IngredientListField />
-			<label className="text-xs font-bold uppercase" htmlFor="steps">
-				steps (one per line)
-			</label>
-			<textarea
-				id="steps"
-				name="steps"
-				rows={6}
-				placeholder={'boil the pasta\nstir in the miso'}
-				className="border-foreground bg-background focus-visible:outline-kitchen-eggplant border-line resize-y px-3 py-2 text-sm font-semibold placeholder:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2"
-			/>
+			<StepsField />
 			{error ? (
 				<p role="alert" className="text-kitchen-tomato text-xs font-bold">
 					{error}

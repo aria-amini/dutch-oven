@@ -181,6 +181,20 @@ export async function createCollectionForUser(
 	return collection
 }
 
+// Imports keep a public URL; uploads must sit under the owner's prefix.
+function assertRecipePhoto(
+	userId: string,
+	imageUrl: string | null | undefined,
+) {
+	if (
+		imageUrl &&
+		!/^https?:\/\//.test(imageUrl) &&
+		!ownsRecipePhoto(userId, imageUrl)
+	) {
+		throw new Error('Invalid recipe photo')
+	}
+}
+
 export async function createRecipeForUser(
 	userId: string,
 	input: {
@@ -195,13 +209,7 @@ export async function createRecipeForUser(
 	},
 	database: typeof db = db,
 ) {
-	if (
-		input.imageUrl &&
-		!/^https?:\/\//.test(input.imageUrl) &&
-		!ownsRecipePhoto(userId, input.imageUrl)
-	) {
-		throw new Error('Invalid recipe photo')
-	}
+	assertRecipePhoto(userId, input.imageUrl)
 
 	return database.transaction(async (tx) => {
 		if (input.collectionId) {
@@ -270,6 +278,8 @@ export async function updateRecipeForUser(
 	{ id, ingredients, steps, finalize, ...details }: RecipeUpdate,
 	database: typeof db = db,
 ) {
+	assertRecipePhoto(userId, details.imageUrl)
+
 	return database.transaction(async (tx) => {
 		const [recipe] = await tx
 			.update(recipes)

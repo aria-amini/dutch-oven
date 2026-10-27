@@ -2,10 +2,6 @@ import { z } from 'zod'
 
 export const recipeTitleMax = 120
 
-export const recipeServingsMax = 99
-
-export const recipeMinutesMax = 24 * 60
-
 export const recipeNotesMax = 2000
 
 // zod measures string length in code points, so truncate the same way to avoid splitting a surrogate pair
@@ -23,12 +19,10 @@ export const ownsRecipePhoto = (userId: string, image: string) =>
 
 const recipePhotoPath = z.string().regex(/^recipes\/[\w-]{1,150}$/)
 
-export const recipeFields = {
+const recipeFields = {
 	title: z.string().trim().min(1).max(recipeTitleMax),
 	imageUrl: recipeImageUrl,
 	sourceUrl: z.url({ protocol: /^https?$/ }).max(2000),
-	servings: z.number().int().min(1).max(recipeServingsMax),
-	totalMinutes: z.number().int().min(1).max(recipeMinutesMax),
 	notes: z.string().trim().max(recipeNotesMax),
 }
 
@@ -52,8 +46,8 @@ export const recipeInput = z.object({
 export const recipeUpdateInput = z.object({
 	id: z.string().min(1),
 	title: recipeFields.title,
-	servings: recipeFields.servings.nullable(),
-	totalMinutes: recipeFields.totalMinutes.nullable(),
+	// Omitted keeps the current photo; null removes it.
+	imageUrl: z.union([recipeFields.imageUrl, recipePhotoPath]).nullish(),
 	notes: recipeFields.notes.nullable().transform((notes) => notes || null),
 	finalize: z.boolean().optional(),
 	ingredients: contentLines,

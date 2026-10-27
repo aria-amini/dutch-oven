@@ -1,4 +1,4 @@
-import { Camera, X } from '@phosphor-icons/react'
+import { ImageSquare, X } from '@phosphor-icons/react'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -7,14 +7,20 @@ import { cn } from '@/lib/utils/ui'
 
 const maxBytes = 10 * 1024 * 1024
 
-// Uploads on pick, then submits the storage key as the form's `imageUrl`.
+// Shows `current` (an imported or saved photo) until the user picks another.
+// Uploads on pick, then submits the storage key as the form's `imageUrl`. An
+// untouched field submits nothing, and a removed photo submits an empty value.
 export function RecipePhotoField({
+	current,
 	onBusyChange,
 }: {
+	current?: string | null | undefined
 	onBusyChange: (busy: boolean) => void
 }) {
 	const [photo, setPhoto] = useState<{ key: string; preview: string }>()
+	const [removed, setRemoved] = useState(false)
 	const [busy, setBusy] = useState(false)
+	const shown = photo?.preview ?? (removed ? undefined : (current ?? undefined))
 
 	useEffect(() => {
 		const preview = photo?.preview
@@ -66,7 +72,7 @@ export function RecipePhotoField({
 			<label
 				className={cn(
 					'border-foreground bg-background focus-within:outline-kitchen-eggplant hover:bg-card grid size-full cursor-pointer place-items-center overflow-hidden border-2 focus-within:outline-2 focus-within:outline-offset-2',
-					!photo && 'border-dashed',
+					!shown && 'border-dashed',
 					busy && 'animate-pulse',
 				)}
 			>
@@ -78,32 +84,37 @@ export function RecipePhotoField({
 					onChange={choose}
 					className="sr-only"
 				/>
-				{photo ? (
-					<img src={photo.preview} alt="" className="size-full object-cover" />
+				{shown ? (
+					<img src={shown} alt="" className="size-full object-cover" />
 				) : (
-					<span className="flex flex-col items-center gap-1 text-xs font-bold uppercase">
+					<span className="text-foreground/60 flex flex-col items-center gap-1 text-xs font-bold uppercase">
 						{busy ? (
 							'uploading…'
 						) : (
 							<>
-								<Camera size={22} weight="bold" aria-hidden />
-								photo
+								<ImageSquare size={28} weight="duotone" aria-hidden />
+								add photo
 							</>
 						)}
 					</span>
 				)}
 			</label>
-			{photo ? (
+			{shown ? (
 				<button
 					type="button"
 					aria-label="Remove photo"
-					onClick={() => setPhoto(undefined)}
+					onClick={() => {
+						setPhoto(undefined)
+						setRemoved(true)
+					}}
 					className="border-foreground bg-background focus-visible:outline-kitchen-eggplant absolute -top-2 -right-2 grid size-6 place-items-center border-2 focus-visible:outline-2"
 				>
 					<X size={12} weight="bold" aria-hidden />
 				</button>
 			) : null}
-			<input type="hidden" name="imageUrl" value={photo?.key ?? ''} />
+			{photo || removed ? (
+				<input type="hidden" name="imageUrl" value={photo?.key ?? ''} />
+			) : null}
 		</div>
 	)
 }

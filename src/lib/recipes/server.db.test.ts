@@ -121,8 +121,6 @@ describe('recipe shelf', () => {
 		const update = recipeUpdateInput.parse({
 			id: recipe.id,
 			title: 'tomato dal',
-			servings: 4,
-			totalMinutes: 45,
 			notes: '  ',
 			ingredients: ['tomatoes'],
 			steps: ['toast', '', 'serve'],
@@ -133,8 +131,6 @@ describe('recipe shelf', () => {
 			getRecipeForUser(userId, recipe.id, db),
 		).resolves.toMatchObject({
 			title: 'tomato dal',
-			servings: 4,
-			totalMinutes: 45,
 			notes: null,
 			ingredients: ['tomatoes'],
 			steps: ['toast', 'serve'],
@@ -211,8 +207,6 @@ describe('recipe shelf', () => {
 			{
 				id: draft.id,
 				title: 'stew',
-				servings: null,
-				totalMinutes: null,
 				notes: null,
 				ingredients: [],
 				steps: [],
@@ -227,8 +221,6 @@ describe('recipe shelf', () => {
 			{
 				id: draft.id,
 				title: 'stew',
-				servings: null,
-				totalMinutes: null,
 				notes: null,
 				ingredients: [],
 				steps: [],
@@ -258,6 +250,57 @@ describe('recipe shelf', () => {
 		)
 
 		expect(recipe?.imageUrl).toBe(`recipes/${userId}-abc`)
+	})
+
+	test('keeps, replaces, and clears the photo on update', async ({ db }) => {
+		const userId = await seedUser(db)
+
+		const recipe = await createRecipeForUser(
+			userId,
+			{ title: 'dal', imageUrl: 'https://example.com/dal.jpg' },
+			db,
+		)
+
+		if (!recipe) throw new Error('recipe was not created')
+
+		const edit = {
+			id: recipe.id,
+			title: 'dal',
+			notes: null,
+			ingredients: [],
+			steps: [],
+		}
+
+		await updateRecipeForUser(userId, recipeUpdateInput.parse(edit), db)
+		await expect(
+			getRecipeForUser(userId, recipe.id, db),
+		).resolves.toMatchObject({ imageUrl: 'https://example.com/dal.jpg' })
+
+		await updateRecipeForUser(
+			userId,
+			recipeUpdateInput.parse({ ...edit, imageUrl: `recipes/${userId}-new` }),
+			db,
+		)
+		await expect(
+			getRecipeForUser(userId, recipe.id, db),
+		).resolves.toMatchObject({ imageUrl: `recipes/${userId}-new` })
+
+		await expect(
+			updateRecipeForUser(
+				userId,
+				recipeUpdateInput.parse({ ...edit, imageUrl: 'recipes/other-1' }),
+				db,
+			),
+		).rejects.toThrow('Invalid recipe photo')
+
+		await updateRecipeForUser(
+			userId,
+			recipeUpdateInput.parse({ ...edit, imageUrl: null }),
+			db,
+		)
+		await expect(
+			getRecipeForUser(userId, recipe.id, db),
+		).resolves.toMatchObject({ imageUrl: null })
 	})
 })
 

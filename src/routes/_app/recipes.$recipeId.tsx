@@ -10,21 +10,23 @@ import { Fragment, useMemo, useState, useSyncExternalStore } from 'react'
 import { toast } from 'sonner'
 
 import { IngredientListField } from '@/components/ingredient-list-field'
-import { StepListField } from '@/components/step-list-field'
+import { RecipePhotoField } from '@/components/recipe-photo-field'
+import { StepsField, stepsFrom } from '@/components/steps-field'
 import type { collections } from '@/db/schema'
+import { authClient } from '@/lib/auth/client'
 import { logCook, undoCook } from '@/lib/cooks/server'
 import { importSiteForUrl, importSiteLogo } from '@/lib/import/sites'
+import { resolveSpriteSrc } from '@/lib/pantry/sprites'
 import {
 	checklistKey,
 	readChecklist,
 	subscribeChecklist,
 	writeChecklist,
 } from '@/lib/recipes/checklist'
+import { parseIngredientLine } from '@/lib/recipes/ingredient-line'
 import {
 	formatMinutes,
-	recipeMinutesMax,
 	recipeNotesMax,
-	recipeServingsMax,
 	recipeTitleMax,
 	recipeUpdateInput,
 } from '@/lib/recipes/model'
@@ -57,10 +59,6 @@ const fieldClassName =
 
 const sectionLabelClassName =
 	'inline-block border-b-3 pb-0.5 text-xs font-bold tracking-wide uppercase'
-
-function optionalNumber(value: string) {
-	return value ? Number(value) : null
-}
 
 function hostOf(url: string) {
 	try {
@@ -199,6 +197,13 @@ function RecipeView({
 											checked={done}
 											onChange={() => checklist.toggle(item)}
 											className="accent-kitchen-basil size-5 shrink-0"
+										/>
+										<img
+											src={resolveSpriteSrc(
+												parseIngredientLine(ingredient).name,
+											)}
+											alt=""
+											className="size-8 shrink-0 object-contain [image-rendering:pixelated]"
 										/>
 										<span
 											className={cn(
@@ -434,22 +439,28 @@ function RecipeEditor({
 	const [pending, setPending] = useState(false)
 	const [error, setError] = useState<string>()
 	const [confirmingDelete, setConfirmingDelete] = useState(false)
+	const [photoBusy, setPhotoBusy] = useState(false)
+	const user = authClient.useSession().data?.user
+	// Uploads need a real account, same as avatars.
+	const canAddPhoto = Boolean(user && !user.isAnonymous)
 	const isDraft = !recipe.finalizedAt
 
 	const save = async (form: FormData) => {
 		const parsed = recipeUpdateInput.safeParse({
 			id: recipe.id,
 			title: formField(form, 'title'),
-			servings: optionalNumber(formField(form, 'servings')),
-			totalMinutes: optionalNumber(formField(form, 'totalMinutes')),
+			// Absent when the photo is untouched; empty when it was removed.
+			imageUrl: form.has('imageUrl')
+				? formField(form, 'imageUrl') || null
+				: undefined,
 			notes: formField(form, 'notes'),
 			ingredients: form.getAll('ingredient').map(String),
-			steps: form.getAll('step').map(String),
+			steps: stepsFrom(form),
 			finalize: isDraft ? true : undefined,
 		})
 
 		if (!parsed.success) {
-			setError('check the name, servings, and time')
+			setError('give the recipe a name')
 
 			return
 		}
@@ -494,54 +505,35 @@ function RecipeEditor({
 					draft — check it over, then finalize
 				</p>
 			) : null}
-			<label className="text-xs font-bold uppercase" htmlFor="edit-title">
-				name
-			</label>
-			<input
-				id="edit-title"
-				name="title"
-				required
-				maxLength={recipeTitleMax}
-				defaultValue={recipe.title}
-				className={cn(fieldClassName, 'text-2xl font-extrabold')}
-			/>
-			<div className="grid grid-cols-2 gap-3">
-				<div className="flex flex-col gap-3">
-					<label
-						className="text-xs font-bold uppercase"
-						htmlFor="edit-servings"
-					>
-						servings
-					</label>
-					<input
-						id="edit-servings"
-						name="servings"
-						type="number"
-						inputMode="numeric"
-						min={1}
-						max={recipeServingsMax}
-						defaultValue={recipe.servings ?? ''}
-						className={fieldClassName}
+			<div className="flex items-start gap-3">
+				{canAddPhoto ? (
+					<RecipePhotoField
+						current={recipe.imageUrl}
+						onBusyChange={setPhotoBusy}
 					/>
-				</div>
-				<div className="flex flex-col gap-3">
-					<label className="text-xs font-bold uppercase" htmlFor="edit-minutes">
-						total minutes
+				) : recipe.imageUrl ? (
+					<img
+						src={recipe.imageUrl}
+						alt=""
+						className="border-foreground border-line size-24 shrink-0 object-cover"
+					/>
+				) : null}
+				<div className="flex min-w-0 flex-1 flex-col gap-3">
+					<label className="text-xs font-bold uppercase" htmlFor="edit-title">
+						name
 					</label>
 					<input
-						id="edit-minutes"
-						name="totalMinutes"
-						type="number"
-						inputMode="numeric"
-						min={1}
-						max={recipeMinutesMax}
-						defaultValue={recipe.totalMinutes ?? ''}
-						className={fieldClassName}
+						id="edit-title"
+						name="title"
+						required
+						maxLength={recipeTitleMax}
+						defaultValue={recipe.title}
+						className={cn(fieldClassName, 'text-2xl font-extrabold')}
 					/>
 				</div>
 			</div>
 			<IngredientListField defaultValue={recipe.ingredients} />
-			<StepListField defaultValue={recipe.steps} />
+			<StepsField defaultValue={recipe.steps} />
 			<label className="text-xs font-bold uppercase" htmlFor="edit-notes">
 				notes
 			</label>
@@ -562,7 +554,7 @@ function RecipeEditor({
 			<div className="flex flex-wrap gap-2">
 				<button
 					type="submit"
-					disabled={pending}
+					disabled={pending || photoBusy}
 					className="border-foreground bg-kitchen-basil border-2 px-4 py-2 text-xs font-bold uppercase shadow-sm disabled:opacity-50"
 				>
 					{pending ? 'saving…' : isDraft ? 'save & finalize' : 'save'}

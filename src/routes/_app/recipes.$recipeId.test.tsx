@@ -1,6 +1,6 @@
 import { renderRoute } from '@tests/support/render/route'
 import { beforeEach, describe, expect, test, vi } from 'vite-plus/test'
-import { page } from 'vitest/browser'
+import { page, userEvent } from 'vitest/browser'
 
 import type { getRecipe } from '@/lib/recipes/server'
 
@@ -13,7 +13,7 @@ const recipeState: { recipe: Recipe | null } = vi.hoisted(() => ({
 type RecipeUpdate = Omit<
 	Recipe,
 	'userId' | 'collectionId' | 'imageUrl' | 'sourceUrl' | 'createdAt'
-> & { finalize?: boolean | undefined }
+> & { imageUrl?: string | null | undefined; finalize?: boolean | undefined }
 
 const updateCalls = vi.hoisted(() => {
 	const calls: RecipeUpdate[] = []
@@ -29,9 +29,11 @@ vi.mock('@/lib/recipes/server', () => ({
 		updateCalls.calls.push(data)
 
 		if (recipeState.recipe) {
-			const { finalize, ...rest } = data
+			const { finalize, imageUrl, ...rest } = data
 
 			Object.assign(recipeState.recipe, rest)
+
+			if (imageUrl !== undefined) recipeState.recipe.imageUrl = imageUrl
 
 			if (finalize) recipeState.recipe.finalizedAt = new Date()
 		}
@@ -55,6 +57,14 @@ vi.mock('@/lib/recipes/server', () => ({
 	deleteRecipe: async ({ data }: { data: { id: string } }) => {
 		updateCalls.deleted.push(data.id)
 	},
+}))
+
+vi.mock('@/lib/s3', () => ({
+	getRecipePhotoUploadUrl: () =>
+		Promise.resolve({
+			key: 'recipes/user-1-photo',
+			url: 'https://storage.test/upload',
+		}),
 }))
 
 vi.mock('@/lib/cooks/server', () => ({
@@ -137,7 +147,7 @@ describe('recipe detail', () => {
 		await expect.element(screen.getByText('no steps yet')).toBeVisible()
 	})
 
-	test('saves edited ingredients and steps', async () => {
+	test('saves edited ingredients and free-form steps', async () => {
 		if (!recipeState.recipe) throw new Error('recipe was not seeded')
 		recipeState.recipe.ingredients = ['200 g pasta']
 		recipeState.recipe.steps = ['boil the pasta']
@@ -152,10 +162,9 @@ describe('recipe detail', () => {
 		await screen.getByRole('spinbutton', { name: 'Quantity 2' }).fill('2')
 		await screen.getByRole('combobox', { name: 'Unit 2' }).selectOptions('tbsp')
 		await screen.getByRole('combobox', { name: 'Ingredient 2' }).fill('butter')
-		await screen.getByRole('button', { name: 'add step' }).click()
 		await screen
-			.getByRole('textbox', { name: 'Step 2' })
-			.fill('stir in the butter')
+			.getByRole('textbox', { name: 'steps (one per line)' })
+			.fill('boil the pasta\n\nstir in the butter')
 		await screen.getByRole('button', { name: 'save', exact: true }).click()
 
 		await expect.element(screen.getByText('2 tbsp butter')).toBeVisible()
@@ -167,10 +176,9 @@ describe('recipe detail', () => {
 		expect(updateCalls.calls.at(-1)?.finalize).toBeUndefined()
 	})
 
-	test('reorders and removes ingredients and steps while editing', async () => {
+	test('reorders ingredients from the drag handle and removes rows', async () => {
 		if (!recipeState.recipe) throw new Error('recipe was not seeded')
 		recipeState.recipe.ingredients = ['200 g pasta', '1 tbsp miso', '1 onion']
-		recipeState.recipe.steps = ['boil', 'drain', 'serve']
 
 		const { screen } = await renderRoute({
 			path: '/recipes/recipe-1',
@@ -178,23 +186,95 @@ describe('recipe detail', () => {
 		})
 
 		await screen.getByRole('button', { name: 'edit' }).click()
-		await screen.getByRole('button', { name: 'Move ingredient 2 up' }).click()
+		screen
+			.getByRole('button', { name: 'Reorder ingredient 2' })
+			.element()
+			.focus()
+		await userEvent.keyboard('[Space]')
+		await userEvent.keyboard('[ArrowUp]')
+		await userEvent.keyboard('[Space]')
 		await screen.getByRole('button', { name: 'Remove ingredient 3' }).click()
-		await screen.getByRole('button', { name: 'Move step 3 up' }).click()
-		await screen.getByRole('button', { name: 'Remove step 1' }).click()
 		await screen.getByRole('button', { name: 'save', exact: true }).click()
 
 		await expect.poll(() => updateCalls.calls.at(-1)).toBeDefined()
 		expect(updateCalls.calls.at(-1)).toMatchObject({
 			ingredients: ['1 tbsp miso', '200 g pasta'],
-			steps: ['serve', 'drain'],
 		})
+	})
+
+	test('shows an ingredient icon in the list and the editor', async () => {
+		if (!recipeState.recipe) throw new Error('recipe was not seeded')
+		recipeState.recipe.ingredients = ['2 large eggs, beaten']
+
+		const { screen } = await renderRoute({
+			path: '/recipes/recipe-1',
+			session,
+		})
+
+		const icon = () =>
+			document.querySelector('img[src="/sprites/pantry/egg.png"]')
+
+		await expect.poll(icon).not.toBeNull()
+		await screen.getByRole('button', { name: 'edit' }).click()
+		await expect.poll(icon).not.toBeNull()
+	})
+
+	test('keeps an imported photo unless it is changed', async () => {
+		if (!recipeState.recipe) throw new Error('recipe was not seeded')
+		recipeState.recipe.imageUrl = '/sprites/pantry/apple.png'
+
+		const { screen } = await renderRoute({
+			path: '/recipes/recipe-1',
+			session,
+		})
+
+		await screen.getByRole('button', { name: 'edit' }).click()
+		await screen.getByRole('button', { name: 'save', exact: true }).click()
+		await expect.poll(() => updateCalls.calls.at(-1)).toBeDefined()
+		expect(updateCalls.calls.at(-1)?.imageUrl).toBeUndefined()
+
+		await screen.getByRole('button', { name: 'edit' }).click()
+		await screen.getByRole('button', { name: 'Remove photo' }).click()
+		await expect
+			.element(screen.getByLabelText('Recipe photo'))
+			.toBeInTheDocument()
+		await screen.getByRole('button', { name: 'save', exact: true }).click()
+		await expect.poll(() => updateCalls.calls.length).toBe(2)
+		expect(updateCalls.calls.at(-1)?.imageUrl).toBeNull()
+	})
+
+	test('uploads a photo for a recipe without one', async () => {
+		const realFetch = globalThis.fetch.bind(globalThis)
+
+		vi.spyOn(globalThis, 'fetch').mockImplementation((input, init) =>
+			new Request(input).url.startsWith('https://storage.test/')
+				? Promise.resolve(new Response(null, { status: 200 }))
+				: realFetch(input, init),
+		)
+
+		const { screen } = await renderRoute({
+			path: '/recipes/recipe-1',
+			session,
+		})
+
+		await screen.getByRole('button', { name: 'edit' }).click()
+		await userEvent.upload(
+			screen.getByLabelText('Recipe photo'),
+			new File(['x'], 'pasta.png', { type: 'image/png' }),
+		)
+		await expect
+			.element(screen.getByRole('button', { name: 'Remove photo' }))
+			.toBeVisible()
+		await screen.getByRole('button', { name: 'save', exact: true }).click()
+
+		await expect.poll(() => updateCalls.calls.at(-1)).toBeDefined()
+		expect(updateCalls.calls.at(-1)?.imageUrl).toBe('recipes/user-1-photo')
 	})
 
 	test('opens a draft in the editor and finalizes it', async () => {
 		if (!recipeState.recipe) throw new Error('recipe was not seeded')
 		recipeState.recipe.finalizedAt = null
-		recipeState.recipe.ingredients = ['200 g pasta']
+		recipeState.recipe.ingredients = ['⅓ cup flour', '⅛ tsp salt']
 		recipeState.recipe.steps = ['boil the pasta']
 
 		const { screen } = await renderRoute({
@@ -211,7 +291,7 @@ describe('recipe detail', () => {
 		await screen.getByRole('button', { name: 'save & finalize' }).click()
 
 		await expect
-			.element(screen.getByRole('checkbox', { name: '200 g pasta' }))
+			.element(screen.getByRole('checkbox', { name: '⅓ cup flour' }))
 			.toBeVisible()
 		await expect
 			.element(screen.getByRole('button', { name: 'edit' }))
@@ -246,7 +326,7 @@ describe('recipe detail', () => {
 		await expect.element(step).not.toBeChecked()
 	})
 
-	test('edits the name, servings, time, and notes', async () => {
+	test('edits the name and notes without asking for servings or time', async () => {
 		const { screen } = await renderRoute({
 			path: '/recipes/recipe-1',
 			session,
@@ -254,21 +334,21 @@ describe('recipe detail', () => {
 
 		await screen.getByRole('button', { name: 'edit' }).click()
 		await screen.getByLabelText('name').fill('brown butter pasta')
-		await screen.getByLabelText('servings').fill('2')
-		await screen.getByLabelText('total minutes').fill('75')
+		await expect
+			.element(screen.getByLabelText('servings'))
+			.not.toBeInTheDocument()
+		await expect
+			.element(screen.getByLabelText('total minutes'))
+			.not.toBeInTheDocument()
 		await screen.getByLabelText('notes').fill('more lemon')
 		await screen.getByRole('button', { name: 'save', exact: true }).click()
 
 		await expect
 			.element(screen.getByRole('heading', { name: 'brown butter pasta' }))
 			.toBeVisible()
-		await expect.element(screen.getByText('serves 2')).toBeVisible()
-		await expect.element(screen.getByText('1 hr 15 min')).toBeVisible()
 		await expect.element(screen.getByText('more lemon')).toBeVisible()
 		expect(updateCalls.calls.at(-1)).toMatchObject({
 			title: 'brown butter pasta',
-			servings: 2,
-			totalMinutes: 75,
 			notes: 'more lemon',
 		})
 	})
