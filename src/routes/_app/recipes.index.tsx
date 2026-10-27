@@ -17,11 +17,11 @@ export const Route = createFileRoute('/_app/recipes/')({
 const ease = [0.16, 1, 0.3, 1] as const
 
 const tileColors = {
-	tomato: 'bg-kitchen-tomato text-black',
-	yolk: 'bg-kitchen-yolk text-black',
-	basil: 'bg-kitchen-basil text-black',
-	eggplant: 'bg-kitchen-eggplant text-white',
-	cream: 'bg-card text-black',
+	tomato: 'bg-kitchen-tomato/25 text-foreground',
+	yolk: 'bg-kitchen-yolk/35 text-foreground',
+	basil: 'bg-kitchen-basil/25 text-foreground',
+	eggplant: 'bg-kitchen-eggplant/15 text-foreground',
+	cream: 'bg-card text-foreground',
 } as const
 
 type TileColor = keyof typeof tileColors
@@ -61,7 +61,7 @@ function Shelf() {
 			<motion.div {...enter} className="flex flex-col gap-6 p-6 md:p-10">
 				<h1 className="sr-only">your recipes</h1>
 				<div className="flex flex-wrap items-center gap-3">
-					<label className="border-foreground/40 bg-background focus-within:border-foreground focus-within:outline-kitchen-eggplant border-line flex max-w-md flex-1 items-center gap-2 px-3 py-1.5 transition-colors focus-within:outline-2 focus-within:outline-offset-2">
+					<label className="border-input bg-background focus-within:border-input focus-within:outline-kitchen-eggplant flex max-w-md flex-1 items-center gap-2 border px-3 py-1.5 transition-colors focus-within:outline-2 focus-within:outline-offset-2">
 						<MagnifyingGlass size={16} aria-hidden />
 						<span className="sr-only">Search recipes</span>
 						<input
@@ -88,7 +88,7 @@ function Shelf() {
 					</label>
 					<Link
 						to="/recipes/new"
-						className="focus-visible:outline-kitchen-eggplant inline-flex items-center gap-1.5 px-2 py-2 text-xs font-semibold uppercase underline focus-visible:outline-2 focus-visible:outline-offset-2"
+						className="focus-visible:outline-kitchen-eggplant inline-flex items-center gap-1.5 px-2 py-2 text-xs font-semibold underline focus-visible:outline-2 focus-visible:outline-offset-2"
 					>
 						<Plus size={16} aria-hidden /> add recipe
 					</Link>
@@ -98,7 +98,7 @@ function Shelf() {
 						aria-label="Online recipes"
 						className="border-foreground/20 max-w-md border-t pt-3"
 					>
-						<h2 className="mb-3 text-xs font-semibold uppercase">
+						<h2 className="mb-3 text-xs font-semibold">
 							{url ? 'Import a link' : 'Online recipes'}
 						</h2>
 						<RecipeFinder
@@ -125,12 +125,12 @@ function Shelf() {
 				{isEmpty && !searchQuery ? (
 					<Link
 						to="/recipes/new"
-						className="border-foreground text-foreground hover:bg-card focus-visible:outline-kitchen-eggplant relative block aspect-square w-full max-w-md border-2 border-dashed text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 md:aspect-auto md:h-[calc(var(--spacing-tile)*2+16px)] md:w-[calc(var(--spacing-tile)*2+16px)]"
+						className="border-border text-foreground hover:bg-card focus-visible:outline-kitchen-eggplant relative block aspect-square w-full max-w-md border-dashed text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 md:aspect-auto md:h-[calc(var(--spacing-tile)*2+16px)] md:w-[calc(var(--spacing-tile)*2+16px)]"
 					>
-						<span className="border-foreground bg-kitchen-yolk absolute top-3 left-4 inline-block border-2 px-2 py-0.5 text-xs leading-5 font-bold uppercase">
+						<span className="bg-kitchen-yolk/50 absolute top-3 left-4 inline-block px-2 py-0.5 text-xs leading-5 font-semibold">
 							no recipes yet
 						</span>
-						<span className="absolute right-4 bottom-3 left-4 text-3xl leading-none font-extrabold md:text-4xl">
+						<span className="absolute right-4 bottom-3 left-4 text-3xl leading-none font-bold md:text-4xl">
 							save your first recipe
 						</span>
 						<Plus
@@ -157,7 +157,7 @@ function Shelf() {
 					))}
 				</div>
 				{searchQuery && !url && !shelved.length ? (
-					<p className="border-foreground max-w-md border-2 border-dashed p-4 text-sm font-semibold">
+					<p className="border-border max-w-md border-dashed p-4 text-sm font-semibold">
 						no recipes match &ldquo;{searchQuery}&rdquo;.
 					</p>
 				) : null}
@@ -181,8 +181,8 @@ function RecipeTile({ recipe, color }: { recipe: Recipe; color: TileColor }) {
 			to="/recipes/$recipeId"
 			params={{ recipeId: recipe.id }}
 			className={cn(
-				'border-foreground focus-visible:outline-kitchen-eggplant relative flex aspect-square flex-col overflow-hidden border-2 shadow-sm transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 md:aspect-auto',
-				recipe.imageUrl ? 'bg-card text-black' : tileColors[color],
+				'border-border focus-visible:outline-kitchen-eggplant relative flex aspect-square flex-col overflow-hidden border transition-shadow hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 md:aspect-auto',
+				recipe.imageUrl ? 'bg-card text-foreground' : tileColors[color],
 			)}
 		>
 			{recipe.imageUrl ? (
@@ -195,12 +195,12 @@ function RecipeTile({ recipe, color }: { recipe: Recipe; color: TileColor }) {
 							className="absolute inset-0 size-full object-cover"
 						/>
 					</div>
-					<h3 className="border-foreground bg-card line-clamp-2 shrink-0 border-t-2 px-2.5 py-1.5 text-sm leading-tight font-extrabold">
+					<h3 className="border-border bg-card line-clamp-2 shrink-0 border-t px-2.5 py-1.5 text-sm leading-tight font-bold">
 						{recipe.title}
 					</h3>
 				</>
 			) : (
-				<h3 className="absolute right-3 bottom-2.5 left-3 text-xl leading-tight font-extrabold">
+				<h3 className="absolute right-3 bottom-2.5 left-3 text-xl leading-tight font-bold">
 					{recipe.title}
 				</h3>
 			)}

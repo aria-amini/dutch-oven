@@ -38,17 +38,20 @@ tonight" decision surface, groceries (list from picked recipes, later).
 Decision-first, not calendar-first: week planning deferred. Undecided:
 nutrition/macro detail depth, sharing/social features. Pantry tracking returns
 on 2026-10-19: per-user ingredients, whole-item quantities, four storage
-locations, and pixel icons. The existing kitchen theme stays unchanged.
+locations, and pixel icons.
 
 ## Brand Commitments
 
-Name: dutch-oven. User-pinned visual direction (2026-08-14, second revision):
-neobrutalist kitchen — butcher-paper cream ground, cast-iron ink 2px borders and
-hard offset shadows, bold ingredient colors (tomato #ff4b26, yolk #ffc21c, basil
-#2fa84f, eggplant #5b3df5), extrabold uppercase labels, zero radius. Earlier
-directions the user moved past: metro tiles (cyan/magenta/lime), and homey
-pantry-shelf with mustard/ketchup accents (user reversed that pin). Explicitly
-rejected: restaurant/diner ticket-rail world — too commercial, not homey.
+Name: dutch-oven. User-pinned visual direction (2026-10-27, third revision): the
+soft kitchen — butcher-paper cream ground, ink drawn as 1px hairlines (18% for
+surfaces, 40% for fields), square corners, lowercase semibold type, no resting
+shadows, and ingredient colors (tomato #ff4b26, yolk #ffc21c, basil #2fa84f,
+eggplant #5b3df5) used as tints with one solid primary action. The left sidebar
+is the reference for the whole system. Earlier directions the user moved past:
+neobrutalist kitchen (2px ink borders, hard offset shadows, uppercase stickers —
+rejected as too harsh), metro tiles (cyan/magenta/lime), and homey pantry-shelf
+with mustard/ketchup accents. Explicitly rejected: restaurant/diner ticket-rail
+world — too commercial, not homey.
 
 ## Evidence on Hand
 

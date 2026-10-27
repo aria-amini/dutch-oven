@@ -25,8 +25,8 @@
 	--accent-foreground: #ffffff;
 	--destructive: #ff4b26;
 	--destructive-foreground: #16130e;
-	--border: #16130e;
-	--input: #16130e;
+	--border: rgb(22 19 14 / 0.18);
+	--input: rgb(22 19 14 / 0.4);
 	--ring: #5b3df5;
 
 	--kitchen-tomato: #ff4b26;
@@ -45,7 +45,7 @@
 	--sidebar-primary-foreground: #16130e;
 	--sidebar-accent: #f3e7d0;
 	--sidebar-accent-foreground: #16130e;
-	--sidebar-border: #16130e;
+	--sidebar-border: rgb(22 19 14 / 0.2);
 	--sidebar-ring: #5b3df5;
 
 	--chart-1: #ff4b26;
@@ -61,15 +61,16 @@
 		consolas, monospace;
 
 	--shadow-color: #16130e;
-	--shadow-2xs: 1px 1px 0 0 #16130e;
-	--shadow-xs: 2px 2px 0 0 #16130e;
-	--shadow-sm: 3px 3px 0 0 #16130e;
-	--shadow-card: 4px 4px 0 0 #16130e;
-	--shadow: 4px 4px 0 0 #16130e;
-	--shadow-md: 5px 5px 0 0 #16130e;
-	--shadow-lg: 7px 7px 0 0 #16130e;
-	--shadow-xl: 9px 9px 0 0 #16130e;
-	--shadow-2xl: 12px 12px 0 0 #16130e;
+	--shadow-2xs: 0 1px 1px rgb(22 19 14 / 0.04);
+	--shadow-xs: 0 1px 2px rgb(22 19 14 / 0.05);
+	--shadow-sm: 0 1px 3px rgb(22 19 14 / 0.07);
+	--shadow-card: 0 2px 8px rgb(22 19 14 / 0.07);
+	--shadow: 0 2px 8px rgb(22 19 14 / 0.07);
+	--shadow-md:
+		0 6px 20px -4px rgb(22 19 14 / 0.14), 0 1px 3px rgb(22 19 14 / 0.06);
+	--shadow-lg: 0 12px 32px -8px rgb(22 19 14 / 0.18);
+	--shadow-xl: 0 18px 44px -10px rgb(22 19 14 / 0.2);
+	--shadow-2xl: 0 24px 60px -12px rgb(22 19 14 / 0.24);
 }
 
 .dark {
@@ -89,8 +90,8 @@
 	--accent-foreground: #ffffff;
 	--destructive: #ff4b26;
 	--destructive-foreground: #16130e;
-	--border: #16130e;
-	--input: #16130e;
+	--border: rgb(22 19 14 / 0.18);
+	--input: rgb(22 19 14 / 0.4);
 	--ring: #5b3df5;
 
 	--kitchen-tomato: #ff4b26;
@@ -109,7 +110,7 @@
 	--sidebar-primary-foreground: #16130e;
 	--sidebar-accent: #f3e7d0;
 	--sidebar-accent-foreground: #16130e;
-	--sidebar-border: #16130e;
+	--sidebar-border: rgb(22 19 14 / 0.2);
 	--sidebar-ring: #5b3df5;
 
 	--chart-1: #ff4b26;
@@ -192,12 +193,6 @@
 	--shadow-lg: var(--shadow-lg);
 	--shadow-xl: var(--shadow-xl);
 	--shadow-2xl: var(--shadow-2xl);
-}
-
-/* The hairline around data surfaces (lists, tiles, fields); chunky 2px stays
-   on things you press. */
-@utility border-line {
-	border-width: 1.5px;
 }
 
 @layer base {

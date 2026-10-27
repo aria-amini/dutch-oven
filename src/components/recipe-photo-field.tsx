@@ -71,7 +71,7 @@ export function RecipePhotoField({
 		<div className="relative size-24 shrink-0">
 			<label
 				className={cn(
-					'border-foreground bg-background focus-within:outline-kitchen-eggplant hover:bg-card grid size-full cursor-pointer place-items-center overflow-hidden border-2 focus-within:outline-2 focus-within:outline-offset-2',
+					'border-input bg-background focus-within:outline-kitchen-eggplant hover:bg-card grid size-full cursor-pointer place-items-center overflow-hidden border focus-within:outline-2 focus-within:outline-offset-2',
 					!shown && 'border-dashed',
 					busy && 'animate-pulse',
 				)}
@@ -87,7 +87,7 @@ export function RecipePhotoField({
 				{shown ? (
 					<img src={shown} alt="" className="size-full object-cover" />
 				) : (
-					<span className="text-foreground/60 flex flex-col items-center gap-1 text-xs font-bold uppercase">
+					<span className="text-foreground/60 flex flex-col items-center gap-1 text-xs font-semibold">
 						{busy ? (
 							'uploading…'
 						) : (
@@ -107,7 +107,7 @@ export function RecipePhotoField({
 						setPhoto(undefined)
 						setRemoved(true)
 					}}
-					className="border-foreground bg-background focus-visible:outline-kitchen-eggplant absolute -top-2 -right-2 grid size-6 place-items-center border-2 focus-visible:outline-2"
+					className="border-border bg-background focus-visible:outline-kitchen-eggplant absolute -top-2 -right-2 grid size-6 place-items-center border focus-visible:outline-2"
 				>
 					<X size={12} weight="bold" aria-hidden />
 				</button>

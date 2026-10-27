@@ -42,12 +42,12 @@ function BulkAdd() {
 				<div>
 					<Link
 						to={section ? '/ingredients/bulk' : '/ingredients'}
-						className="focus-visible:outline-kitchen-eggplant mb-4 inline-flex items-center gap-1.5 text-xs font-bold uppercase underline focus-visible:outline-2 focus-visible:outline-offset-2"
+						className="focus-visible:outline-kitchen-eggplant mb-4 inline-flex items-center gap-1.5 text-xs font-semibold underline focus-visible:outline-2 focus-visible:outline-offset-2"
 					>
 						<ArrowLeft size={14} weight="bold" aria-hidden />
 						{section ? 'all sections' : 'back to ingredients'}
 					</Link>
-					<h1 className="text-4xl font-extrabold tracking-tight md:text-5xl">
+					<h1 className="text-4xl font-bold tracking-tight md:text-5xl">
 						{section ? pantryCategoryLabels[section.id] : 'stock up fast'}
 					</h1>
 					<p className="text-muted-foreground mt-2 text-sm">
@@ -82,7 +82,7 @@ function SectionGrid({ owned }: { owned: Set<string> }) {
 							key={entry.id}
 							to="/ingredients/bulk"
 							search={{ cat: entry.id }}
-							className="border-foreground bg-card focus-visible:outline-kitchen-eggplant flex items-center gap-3 border-2 p-4 shadow-sm transition-transform hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2"
+							className="border-border bg-card focus-visible:outline-kitchen-eggplant flex items-center gap-3 border p-4 focus-visible:outline-2 focus-visible:outline-offset-2"
 						>
 							<img
 								src={`/sprites/pantry/${categorySprites[entry.id]}.png`}
@@ -90,7 +90,7 @@ function SectionGrid({ owned }: { owned: Set<string> }) {
 								className="size-10 shrink-0 [image-rendering:pixelated] md:size-12"
 							/>
 							<span className="flex min-w-0 flex-col">
-								<span className="font-extrabold lowercase md:text-lg">
+								<span className="font-bold lowercase md:text-lg">
 									{pantryCategoryLabels[entry.id]}
 								</span>
 								<span className="text-muted-foreground font-mono text-xs">
@@ -103,7 +103,7 @@ function SectionGrid({ owned }: { owned: Set<string> }) {
 			</nav>
 			<Link
 				to="/ingredients"
-				className="border-foreground bg-kitchen-basil focus-visible:outline-kitchen-eggplant self-start border-2 px-4 py-2 text-xs font-bold tracking-wide uppercase shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2"
+				className="bg-kitchen-basil focus-visible:outline-kitchen-eggplant self-start px-4 py-2 text-xs font-semibold focus-visible:outline-2 focus-visible:outline-offset-2"
 			>
 				done
 			</Link>
@@ -175,7 +175,7 @@ function SectionPicker({
 	return (
 		<>
 			<label className="flex flex-col gap-1.5">
-				<span className="text-xs font-bold uppercase">filter</span>
+				<span className="text-xs font-semibold">filter</span>
 				<input
 					type="search"
 					value={query}
@@ -195,7 +195,7 @@ function SectionPicker({
 							addTyped()
 						}
 					}}
-					className="border-foreground bg-background focus-visible:outline-kitchen-eggplant w-full border-2 px-3 py-2 text-lg font-bold placeholder:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2"
+					className="border-input bg-background focus-visible:outline-kitchen-eggplant w-full border px-3 py-2 text-lg font-semibold placeholder:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2"
 				/>
 			</label>
 
@@ -208,7 +208,7 @@ function SectionPicker({
 						<button
 							type="button"
 							onClick={addTyped}
-							className="border-foreground/50 hover:border-foreground focus-visible:outline-kitchen-eggplant flex h-full w-full items-center gap-2 border-2 border-dashed p-2 text-left text-sm font-bold focus-visible:outline-2 focus-visible:outline-offset-2"
+							className="border-foreground/50 hover:border-input focus-visible:outline-kitchen-eggplant flex h-full w-full items-center gap-2 border border-dashed p-2 text-left text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-2"
 						>
 							<Plus size={18} weight="bold" aria-hidden className="m-2" />
 							add &ldquo;{typed}&rdquo;
@@ -227,11 +227,11 @@ function SectionPicker({
 								disabled={have}
 								onClick={() => toggle(name)}
 								className={cn(
-									'focus-visible:outline-kitchen-eggplant relative flex h-full w-full items-center gap-2 border-2 p-2 text-left text-sm font-bold transition-transform focus-visible:outline-2 focus-visible:outline-offset-2',
+									'focus-visible:outline-kitchen-eggplant relative flex h-full w-full items-center gap-2 border p-2 text-left text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-2',
 									on
-										? 'border-foreground bg-kitchen-yolk shadow-sm'
-										: 'border-foreground bg-card hover:-translate-y-0.5 hover:shadow-sm',
-									have && 'opacity-45 hover:translate-y-0 hover:shadow-none',
+										? 'border-border bg-kitchen-yolk/40'
+										: 'border-border bg-card',
+									have && 'opacity-45',
 								)}
 							>
 								<img
@@ -261,11 +261,11 @@ function SectionPicker({
 				<p className="text-muted-foreground text-sm">nothing matches</p>
 			) : null}
 
-			<div className="border-foreground bg-card fixed inset-x-0 bottom-0 z-40 border-t-2 p-3 shadow-md">
+			<div className="border-border bg-card fixed inset-x-0 bottom-0 z-40 border-t p-3">
 				<div className="mx-auto flex max-w-6xl items-center gap-3 px-3 md:px-7">
 					<p
 						aria-live="polite"
-						className="text-muted-foreground flex-1 text-xs font-bold uppercase"
+						className="text-muted-foreground flex-1 text-xs font-semibold"
 					>
 						{selected.size} picked
 					</p>
@@ -273,7 +273,7 @@ function SectionPicker({
 						<button
 							type="button"
 							onClick={() => setSelected(new Set())}
-							className="focus-visible:outline-kitchen-eggplant text-xs font-bold underline underline-offset-4 focus-visible:outline-2"
+							className="focus-visible:outline-kitchen-eggplant text-xs font-semibold underline underline-offset-4 focus-visible:outline-2"
 						>
 							clear
 						</button>
@@ -282,7 +282,7 @@ function SectionPicker({
 						type="button"
 						disabled={pending || selected.size === 0}
 						onClick={submit}
-						className="border-foreground bg-kitchen-basil focus-visible:outline-kitchen-eggplant border-2 px-4 py-2.5 text-xs font-bold tracking-wide uppercase shadow-sm transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50"
+						className="bg-kitchen-basil focus-visible:outline-kitchen-eggplant px-4 py-2.5 text-xs font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50"
 					>
 						{pending ? 'adding…' : `add ${selected.size}`}
 					</button>

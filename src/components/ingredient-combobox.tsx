@@ -116,10 +116,10 @@ export function IngredientCombobox({
 					if (!event.defaultPrevented) onKeyDown?.(event)
 				}}
 				className={cn(
-					'border-foreground bg-background focus-visible:outline-kitchen-eggplant w-full border-line placeholder:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2',
+					'border-input bg-background focus-visible:outline-kitchen-eggplant w-full border placeholder:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2',
 					compact
 						? 'px-3 py-2 text-sm font-semibold'
-						: 'px-3 py-3 text-lg font-bold',
+						: 'px-3 py-3 text-lg font-semibold',
 				)}
 			/>
 			{expanded ? (
@@ -127,7 +127,7 @@ export function IngredientCombobox({
 					id={listboxId}
 					role="listbox"
 					aria-label="Ingredient suggestions"
-					className="border-foreground bg-card absolute inset-x-0 top-full z-10 mt-1.5 border-2 shadow-md"
+					className="bg-card absolute inset-x-0 top-full z-10 mt-1.5 shadow-md"
 				>
 					{suggestions.map((suggestion, index) => (
 						<li
@@ -143,7 +143,7 @@ export function IngredientCombobox({
 							onMouseEnter={() => setActiveIndex(index)}
 							className={cn(
 								'flex cursor-pointer items-center gap-3 px-3 py-2 font-semibold',
-								index === activeIndex && 'bg-kitchen-yolk',
+								index === activeIndex && 'bg-kitchen-yolk/40',
 							)}
 						>
 							<img

@@ -109,7 +109,7 @@ function SortableRow({
 }
 
 const controlClassName =
-	'border-foreground bg-background focus-visible:outline-kitchen-eggplant w-full border-line px-3 py-2 text-sm font-semibold placeholder:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2'
+	'border-input bg-background focus-visible:outline-kitchen-eggplant w-full border px-3 py-2 text-sm font-semibold placeholder:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2'
 
 // Each row submits as one `ingredient` field holding "1½ cup flour"; read the
 // rows with `getAll`.
@@ -170,7 +170,7 @@ export function IngredientListField({
 
 	return (
 		<fieldset className="flex flex-col gap-2">
-			<legend className="mb-1 text-xs font-bold uppercase">ingredients</legend>
+			<legend className="mb-1 text-xs font-semibold">ingredients</legend>
 			<DndContext
 				sensors={sensors}
 				collisionDetection={closestCenter}
@@ -302,7 +302,7 @@ export function IngredientListField({
 			<button
 				type="button"
 				onClick={() => insertAfter(rows.length - 1, [''])}
-				className="border-foreground bg-background focus-visible:outline-kitchen-eggplant border-line inline-flex items-center gap-1.5 self-start px-3 py-1.5 text-xs font-bold uppercase focus-visible:outline-2 focus-visible:outline-offset-2"
+				className="border-input bg-background focus-visible:outline-kitchen-eggplant inline-flex items-center gap-1.5 self-start border px-3 py-1.5 text-xs font-semibold focus-visible:outline-2 focus-visible:outline-offset-2"
 			>
 				<Plus size={13} weight="bold" aria-hidden />
 				add ingredient

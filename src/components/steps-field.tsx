@@ -9,7 +9,7 @@ export function StepsField({
 }) {
 	return (
 		<>
-			<label className="text-xs font-bold uppercase" htmlFor="steps">
+			<label className="text-xs font-semibold" htmlFor="steps">
 				steps (one per line)
 			</label>
 			<textarea
@@ -18,7 +18,7 @@ export function StepsField({
 				rows={6}
 				defaultValue={defaultValue.join('\n')}
 				placeholder={'boil the pasta\nstir in the miso'}
-				className="border-foreground bg-background focus-visible:outline-kitchen-eggplant border-line field-sizing-content min-h-36 resize-y px-3 py-2 text-sm font-semibold placeholder:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2"
+				className="border-input bg-background focus-visible:outline-kitchen-eggplant field-sizing-content min-h-36 resize-y border px-3 py-2 text-sm font-semibold placeholder:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2"
 			/>
 		</>
 	)

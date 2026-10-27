@@ -44,7 +44,7 @@ const features = [
 ]
 
 const buttonClassName =
-	'border-foreground focus-visible:outline-kitchen-eggplant inline-flex items-center border-2 px-5 py-3 text-sm font-bold tracking-wide uppercase shadow-md transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-2 focus-visible:outline-offset-2'
+	'border-border focus-visible:outline-kitchen-eggplant inline-flex items-center border px-5 py-3 text-sm font-semibold transition-colors hover:brightness-95 focus-visible:outline-2 focus-visible:outline-offset-2'
 
 function Landing() {
 	return (
@@ -52,12 +52,12 @@ function Landing() {
 			<div className="bg-background text-foreground min-h-dvh">
 				<div className="mx-auto flex max-w-5xl flex-col gap-16 px-6 py-6 md:gap-24 md:px-10 md:py-8">
 					<header className="flex items-center justify-between">
-						<span className="font-mono text-sm font-extrabold tracking-tight lowercase">
+						<span className="font-mono text-sm font-bold tracking-tight lowercase">
 							dutch-oven
 						</span>
 						<Link
 							to="/auth/login"
-							className="focus-visible:outline-kitchen-eggplant text-xs font-bold uppercase underline focus-visible:outline-2 focus-visible:outline-offset-2"
+							className="focus-visible:outline-kitchen-eggplant text-xs font-semibold underline focus-visible:outline-2 focus-visible:outline-offset-2"
 						>
 							sign in
 						</Link>
@@ -80,7 +80,7 @@ function Landing() {
 									/>
 								))}
 							</div>
-							<h1 className="max-w-3xl text-5xl leading-none font-extrabold tracking-tight md:text-7xl">
+							<h1 className="max-w-3xl text-5xl leading-none font-bold tracking-tight md:text-7xl">
 								recipes from real cooks, never made up by AI
 							</h1>
 							<p className="text-muted-foreground max-w-xl text-lg font-semibold text-balance">
@@ -104,7 +104,7 @@ function Landing() {
 
 						<section
 							aria-label="Supported recipe sites"
-							className="border-foreground bg-card flex flex-col gap-3 border-2 p-5 shadow-md"
+							className="border-border bg-card flex flex-col gap-3 border p-5"
 						>
 							<ul className="flex flex-wrap items-center gap-4">
 								{importSites.map((site) => (
@@ -134,11 +134,11 @@ function Landing() {
 							{features.map((feature) => (
 								<article
 									key={feature.title}
-									className="border-foreground bg-card flex flex-col gap-3 border-2 p-5 shadow-md"
+									className="border-border bg-card flex flex-col gap-3 border p-5"
 								>
 									<span
 										className={cn(
-											'border-foreground grid size-12 place-items-center border-2',
+											'border-border grid size-12 place-items-center border',
 											feature.color,
 										)}
 									>
@@ -148,7 +148,7 @@ function Landing() {
 											className="size-8 [image-rendering:pixelated]"
 										/>
 									</span>
-									<h2 className="text-lg leading-tight font-extrabold">
+									<h2 className="text-lg leading-tight font-bold">
 										{feature.title}
 									</h2>
 									<p className="text-muted-foreground text-sm font-semibold">
@@ -159,7 +159,7 @@ function Landing() {
 						</section>
 
 						<section className="flex flex-col items-start gap-4 pb-8">
-							<h2 className="text-3xl font-extrabold tracking-tight md:text-4xl">
+							<h2 className="text-3xl font-bold tracking-tight md:text-4xl">
 								save your first recipe
 							</h2>
 							<Link

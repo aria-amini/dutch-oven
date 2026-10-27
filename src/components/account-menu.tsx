@@ -16,13 +16,13 @@ import { useShelfStats } from '@/lib/use-shelf-stats'
 import { cn } from '@/lib/utils/ui'
 
 const triggerClassName =
-	'order-first mr-auto flex shrink-0 items-center gap-2.5 border-2 px-1.5 py-1.5 md:px-2.5 md:py-2 text-xs font-bold tracking-wide whitespace-nowrap uppercase sm:mr-0 md:order-none md:mt-auto md:w-full'
+	'order-first mr-auto flex shrink-0 items-center gap-2.5 border px-1.5 py-1.5 md:px-2.5 md:py-2 text-xs font-semibold whitespace-nowrap sm:mr-0 md:order-none md:mt-auto md:w-full'
 
 const interactiveClassName =
-	'hover:bg-card hover:border-foreground focus-visible:outline-kitchen-eggplant hover:shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 data-popup-open:bg-card data-popup-open:border-foreground data-popup-open:shadow-sm'
+	'hover:bg-card hover:border-border focus-visible:outline-kitchen-eggplant focus-visible:outline-2 focus-visible:outline-offset-2 data-popup-open:bg-card data-popup-open:border-border data-popup-open:'
 
 const itemClassName =
-	'flex w-full cursor-default items-center gap-2.5 px-3 py-2.5 text-xs font-bold tracking-wide uppercase outline-none select-none data-highlighted:bg-kitchen-yolk'
+	'flex w-full cursor-default items-center gap-2.5 px-3 py-2.5 text-xs font-semibold outline-none select-none data-highlighted:bg-kitchen-yolk/40'
 
 export function AccountMenu() {
 	const session = authClient.useSession()
@@ -81,18 +81,18 @@ export function AccountMenu() {
 							guest
 						</span>
 						{itemCount > 0 ? (
-							<span className="bg-foreground text-background px-1 font-mono text-xs leading-4 font-bold">
+							<span className="bg-foreground text-background px-1 font-mono text-xs leading-4 font-semibold">
 								{itemCount}
 							</span>
 						) : null}
 					</>
 				}
-				triggerClassName="border-foreground border-dashed"
+				triggerClassName="border-border border-dashed"
 				header={
 					<div className="flex items-center gap-3">
 						<GuestAvatar className="size-10" iconSize={22} />
 						<div className="min-w-0">
-							<p className="text-sm font-extrabold">guest account</p>
+							<p className="text-sm font-bold">guest account</p>
 							<p className="text-muted-foreground mt-1 text-xs font-semibold">
 								create an account to save your recipes
 							</p>
@@ -101,7 +101,7 @@ export function AccountMenu() {
 				}
 			>
 				<Menu.LinkItem
-					className={cn(itemClassName, 'bg-kitchen-basil')}
+					className={cn(itemClassName, 'bg-kitchen-basil/30')}
 					render={<Link to="/auth/signup" />}
 				>
 					<UserPlusIcon size={16} weight="bold" aria-hidden />
@@ -128,7 +128,7 @@ export function AccountMenu() {
 				<>
 					<span
 						aria-hidden
-						className="border-foreground bg-kitchen-yolk grid size-6 shrink-0 place-items-center border-2 text-xs font-extrabold"
+						className="border-border bg-kitchen-yolk grid size-6 shrink-0 place-items-center border text-xs font-bold"
 					>
 						{user.name.charAt(0)}
 					</span>
@@ -140,7 +140,7 @@ export function AccountMenu() {
 			triggerClassName="border-transparent"
 			header={
 				<>
-					<p className="truncate text-sm font-extrabold">{user.name}</p>
+					<p className="truncate text-sm font-bold">{user.name}</p>
 					<p className="text-muted-foreground mt-1 truncate text-xs font-semibold">
 						{user.email}
 					</p>
@@ -185,10 +185,8 @@ function AccountMenuShell({
 			</Menu.Trigger>
 			<Menu.Portal>
 				<Menu.Positioner className="z-50" align="start" sideOffset={6}>
-					<Menu.Popup className="border-foreground bg-background w-64 border-2 shadow-md outline-none">
-						<div className="border-foreground border-b-2 px-3 py-3">
-							{header}
-						</div>
+					<Menu.Popup className="bg-background w-64 shadow-md outline-none">
+						<div className="border-border border-b px-3 py-3">{header}</div>
 						<div className="flex flex-col py-1">{children}</div>
 					</Menu.Popup>
 				</Menu.Positioner>
@@ -239,7 +237,7 @@ function GuestAvatar({
 		<span
 			aria-hidden
 			className={cn(
-				'border-foreground bg-card grid shrink-0 place-items-center border-2 border-dashed',
+				'border-border bg-card grid shrink-0 place-items-center border border-dashed',
 				className,
 			)}
 		>

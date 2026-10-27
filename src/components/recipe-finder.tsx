@@ -118,7 +118,7 @@ export function RecipeFinder({
 					className="flex flex-col gap-2 sm:flex-row"
 				>
 					{!hideSearch ? (
-						<label className="border-foreground bg-background focus-within:outline-kitchen-eggplant flex flex-1 items-center gap-2 border-2 px-3 py-3 focus-within:outline-2 focus-within:outline-offset-2">
+						<label className="border-input bg-background focus-within:outline-kitchen-eggplant flex flex-1 items-center gap-2 border px-3 py-3 focus-within:outline-2 focus-within:outline-offset-2">
 							{url ? (
 								<LinkSimple size={16} weight="bold" aria-hidden />
 							) : (
@@ -144,7 +144,7 @@ export function RecipeFinder({
 						<button
 							type="submit"
 							disabled={saving !== undefined}
-							className="border-foreground bg-kitchen-basil border-2 px-4 py-2 text-xs font-bold uppercase shadow-sm transition-transform hover:-translate-y-0.5 disabled:opacity-50"
+							className="bg-kitchen-basil px-4 py-2 text-xs font-semibold disabled:opacity-50"
 						>
 							{saving
 								? 'importing…'
@@ -164,7 +164,10 @@ export function RecipeFinder({
 						</output>
 					) : null}
 					{error ? (
-						<p role="alert" className="text-kitchen-tomato text-xs font-bold">
+						<p
+							role="alert"
+							className="text-kitchen-tomato text-xs font-semibold"
+						>
 							{error}
 						</p>
 					) : null}
@@ -183,9 +186,8 @@ export function RecipeFinder({
 										disabled={saving !== undefined}
 										onClick={() => save(result.url)}
 										className={cn(
-											'border-foreground bg-background focus-visible:outline-kitchen-eggplant flex min-w-0 flex-1 items-center gap-2.5 border-2 p-1.5 text-left transition-transform focus-visible:outline-2 focus-visible:outline-offset-2',
-											saving === undefined &&
-												'hover:-translate-y-0.5 hover:shadow-sm',
+											'border-border bg-background focus-visible:outline-kitchen-eggplant flex min-w-0 flex-1 items-center gap-2.5 border p-1.5 text-left focus-visible:outline-2 focus-visible:outline-offset-2',
+											saving === undefined && '',
 											saving !== undefined &&
 												saving !== result.url &&
 												'opacity-50',
@@ -193,7 +195,7 @@ export function RecipeFinder({
 									>
 										<Thumb result={result} />
 										<span className="min-w-0 flex-1">
-											<span className="block truncate text-sm font-extrabold">
+											<span className="block truncate text-sm font-bold">
 												{result.title}
 											</span>
 											<span className="text-muted-foreground block text-xs font-semibold">
@@ -208,7 +210,7 @@ export function RecipeFinder({
 										target="_blank"
 										rel="noreferrer"
 										aria-label={`Open ${result.title} on ${result.siteName}`}
-										className="border-foreground bg-background focus-visible:outline-kitchen-eggplant grid w-9 shrink-0 place-items-center border-2 focus-visible:outline-2 focus-visible:outline-offset-2"
+										className="border-border bg-background focus-visible:outline-kitchen-eggplant grid w-9 shrink-0 place-items-center border focus-visible:outline-2 focus-visible:outline-offset-2"
 									>
 										<ArrowSquareOut size={14} weight="bold" aria-hidden />
 									</a>
@@ -225,7 +227,10 @@ export function RecipeFinder({
 						</p>
 					)}
 					{error ? (
-						<p role="alert" className="text-kitchen-tomato text-xs font-bold">
+						<p
+							role="alert"
+							className="text-kitchen-tomato text-xs font-semibold"
+						>
 							{error}
 						</p>
 					) : null}
@@ -267,7 +272,7 @@ function Thumb({ result }: { result: Result }) {
 		return (
 			<span
 				aria-hidden
-				className="bg-kitchen-yolk border-foreground grid size-10 shrink-0 place-items-center border-2 text-sm font-extrabold uppercase"
+				className="bg-kitchen-yolk border-border grid size-10 shrink-0 place-items-center border text-sm font-bold"
 			>
 				{result.title.charAt(0)}
 			</span>
@@ -280,7 +285,7 @@ function Thumb({ result }: { result: Result }) {
 			loading="lazy"
 			referrerPolicy="no-referrer"
 			onError={() => setBroken(true)}
-			className="border-foreground size-10 shrink-0 border-2 object-cover"
+			className="border-border size-10 shrink-0 border object-cover"
 		/>
 	)
 }

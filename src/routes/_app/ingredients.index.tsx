@@ -86,12 +86,12 @@ function Pantry() {
 					<div>
 						<Link
 							to="/recipes"
-							className="focus-visible:outline-kitchen-eggplant mb-4 inline-flex items-center gap-1.5 text-xs font-bold uppercase underline focus-visible:outline-2 focus-visible:outline-offset-2"
+							className="focus-visible:outline-kitchen-eggplant mb-4 inline-flex items-center gap-1.5 text-xs font-semibold underline focus-visible:outline-2 focus-visible:outline-offset-2"
 						>
 							<ArrowLeft size={14} weight="bold" aria-hidden />
 							recipes
 						</Link>
-						<h1 className="text-4xl font-extrabold tracking-tight md:text-5xl">
+						<h1 className="text-4xl font-bold tracking-tight md:text-5xl">
 							ingredients
 						</h1>
 					</div>
@@ -99,7 +99,7 @@ function Pantry() {
 						<Link
 							to="/ingredients/bulk"
 							search={bulkSearch(cat)}
-							className="border-foreground bg-kitchen-yolk focus-visible:outline-kitchen-eggplant inline-flex items-center gap-2 border-2 px-4 py-2.5 text-sm font-extrabold uppercase shadow-md transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-2 focus-visible:outline-offset-2"
+							className="bg-kitchen-yolk focus-visible:outline-kitchen-eggplant inline-flex items-center gap-2 px-4 py-2.5 text-sm font-bold transition-colors hover:brightness-95 focus-visible:outline-2 focus-visible:outline-offset-2"
 						>
 							<Plus size={18} weight="bold" aria-hidden />
 							add
@@ -119,10 +119,10 @@ function Pantry() {
 									search={{ cat: active ? undefined : category }}
 									aria-current={active ? 'true' : undefined}
 									className={cn(
-										'focus-visible:outline-kitchen-eggplant flex items-center gap-1.5 border-line px-2.5 py-1.5 text-xs font-bold tracking-wide uppercase transition-colors focus-visible:outline-2 focus-visible:outline-offset-2',
+										'focus-visible:outline-kitchen-eggplant flex items-center gap-1.5 border px-2.5 py-1.5 text-xs font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2',
 										active
-											? 'border-foreground bg-kitchen-yolk'
-											: 'border-foreground/30 hover:border-foreground',
+											? 'border-border bg-kitchen-yolk/40'
+											: 'border-foreground/30 hover:border-input',
 									)}
 								>
 									<img
@@ -138,7 +138,7 @@ function Pantry() {
 				) : null}
 
 				{groups.length === 0 ? (
-					<section className="border-foreground bg-card border-line flex flex-col items-center gap-4 p-10 text-center">
+					<section className="border-border bg-card flex flex-col items-center gap-4 border p-10 text-center">
 						<div aria-hidden className="flex gap-3">
 							{emptyPreview.map((category) => (
 								<img
@@ -149,10 +149,10 @@ function Pantry() {
 								/>
 							))}
 						</div>
-						<p className="text-lg font-extrabold">nothing here yet</p>
+						<p className="text-lg font-bold">nothing here yet</p>
 						<Link
 							to="/ingredients/bulk"
-							className="border-foreground bg-kitchen-yolk focus-visible:outline-kitchen-eggplant flex items-center gap-1.5 border-2 px-4 py-2 text-xs font-bold tracking-wide uppercase shadow-sm transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2"
+							className="bg-kitchen-yolk focus-visible:outline-kitchen-eggplant flex items-center gap-1.5 px-4 py-2 text-xs font-semibold focus-visible:outline-2 focus-visible:outline-offset-2"
 						>
 							<Plus size={14} weight="bold" aria-hidden />
 							stock up
@@ -160,13 +160,13 @@ function Pantry() {
 					</section>
 				) : (
 					<div className="flex flex-col gap-4 lg:flex-row lg:items-start">
-						<div className="border-foreground bg-card border-line flex flex-1 flex-col gap-5 p-3 md:p-4">
+						<div className="border-border bg-card flex flex-1 flex-col gap-5 border p-3 md:p-4">
 							{groups.map((group) => (
 								<section
 									key={group.category}
 									aria-label={pantryCategoryLabels[group.category]}
 								>
-									<h2 className="mb-2 flex items-center gap-2 text-xs font-bold tracking-wide uppercase">
+									<h2 className="mb-2 flex items-center gap-2 text-xs font-semibold">
 										{pantryCategoryLabels[group.category]}
 										<span className="text-muted-foreground font-mono">
 											{group.items.length}
@@ -185,7 +185,7 @@ function Pantry() {
 											to="/ingredients/bulk"
 											search={bulkSearch(group.category)}
 											aria-label={`Add ${pantryCategoryLabels[group.category]}`}
-											className="border-foreground/40 hover:border-foreground hover:text-foreground text-foreground/50 focus-visible:outline-kitchen-eggplant border-line flex aspect-square items-center justify-center border-dashed transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
+											className="border-foreground/40 hover:border-input hover:text-foreground text-foreground/50 focus-visible:outline-kitchen-eggplant flex aspect-square items-center justify-center border border-dashed transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
 										>
 											<Plus size={22} weight="bold" aria-hidden />
 										</Link>
@@ -220,7 +220,7 @@ function Pantry() {
 							</Dialog.Title>
 							<Dialog.Close
 								aria-label="Close details"
-								className="border-foreground bg-background focus-visible:outline-kitchen-eggplant absolute top-3 right-3 border-2 p-2 focus-visible:outline-2"
+								className="border-border bg-background focus-visible:outline-kitchen-eggplant absolute top-3 right-3 border p-2 focus-visible:outline-2"
 							>
 								<X size={18} aria-hidden />
 							</Dialog.Close>
@@ -256,10 +256,10 @@ function Slot({
 			aria-label={`${item.name}, quantity ${item.quantity}`}
 			aria-current={selected ? 'true' : undefined}
 			className={cn(
-				'focus-visible:outline-kitchen-eggplant relative flex aspect-square items-center justify-center border-line p-1 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2',
+				'focus-visible:outline-kitchen-eggplant relative flex aspect-square items-center justify-center border p-1 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2',
 				selected
-					? 'border-foreground bg-kitchen-yolk'
-					: 'border-foreground/30 bg-card hover:border-foreground',
+					? 'border-border bg-kitchen-yolk/40'
+					: 'border-foreground/30 bg-card hover:border-input',
 			)}
 		>
 			<img
@@ -268,7 +268,7 @@ function Slot({
 				className="size-10 object-contain [image-rendering:pixelated] md:size-12"
 			/>
 			<span className="sr-only">{item.name}</span>
-			<span className="bg-foreground text-background absolute right-0.5 bottom-0.5 px-1 font-mono text-xs leading-4 font-bold">
+			<span className="bg-foreground text-background absolute right-0.5 bottom-0.5 px-1 font-mono text-xs leading-4 font-semibold">
 				{item.quantity}
 			</span>
 		</Link>
@@ -319,7 +319,7 @@ function DetailPanel({
 	return (
 		<aside
 			aria-label="Item details"
-			className={cn('border-foreground bg-card border-line p-5', className)}
+			className={cn('border-border bg-card border p-5', className)}
 		>
 			{item ? (
 				<div className="flex flex-col items-center gap-4">
@@ -328,7 +328,7 @@ function DetailPanel({
 						alt=""
 						className="size-20 object-contain [image-rendering:pixelated]"
 					/>
-					<h2 className="text-2xl font-extrabold tracking-tight lowercase">
+					<h2 className="text-2xl font-bold tracking-tight lowercase">
 						{item.name}
 					</h2>
 					<div className="flex items-center gap-3">
@@ -337,11 +337,11 @@ function DetailPanel({
 							aria-label="Decrease quantity"
 							disabled={pending || item.quantity <= 1}
 							onClick={() => changeQuantity(item.id, item.quantity - 1)}
-							className="border-foreground bg-background hover:bg-kitchen-yolk focus-visible:outline-kitchen-eggplant border-line flex size-9 items-center justify-center focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-40"
+							className="border-border bg-background hover:bg-kitchen-yolk/40 focus-visible:outline-kitchen-eggplant flex size-9 items-center justify-center border focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-40"
 						>
 							<Minus size={16} weight="bold" aria-hidden />
 						</button>
-						<p className="min-w-16 text-center font-mono text-2xl font-extrabold">
+						<p className="min-w-16 text-center font-mono text-2xl font-bold">
 							× {item.quantity}
 						</p>
 						<button
@@ -349,7 +349,7 @@ function DetailPanel({
 							aria-label="Increase quantity"
 							disabled={pending || item.quantity >= pantryQuantityMax}
 							onClick={() => changeQuantity(item.id, item.quantity + 1)}
-							className="border-foreground bg-background hover:bg-kitchen-yolk focus-visible:outline-kitchen-eggplant border-line flex size-9 items-center justify-center focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-40"
+							className="border-border bg-background hover:bg-kitchen-yolk/40 focus-visible:outline-kitchen-eggplant flex size-9 items-center justify-center border focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-40"
 						>
 							<Plus size={16} weight="bold" aria-hidden />
 						</button>
@@ -372,7 +372,7 @@ function DetailPanel({
 						type="button"
 						disabled={pending}
 						onClick={() => remove(item.id)}
-						className="focus-visible:outline-kitchen-eggplant mt-1 text-xs font-bold underline underline-offset-4 focus-visible:outline-2 disabled:opacity-40"
+						className="focus-visible:outline-kitchen-eggplant mt-1 text-xs font-semibold underline underline-offset-4 focus-visible:outline-2 disabled:opacity-40"
 					>
 						use it up — remove it
 					</button>

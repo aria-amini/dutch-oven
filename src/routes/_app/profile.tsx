@@ -18,7 +18,7 @@ function Profile() {
 	if (session.isPending) {
 		return (
 			<main className="mx-auto min-h-dvh max-w-xl space-y-8 p-6">
-				<h1 className="text-4xl font-bold">Profile</h1>
+				<h1 className="text-4xl font-semibold">Profile</h1>
 				<p className="text-muted-foreground animate-pulse">loading…</p>
 			</main>
 		)
@@ -27,7 +27,7 @@ function Profile() {
 	if (session.error) {
 		return (
 			<main className="mx-auto min-h-dvh max-w-xl space-y-8 p-6">
-				<h1 className="text-4xl font-bold">Profile</h1>
+				<h1 className="text-4xl font-semibold">Profile</h1>
 				<p role="alert" className="text-destructive">
 					we couldn&apos;t check your session.
 				</p>
@@ -39,7 +39,7 @@ function Profile() {
 	if (!user) {
 		return (
 			<main className="mx-auto min-h-dvh max-w-xl space-y-8 p-6">
-				<h1 className="text-4xl font-bold">Profile</h1>
+				<h1 className="text-4xl font-semibold">Profile</h1>
 				<p className="text-muted-foreground">you are signed out.</p>
 				<Link to="/auth/login" className={buttonVariants()}>
 					sign in
@@ -51,8 +51,8 @@ function Profile() {
 	if (user.isAnonymous) {
 		return (
 			<main className="mx-auto min-h-dvh max-w-xl space-y-8 p-6">
-				<h1 className="text-4xl font-bold">guest cook</h1>
-				<div className="border-foreground space-y-4 border-2 border-dashed p-4">
+				<h1 className="text-4xl font-semibold">guest cook</h1>
+				<div className="border-border space-y-4 border border-dashed p-4">
 					<p className="text-sm font-semibold">
 						no account yet — your shelf lives only in this browser. make an
 						account to keep it on any device.
@@ -152,7 +152,7 @@ function AccountProfile({
 
 	return (
 		<main className="mx-auto min-h-dvh max-w-xl space-y-8 p-6">
-			<h1 className="text-4xl font-bold">Profile</h1>
+			<h1 className="text-4xl font-semibold">Profile</h1>
 			<div className="space-y-4">
 				<p>{name}</p>
 				<p className="text-muted-foreground">{email}</p>
@@ -160,12 +160,12 @@ function AccountProfile({
 					<img
 						src={avatar}
 						alt="Profile avatar"
-						className="border-foreground size-24 border-2 object-cover"
+						className="border-border size-24 border object-cover"
 					/>
 				) : (
 					<div
 						aria-hidden
-						className="bg-kitchen-yolk border-foreground flex size-24 items-center justify-center border-2 text-3xl font-extrabold uppercase"
+						className="bg-kitchen-yolk border-border flex size-24 items-center justify-center border text-3xl font-bold"
 					>
 						{name.charAt(0)}
 					</div>

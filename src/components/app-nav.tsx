@@ -22,7 +22,7 @@ export function AppNav() {
 			<Link
 				to="/recipes"
 				aria-label="dutch-oven"
-				className="border-foreground/20 focus-visible:outline-kitchen-eggplant mr-auto flex shrink-0 items-center justify-center gap-2 border bg-white px-3 py-2 font-mono text-sm font-extrabold tracking-tight whitespace-nowrap lowercase focus-visible:outline-2 focus-visible:outline-offset-2 md:mr-0 md:mb-6 md:w-full md:self-center"
+				className="border-foreground/20 focus-visible:outline-kitchen-eggplant mr-auto flex shrink-0 items-center justify-center gap-2 border bg-white px-3 py-2 font-mono text-sm font-bold tracking-tight whitespace-nowrap lowercase focus-visible:outline-2 focus-visible:outline-offset-2 md:mr-0 md:mb-6 md:w-full md:self-center"
 			>
 				<img
 					src="/icon-192.png"
@@ -40,10 +40,10 @@ export function AppNav() {
 						to={to}
 						aria-current={active ? 'page' : undefined}
 						className={cn(
-							'focus-visible:outline-kitchen-eggplant flex shrink-0 items-center gap-2 border px-2 py-2 text-xs md:gap-2 md:px-2.5 md:py-1.5 font-semibold tracking-wide uppercase focus-visible:outline-2 focus-visible:outline-offset-2 md:w-full',
+							'focus-visible:outline-kitchen-eggplant flex shrink-0 items-center gap-2 border px-2 py-2 text-xs md:gap-2 md:px-2.5 md:py-1.5 font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 md:w-full',
 							active
 								? 'border-foreground/15 bg-kitchen-yolk/30'
-								: 'border-transparent hover:bg-card focus-visible:border-foreground',
+								: 'border-transparent hover:bg-card focus-visible:border-border',
 						)}
 					>
 						<Icon size={18} weight={active ? 'fill' : 'regular'} aria-hidden />

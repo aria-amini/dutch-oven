@@ -1,6 +1,6 @@
 {
 	"schemaVersion": 2,
-	"generatedAt": "2026-08-14T08:25:00Z",
+	"generatedAt": "2026-10-27T22:00:00Z",
 	"title": "Design System: dutch-oven",
 	"extensions": {
 		"colorMeta": {
@@ -98,28 +98,18 @@
 		"typographyMeta": {
 			"display": {
 				"displayName": "Display",
-				"purpose": "The page's single giant headline; lowercase, steps down as content grows."
+				"purpose": "The landing page's single giant headline; lowercase, bold (700)."
 			},
 			"label": {
-				"displayName": "Sticker Label",
-				"purpose": "Uppercase 13px chips on 2px-bordered sticker backgrounds, rotated -1deg."
+				"displayName": "Label",
+				"purpose": "Lowercase 13px semibold labels for nav, buttons, chips and section headings."
 			}
 		},
 		"shadows": [
 			{
-				"name": "resting",
-				"value": "3px 3px 0 0 #16130e",
-				"purpose": "Tiles at rest."
-			},
-			{
-				"name": "raised",
-				"value": "5px 5px 0 0 #16130e",
-				"purpose": "Forms, headline sticker, hover target."
-			},
-			{
-				"name": "hover",
-				"value": "7px 7px 0 0 #16130e",
-				"purpose": "Interactive lift, paired with translate(-2px,-2px)."
+				"name": "float",
+				"value": "0 6px 20px -4px rgb(22 19 14 / 0.14), 0 1px 3px rgb(22 19 14 / 0.06)",
+				"purpose": "Menus, listboxes, toasts, a dragged row, tile hover. Never on resting surfaces."
 			}
 		],
 		"motion": [
@@ -135,94 +125,94 @@
 			"name": "Recipe Tile",
 			"kind": "card",
 			"refersTo": "tile",
-			"description": "The square unit of the shelf — flat ingredient color or a full-bleed photo with a cream title sticker.",
-			"html": "<a class=\"ds-tile\" href=\"#\"><span class=\"ds-tile-caption\">aug 12</span><span class=\"ds-tile-title\">miso butter pasta</span></a>",
-			"css": ".ds-tile { position: relative; display: block; width: 148px; height: 148px; background: #ff4b26; color: #16130e; border: 2px solid #16130e; box-shadow: 3px 3px 0 0 #16130e; text-decoration: none; transition: transform 0.2s, box-shadow 0.2s; } .ds-tile:hover { transform: translate(-2px, -2px); box-shadow: 5px 5px 0 0 #16130e; } .ds-tile:focus-visible { outline: 2px solid #5b3df5; outline-offset: 2px; } .ds-tile-caption { position: absolute; top: 10px; left: 12px; font-size: 13px; font-weight: 600; opacity: 0.7; } .ds-tile-title { position: absolute; right: 12px; bottom: 10px; left: 12px; font-size: 20px; font-weight: 800; line-height: 1.2; }"
+			"description": "The square unit of the shelf — an ingredient tint or a full-bleed photo with a cream title strip.",
+			"html": "<a class=\"ds-tile\" href=\"#\"><span class=\"ds-tile-title\">miso butter pasta</span></a>",
+			"css": ".ds-tile { position: relative; display: block; width: 148px; height: 148px; background: rgb(255 75 38 / 0.25); color: #16130e; border: 1px solid rgb(22 19 14 / 0.18); text-decoration: none; transition: box-shadow 0.2s; } .ds-tile:hover { box-shadow: 0 6px 20px -4px rgb(22 19 14 / 0.14), 0 1px 3px rgb(22 19 14 / 0.06); } .ds-tile:focus-visible { outline: 2px solid #5b3df5; outline-offset: 2px; } .ds-tile-title { position: absolute; right: 12px; bottom: 10px; left: 12px; font-size: 20px; font-weight: 700; line-height: 1.2; }"
 		},
 		{
-			"name": "Group Sticker",
+			"name": "Active Chip",
 			"kind": "chip",
-			"refersTo": "tile-sticker",
-			"description": "The rotated basil label chip that names each shelf group.",
-			"html": "<span class=\"ds-sticker\">weeknight heroes</span>",
-			"css": ".ds-sticker { display: inline-block; background: #2fa84f; color: #16130e; border: 2px solid #16130e; padding: 2px 8px; font-size: 13px; font-weight: 700; text-transform: uppercase; transform: rotate(-1deg); }"
+			"refersTo": "tile",
+			"description": "A selected filter chip: yolk tint with a hairline border.",
+			"html": "<span class=\"ds-chip\">weeknight</span>",
+			"css": ".ds-chip { display: inline-block; background: rgb(255 194 28 / 0.4); color: #16130e; border: 1px solid rgb(22 19 14 / 0.18); padding: 6px 10px; font-size: 13px; font-weight: 600; }"
 		},
 		{
 			"name": "Add Tile",
 			"kind": "button",
 			"refersTo": "tile",
-			"description": "Dashed placeholder tile — 'not real yet' — expands inline into a form.",
+			"description": "Dashed placeholder tile — 'not real yet'.",
 			"html": "<button class=\"ds-add-tile\" type=\"button\">+ recipe</button>",
-			"css": ".ds-add-tile { width: 148px; height: 148px; background: transparent; color: #16130e; border: 2px dashed #16130e; font-size: 13px; font-weight: 700; text-transform: uppercase; cursor: pointer; transition: background 0.2s; } .ds-add-tile:hover { background: #fffdf8; } .ds-add-tile:focus-visible { outline: 2px solid #5b3df5; outline-offset: 2px; }"
+			"css": ".ds-add-tile { width: 148px; height: 148px; background: transparent; color: #16130e; border: 1px dashed rgb(22 19 14 / 0.4); font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.2s; } .ds-add-tile:hover { background: #fffdf8; } .ds-add-tile:focus-visible { outline: 2px solid #5b3df5; outline-offset: 2px; }"
 		},
 		{
 			"name": "Primary Button",
 			"kind": "button",
 			"refersTo": "button-primary",
-			"description": "Basil save/confirm action with resting cast-iron shadow.",
+			"description": "Basil save/confirm action: solid fill, no border, no shadow.",
 			"html": "<button class=\"ds-btn-primary\" type=\"button\">save to shelf</button>",
-			"css": ".ds-btn-primary { background: #2fa84f; color: #16130e; border: 2px solid #16130e; box-shadow: 3px 3px 0 0 #16130e; padding: 8px 16px; font-size: 13px; font-weight: 700; text-transform: uppercase; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; } .ds-btn-primary:hover { transform: translate(-2px, -2px); box-shadow: 5px 5px 0 0 #16130e; } .ds-btn-primary:focus-visible { outline: 2px solid #5b3df5; outline-offset: 2px; } .ds-btn-primary:disabled { opacity: 0.5; }"
+			"css": ".ds-btn-primary { background: #2fa84f; color: #16130e; border: 0; padding: 8px 16px; font-size: 13px; font-weight: 600; cursor: pointer; transition: filter 0.2s; } .ds-btn-primary:hover { filter: brightness(0.95); } .ds-btn-primary:focus-visible { outline: 2px solid #5b3df5; outline-offset: 2px; } .ds-btn-primary:disabled { opacity: 0.5; }"
 		},
 		{
 			"name": "Text Input",
 			"kind": "input",
 			"refersTo": "input-field",
-			"description": "Sharp-cornered paper field with cast-iron border; focus shifts, never glows.",
+			"description": "Square paper field with a 1px field-line border; focus shows the eggplant outline.",
 			"html": "<input class=\"ds-input\" type=\"text\" placeholder=\"miso butter pasta\">",
-			"css": ".ds-input { background: #fdf6ec; color: #16130e; border: 2px solid #16130e; border-radius: 0; padding: 8px 12px; font-size: 14px; font-weight: 600; } .ds-input::placeholder { opacity: 0.5; } .ds-input:focus-visible { outline: 2px solid #5b3df5; outline-offset: 2px; }"
+			"css": ".ds-input { background: #fdf6ec; color: #16130e; border: 1px solid rgb(22 19 14 / 0.4); border-radius: 0; padding: 8px 12px; font-size: 14px; font-weight: 600; } .ds-input::placeholder { opacity: 0.5; } .ds-input:focus-visible { outline: 2px solid #5b3df5; outline-offset: 2px; }"
 		},
 		{
-			"name": "Rail Nav Item",
+			"name": "Nav Item",
 			"kind": "nav",
 			"refersTo": "tile",
-			"description": "Left-rail square icon tile; active state is a yolk sticker.",
-			"html": "<nav><a class=\"ds-nav-item ds-nav-item-active\" href=\"#\">shelf</a> <a class=\"ds-nav-item\" href=\"#\">pantry</a></nav>",
-			"css": ".ds-nav-item { display: inline-flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 12px; border: 2px solid transparent; color: #16130e; font-size: 13px; font-weight: 700; text-transform: uppercase; text-decoration: none; } .ds-nav-item:hover { border-color: #16130e; background: #fffdf8; box-shadow: 3px 3px 0 0 #16130e; } .ds-nav-item-active { border-color: #16130e; background: #ffc21c; box-shadow: 3px 3px 0 0 #16130e; }"
+			"description": "Left-rail row; the active row is a yolk 30% tint with a hairline border.",
+			"html": "<nav><a class=\"ds-nav-item ds-nav-item-active\" href=\"#\">recipes</a> <a class=\"ds-nav-item\" href=\"#\">ingredients</a></nav>",
+			"css": ".ds-nav-item { display: flex; align-items: center; gap: 8px; padding: 6px 10px; border: 1px solid transparent; color: #16130e; font-size: 13px; font-weight: 600; text-decoration: none; } .ds-nav-item:hover { background: #fffdf8; } .ds-nav-item-active { border-color: rgb(22 19 14 / 0.15); background: rgb(255 194 28 / 0.3); }"
 		}
 	],
 	"narrative": {
-		"northStar": "The Neobrutalist Kitchen",
-		"overview": "dutch-oven looks like a kitchen wall, not a dashboard: butcher-paper ground, cast-iron ink outlines, and tiles in the colors of ingredients — tomato, yolk, basil, eggplant. Everything is flat, square, and unapologetically bold. Labels are stickers: extrabold uppercase chips slapped on at a slight rotate. Rejected worlds: metro tiles on pure black, pantry-shelf, diner ticket-rail.",
+		"northStar": "The Soft Kitchen",
+		"overview": "dutch-oven looks like a well-used kitchen wall: butcher-paper ground, ink drawn as hairlines, and the colors of ingredients used as gentle tints. Flat, square and quiet; the left sidebar is the reference for everything. Rejected worlds: neobrutalist, metro tiles on pure black, pantry-shelf, diner ticket-rail.",
 		"keyCharacteristics": [
 			"Butcher-paper cream ground, never white, never dark",
-			"Cast-iron ink 2px borders on every surface; zero radius, zero gradients",
-			"Hard offset shadows only — no blur, no glow",
-			"Ingredient brights carry meaning; black text on tomato/yolk/basil, white on eggplant",
-			"Stickers and dashed outline tiles for anything not yet real"
+			"One 1px hairline weight: ink at 18% for surfaces, 40% for fields",
+			"Square corners, zero gradients, no shadow on resting surfaces",
+			"Ingredient colors are tints; one solid primary action per screen",
+			"Lowercase semibold labels; weight and size carry hierarchy"
 		],
 		"rules": [
 			{
 				"name": "The Ingredient Rule",
-				"body": "Color comes from the kitchen, not a brand book. A tile is tomato, yolk, basil, or eggplant — never 'blue' or 'indigo'.",
+				"body": "Color comes from the kitchen, not a brand book. A tint is tomato, yolk, basil, or eggplant — never 'blue' or 'indigo'.",
 				"section": "colors"
 			},
 			{
-				"name": "The Tinted-Secondary Rule",
-				"body": "Secondary text on a colored tile is the tile's own ink at reduced opacity, never gray.",
+				"name": "The One-Solid Rule",
+				"body": "At most one saturated solid fill per screen, on the primary action. Everything else is a tint or paper.",
 				"section": "colors"
 			},
 			{
 				"name": "The Lowercase Rule",
-				"body": "Display and tile titles are lowercase; labels are uppercase. No Title Case anywhere.",
+				"body": "All UI copy is lowercase, labels included. No Title Case, no uppercase, no tracking.",
 				"section": "typography"
 			},
 			{
-				"name": "The Cast-Iron Rule",
-				"body": "Every shadow is #16130e at 100% opacity with zero blur. A soft or colored shadow is a bug.",
+				"name": "The Declare-Once Rule",
+				"body": "A surface is elevated by a hairline or by a shadow, never both. No hard offset shadows anywhere.",
 				"section": "elevation"
 			}
 		],
 		"dos": [
-			"Do put black text on tomato/yolk/basil and white on eggplant — nothing else pairs.",
-			"Do use the dashed border language for anything the user hasn't created yet.",
-			"Do keep tiles square and let content overflow to a '+N more' tile rather than scrolling a group.",
-			"Do rotate stickers a degree or two; the slight crookedness is the warmth."
+			"Do keep every border one hairline weight; use the 40% field line only for inputs and secondary buttons.",
+			"Do tint ingredient colors and keep one solid fill for the primary action.",
+			"Do use dashed borders for anything the user hasn't created yet.",
+			"Do let weight and size make hierarchy."
 		],
 		"donts": [
-			"Don't use radius, gradients, blur, or soft shadows — the world is flat and hard.",
-			"Don't use gray borders or gray-on-color secondary text; borders are cast iron, secondary text is tinted ink.",
-			"Don't open a modal for add/rename flows — forms expand inline from dashed tiles.",
-			"Don't resurrect rejected worlds: metro-black, pantry-shelf, diner ticket-rail."
+			"Don't use hard offset shadows, 2px ink borders, uppercase labels or rotated stickers.",
+			"Don't put a border and a shadow on the same surface.",
+			"Don't use gray-on-color secondary text; tint from the surface's ink.",
+			"Don't resurrect rejected worlds: neobrutalist, metro-black, pantry-shelf, diner ticket-rail."
 		]
 	}
 }

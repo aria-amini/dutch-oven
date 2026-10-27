@@ -38,12 +38,12 @@ function NewRecipe() {
 				<div>
 					<Link
 						to="/recipes"
-						className="focus-visible:outline-kitchen-eggplant mb-4 inline-flex items-center gap-1.5 text-xs font-bold uppercase underline focus-visible:outline-2 focus-visible:outline-offset-2"
+						className="focus-visible:outline-kitchen-eggplant mb-4 inline-flex items-center gap-1.5 text-xs font-semibold underline focus-visible:outline-2 focus-visible:outline-offset-2"
 					>
 						<ArrowLeft size={14} weight="bold" aria-hidden />
 						recipes
 					</Link>
-					<h1 className="text-4xl font-extrabold tracking-tight md:text-5xl">
+					<h1 className="text-4xl font-bold tracking-tight md:text-5xl">
 						add a recipe
 					</h1>
 				</div>
@@ -52,7 +52,7 @@ function NewRecipe() {
 						void navigate({ to: '/recipes/$recipeId', params: { recipeId } })
 					}
 				/>
-				<div className="flex items-center gap-3 text-xs font-bold uppercase">
+				<div className="flex items-center gap-3 text-xs font-semibold">
 					<span aria-hidden className="bg-foreground h-0.5 flex-1" />
 					or write your own
 					<span aria-hidden className="bg-foreground h-0.5 flex-1" />
@@ -114,13 +114,13 @@ function ManualForm() {
 					maxLength={120}
 					placeholder="miso butter pasta"
 					aria-label="Recipe name"
-					className="border-foreground bg-background border-line min-w-0 flex-1 px-3 py-3 text-2xl font-bold placeholder:opacity-50"
+					className="border-input bg-background min-w-0 flex-1 border px-3 py-3 text-2xl font-semibold placeholder:opacity-50"
 				/>
 			</div>
 			<IngredientListField />
 			<StepsField />
 			{error ? (
-				<p role="alert" className="text-kitchen-tomato text-xs font-bold">
+				<p role="alert" className="text-kitchen-tomato text-xs font-semibold">
 					{error}
 				</p>
 			) : null}
@@ -128,13 +128,13 @@ function ManualForm() {
 				<button
 					type="submit"
 					disabled={pending || photoBusy}
-					className="border-foreground bg-kitchen-basil border-2 px-4 py-2 text-xs font-bold uppercase shadow-sm transition-transform hover:-translate-y-0.5 disabled:opacity-50"
+					className="bg-kitchen-basil px-4 py-2 text-xs font-semibold disabled:opacity-50"
 				>
 					{pending ? 'saving…' : 'save to shelf'}
 				</button>
 				<Link
 					to="/recipes"
-					className="border-foreground bg-background border-2 px-4 py-2 text-xs font-bold uppercase"
+					className="border-input bg-background border px-4 py-2 text-xs font-semibold"
 				>
 					cancel
 				</Link>

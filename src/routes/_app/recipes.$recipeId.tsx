@@ -55,10 +55,10 @@ export const Route = createFileRoute('/_app/recipes/$recipeId')({
 })
 
 const fieldClassName =
-	'border-foreground bg-card focus-visible:outline-kitchen-eggplant border-line p-3 font-semibold focus-visible:outline-2 focus-visible:outline-offset-2'
+	'border-input bg-card focus-visible:outline-kitchen-eggplant border p-3 font-semibold focus-visible:outline-2 focus-visible:outline-offset-2'
 
 const sectionLabelClassName =
-	'inline-block border-b-3 pb-0.5 text-xs font-bold tracking-wide uppercase'
+	'inline-block border-b-3 pb-0.5 text-xs font-semibold'
 
 function hostOf(url: string) {
 	try {
@@ -83,7 +83,7 @@ function RecipeDetail() {
 			<div className="max-w-2xl">
 				<Link
 					to="/recipes"
-					className="focus-visible:outline-kitchen-eggplant mb-4 inline-flex items-center gap-1.5 text-xs font-bold uppercase underline focus-visible:outline-2 focus-visible:outline-offset-2"
+					className="focus-visible:outline-kitchen-eggplant mb-4 inline-flex items-center gap-1.5 text-xs font-semibold underline focus-visible:outline-2 focus-visible:outline-offset-2"
 				>
 					<ArrowLeft size={14} weight="bold" aria-hidden />
 					recipes
@@ -152,11 +152,11 @@ function RecipeView({
 					<img
 						src={recipe.imageUrl}
 						alt={recipe.title}
-						className="border-foreground border-line size-20 shrink-0 object-cover md:size-28"
+						className="border-border size-20 shrink-0 object-cover md:size-28"
 					/>
 				) : null}
 				<div className="min-w-0">
-					<h1 className="text-4xl font-extrabold tracking-tight md:text-5xl">
+					<h1 className="text-4xl font-bold tracking-tight md:text-5xl">
 						{recipe.title}
 					</h1>
 					<RecipeMeta recipe={recipe} />
@@ -166,7 +166,7 @@ function RecipeView({
 				<CookedButton recipe={recipe} onCooked={checklist.clear} />
 				<button
 					type="button"
-					className="text-muted-foreground hover:text-foreground focus-visible:outline-kitchen-eggplant inline-flex items-center gap-1 px-1 py-1 text-xs font-bold uppercase underline focus-visible:outline-2 focus-visible:outline-offset-2"
+					className="text-muted-foreground hover:text-foreground focus-visible:outline-kitchen-eggplant inline-flex items-center gap-1 px-1 py-1 text-xs font-semibold underline focus-visible:outline-2 focus-visible:outline-offset-2"
 					onClick={onEdit}
 				>
 					<PencilSimple size={12} weight="bold" aria-hidden />
@@ -175,12 +175,12 @@ function RecipeView({
 				{books.length ? <BookPicker recipe={recipe} books={books} /> : null}
 			</div>
 			<section className="mt-10">
-				<h2 className="text-xs font-bold uppercase">
+				<h2 className="text-xs font-semibold">
 					<span className={cn(sectionLabelClassName, 'border-kitchen-tomato')}>
 						ingredients
 					</span>
 				</h2>
-				<ul className="border-foreground bg-card border-line mt-4">
+				<ul className="border-border bg-card mt-4 border">
 					{recipe.ingredients.length ? (
 						recipe.ingredients.map((ingredient, index) => {
 							const item = `i${index}`
@@ -217,21 +217,21 @@ function RecipeView({
 							)
 						})
 					) : (
-						<li className="border-foreground/40 border-line border-dashed p-4 text-sm font-semibold">
+						<li className="border-foreground/40 border-dashed p-4 text-sm font-semibold">
 							no ingredients yet
 						</li>
 					)}
 				</ul>
 			</section>
 			<section className="mt-10">
-				<h2 className="text-xs font-bold uppercase">
+				<h2 className="text-xs font-semibold">
 					<span
 						className={cn(sectionLabelClassName, 'border-kitchen-eggplant')}
 					>
 						steps
 					</span>
 				</h2>
-				<ol className="border-foreground bg-card border-line mt-4">
+				<ol className="border-border bg-card mt-4 border">
 					{recipe.steps.length ? (
 						recipe.steps.map((step, index) => {
 							const item = `s${index}`
@@ -249,7 +249,7 @@ function RecipeView({
 											onChange={() => checklist.toggle(item)}
 											className="accent-kitchen-basil mt-0.5 size-5 shrink-0"
 										/>
-										<span className="text-muted-foreground mt-0.5 text-xs font-extrabold">
+										<span className="text-muted-foreground mt-0.5 text-xs font-bold">
 											{index + 1}
 										</span>
 										<span
@@ -265,7 +265,7 @@ function RecipeView({
 							)
 						})
 					) : (
-						<li className="border-foreground/40 border-line border-dashed p-4 text-sm font-semibold">
+						<li className="border-foreground/40 border-dashed p-4 text-sm font-semibold">
 							no steps yet
 						</li>
 					)}
@@ -273,12 +273,12 @@ function RecipeView({
 			</section>
 			{recipe.notes ? (
 				<section className="mt-10">
-					<h2 className="text-xs font-bold uppercase">
+					<h2 className="text-xs font-semibold">
 						<span className={cn(sectionLabelClassName, 'border-kitchen-yolk')}>
 							notes
 						</span>
 					</h2>
-					<p className="border-foreground bg-card border-line mt-4 p-4 text-sm font-semibold whitespace-pre-line">
+					<p className="border-border bg-card mt-4 border p-4 text-sm font-semibold whitespace-pre-line">
 						{recipe.notes}
 					</p>
 				</section>
@@ -377,7 +377,7 @@ function CookedButton({
 			type="button"
 			disabled={pending}
 			onClick={() => void cooked()}
-			className="border-foreground bg-kitchen-yolk focus-visible:outline-kitchen-eggplant inline-flex items-center gap-1.5 border-2 px-3 py-1.5 text-xs font-bold uppercase shadow-sm transition-transform not-disabled:hover:-translate-x-0.5 not-disabled:hover:-translate-y-0.5 not-disabled:hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50"
+			className="bg-kitchen-yolk focus-visible:outline-kitchen-eggplant inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50"
 		>
 			<CookingPot size={14} weight="bold" aria-hidden />
 			cooked it
@@ -406,7 +406,7 @@ function BookPicker({ recipe, books }: { recipe: Recipe; books: Book[] }) {
 
 	return (
 		<div className="flex items-center gap-2">
-			<label htmlFor="recipe-book" className="text-xs font-bold uppercase">
+			<label htmlFor="recipe-book" className="text-xs font-semibold">
 				book
 			</label>
 			<select
@@ -414,7 +414,7 @@ function BookPicker({ recipe, books }: { recipe: Recipe; books: Book[] }) {
 				value={recipe.collectionId ?? ''}
 				disabled={pending}
 				onChange={(event) => void move(event.target.value)}
-				className="border-foreground bg-card focus-visible:outline-kitchen-eggplant border-2 px-2 py-2 text-xs font-bold uppercase focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50"
+				className="border-input bg-card focus-visible:outline-kitchen-eggplant border px-2 py-2 text-xs font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50"
 			>
 				<option value="">no book</option>
 				{books.map((book) => (
@@ -501,7 +501,7 @@ function RecipeEditor({
 			}}
 		>
 			{isDraft ? (
-				<p className="text-muted-foreground text-xs font-bold uppercase">
+				<p className="text-muted-foreground text-xs font-semibold">
 					draft — check it over, then finalize
 				</p>
 			) : null}
@@ -515,11 +515,11 @@ function RecipeEditor({
 					<img
 						src={recipe.imageUrl}
 						alt=""
-						className="border-foreground border-line size-24 shrink-0 object-cover"
+						className="border-border size-24 shrink-0 object-cover"
 					/>
 				) : null}
 				<div className="flex min-w-0 flex-1 flex-col gap-3">
-					<label className="text-xs font-bold uppercase" htmlFor="edit-title">
+					<label className="text-xs font-semibold" htmlFor="edit-title">
 						name
 					</label>
 					<input
@@ -528,13 +528,13 @@ function RecipeEditor({
 						required
 						maxLength={recipeTitleMax}
 						defaultValue={recipe.title}
-						className={cn(fieldClassName, 'text-2xl font-extrabold')}
+						className={cn(fieldClassName, 'text-2xl font-bold')}
 					/>
 				</div>
 			</div>
 			<IngredientListField defaultValue={recipe.ingredients} />
 			<StepsField defaultValue={recipe.steps} />
-			<label className="text-xs font-bold uppercase" htmlFor="edit-notes">
+			<label className="text-xs font-semibold" htmlFor="edit-notes">
 				notes
 			</label>
 			<textarea
@@ -547,7 +547,7 @@ function RecipeEditor({
 				className={cn(fieldClassName, 'resize-y placeholder:opacity-50')}
 			/>
 			{error ? (
-				<p role="alert" className="text-kitchen-tomato text-sm font-bold">
+				<p role="alert" className="text-kitchen-tomato text-sm font-semibold">
 					{error}
 				</p>
 			) : null}
@@ -555,7 +555,7 @@ function RecipeEditor({
 				<button
 					type="submit"
 					disabled={pending || photoBusy}
-					className="border-foreground bg-kitchen-basil border-2 px-4 py-2 text-xs font-bold uppercase shadow-sm disabled:opacity-50"
+					className="bg-kitchen-basil px-4 py-2 text-xs font-semibold disabled:opacity-50"
 				>
 					{pending ? 'saving…' : isDraft ? 'save & finalize' : 'save'}
 				</button>
@@ -564,7 +564,7 @@ function RecipeEditor({
 						type="button"
 						disabled={pending}
 						onClick={onDone}
-						className="border-foreground bg-background border-2 px-4 py-2 text-xs font-bold uppercase"
+						className="border-input bg-background border px-4 py-2 text-xs font-semibold"
 					>
 						cancel
 					</button>
@@ -576,7 +576,7 @@ function RecipeEditor({
 								type="button"
 								disabled={pending}
 								onClick={() => void remove()}
-								className="border-foreground bg-kitchen-tomato border-2 px-4 py-2 text-xs font-bold uppercase shadow-sm disabled:opacity-50"
+								className="bg-kitchen-tomato px-4 py-2 text-xs font-semibold disabled:opacity-50"
 							>
 								really delete
 							</button>
@@ -584,7 +584,7 @@ function RecipeEditor({
 								type="button"
 								disabled={pending}
 								onClick={() => setConfirmingDelete(false)}
-								className="border-foreground bg-background border-2 px-4 py-2 text-xs font-bold uppercase"
+								className="border-input bg-background border px-4 py-2 text-xs font-semibold"
 							>
 								keep it
 							</button>
@@ -594,7 +594,7 @@ function RecipeEditor({
 							type="button"
 							disabled={pending}
 							onClick={() => setConfirmingDelete(true)}
-							className="border-foreground bg-background hover:bg-kitchen-tomato border-2 px-4 py-2 text-xs font-bold uppercase"
+							className="border-input bg-background hover:bg-kitchen-tomato/30 px-4 py-2 text-xs font-semibold"
 						>
 							delete recipe
 						</button>
