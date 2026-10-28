@@ -67,7 +67,7 @@ function Shelf() {
 						<input
 							type="search"
 							defaultValue={q ?? ''}
-							placeholder="search recipes or paste a link"
+							placeholder="search or paste a link"
 							onChange={(event) => {
 								const value = event.target.value
 								setLinkQuery(value)
@@ -88,7 +88,7 @@ function Shelf() {
 					</label>
 					<Link
 						to="/recipes/new"
-						className="focus-visible:outline-kitchen-eggplant inline-flex items-center gap-1.5 px-2 py-2 text-xs font-semibold underline focus-visible:outline-2 focus-visible:outline-offset-2"
+						className="focus-visible:outline-kitchen-eggplant hidden items-center gap-1.5 px-2 py-2 text-xs font-semibold underline focus-visible:outline-2 focus-visible:outline-offset-2 md:inline-flex"
 					>
 						<Plus size={16} aria-hidden /> add recipe
 					</Link>

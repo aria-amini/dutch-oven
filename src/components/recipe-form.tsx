@@ -43,7 +43,7 @@ export function RecipeNameField({
 // on wider screens.
 export function FormActions({ children }: { children: React.ReactNode }) {
 	return (
-		<div className="border-border bg-background sticky bottom-0 z-10 -mx-6 flex flex-wrap items-center gap-2 border-t px-6 py-3 md:static md:mx-0 md:border-t-0 md:bg-transparent md:p-0">
+		<div className="border-border bg-background pb-bar sticky bottom-0 z-10 -mx-6 flex flex-wrap items-center gap-2 border-t px-6 pt-3 md:static md:mx-0 md:border-t-0 md:bg-transparent md:p-0">
 			{children}
 		</div>
 	)

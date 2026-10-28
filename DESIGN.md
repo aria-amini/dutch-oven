@@ -152,7 +152,8 @@ Case, no uppercase, no tracking.
 
 ## Layout
 
-App pages sit behind a fixed left rail (~12rem; mobile collapses to a top bar).
+App pages sit behind a fixed left rail (~12rem). On phones the rail becomes a
+bottom tab bar in thumb reach: recipes, ingredients, a contextual add, and you.
 Pages are top-aligned: a plain title leads, with page-level tools beside it. The
 recipe grid is a single top-anchored flow of square tiles (`--spacing-tile`,
 16px gaps), newest first. Forms are one column, max ~42rem, grouped into soft
@@ -211,6 +212,11 @@ states — are drawn dashed; once real, the border goes solid.
 - Left rail of full-width rows: Phosphor icon (18px, filled when active) +
   lowercase 13px semibold label. Active row = yolk 30% tint with a hairline
   border; hover = card fill.
+- Phone tab bar: four equal tabs (icon over label, 56px tall, safe-area padded)
+  pinned to the bottom behind a hairline. The third tab is the contextual add: a
+  solid yolk square, adding a recipe on recipe screens and an ingredient on
+  ingredient screens. The bar leaves screens that pin their own actions (forms,
+  the recipe view) and steps aside while a text field has focus.
 
 ## Do's and Don'ts
 

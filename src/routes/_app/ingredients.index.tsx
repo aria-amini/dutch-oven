@@ -86,7 +86,7 @@ function Pantry() {
 					<div>
 						<Link
 							to="/recipes"
-							className="focus-visible:outline-kitchen-eggplant mb-4 inline-flex items-center gap-1.5 text-xs font-semibold underline focus-visible:outline-2 focus-visible:outline-offset-2"
+							className="focus-visible:outline-kitchen-eggplant mb-4 hidden items-center gap-1.5 text-xs font-semibold underline focus-visible:outline-2 focus-visible:outline-offset-2 md:inline-flex"
 						>
 							<ArrowLeft size={14} weight="bold" aria-hidden />
 							recipes
@@ -99,7 +99,7 @@ function Pantry() {
 						<Link
 							to="/ingredients/bulk"
 							search={bulkSearch(cat)}
-							className="bg-kitchen-yolk focus-visible:outline-kitchen-eggplant inline-flex items-center gap-2 px-4 py-2.5 text-sm font-bold transition-colors hover:brightness-95 focus-visible:outline-2 focus-visible:outline-offset-2"
+							className="bg-kitchen-yolk focus-visible:outline-kitchen-eggplant hidden items-center gap-2 px-4 py-2.5 text-sm font-bold transition-colors hover:brightness-95 focus-visible:outline-2 focus-visible:outline-offset-2 md:inline-flex"
 						>
 							<Plus size={18} weight="bold" aria-hidden />
 							add

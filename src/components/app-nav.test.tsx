@@ -15,6 +15,13 @@ vi.mock('@/lib/recipes/server', () => ({
 	deleteBook: vi.fn(),
 }))
 
+vi.mock('@/lib/pantry/server', () => ({
+	listPantry: async () => [],
+	createPantryItems: vi.fn(),
+	setPantryItemQuantity: vi.fn(),
+	deletePantryItem: vi.fn(),
+}))
+
 vi.mock('@/lib/shelf/server', () => ({
 	getShelfStats: async () => ({ recipes: 2, pantryItems: 3 }),
 }))
@@ -28,6 +35,9 @@ const guest = {
 	user: { ...member.user, name: 'Guest', isAnonymous: true },
 	session: member.session,
 }
+
+// The tab bar below the md breakpoint, the sidebar above it.
+const isPhone = () => window.innerWidth < 768
 
 describe('app nav', () => {
 	test('keeps two destinations and opens the shelf from the root', async () => {
@@ -46,7 +56,7 @@ describe('app nav', () => {
 				.getByRole('link')
 				.elements()
 				.map((link) => link.textContent)
-				.filter((label) => label !== 'dutch-oven'),
+				.filter((label) => label !== 'dutch-oven' && label !== 'add'),
 		).toEqual(['recipes', 'ingredients'])
 	})
 
@@ -82,6 +92,75 @@ describe('app nav', () => {
 					.getByText('free', { exact: true }),
 			)
 			.toBeVisible()
+	})
+
+	test('puts navigation in the thumb zone on phones and a sidebar on desktop', async () => {
+		const { screen } = await renderRoute({
+			path: '/ingredients',
+			session: member,
+		})
+
+		const nav = screen.getByRole('navigation', { name: 'Primary' })
+		const position = () => getComputedStyle(nav.element()).position
+
+		await expect.element(nav).toBeVisible()
+
+		if (isPhone()) {
+			expect(position()).toBe('fixed')
+			expect(nav.element().getBoundingClientRect().bottom).toBe(
+				window.innerHeight,
+			)
+			await expect
+				.element(nav.getByRole('link', { name: 'add ingredient' }))
+				.toHaveAttribute('href', '/ingredients/bulk')
+			await expect
+				.element(nav.getByRole('button', { name: 'Account' }))
+				.toBeVisible()
+		} else {
+			expect(position()).toBe('sticky')
+			await expect
+				.element(nav.getByRole('link', { name: 'add ingredient' }))
+				.not.toBeInTheDocument()
+		}
+	})
+
+	test('adds a recipe from the tab bar on the shelf', async () => {
+		const { screen } = await renderRoute({ path: '/recipes', session: member })
+
+		if (!isPhone()) return
+
+		await expect
+			.element(
+				screen
+					.getByRole('navigation', { name: 'Primary' })
+					.getByRole('link', { name: 'add recipe' }),
+			)
+			.toHaveAttribute('href', '/recipes/new')
+	})
+
+	test('leaves the tab bar off screens that pin their own actions', async () => {
+		if (!isPhone()) return
+
+		const { screen } = await renderRoute({
+			path: '/recipes/new',
+			session: member,
+		})
+
+		await expect
+			.element(screen.getByRole('navigation', { name: 'Primary' }))
+			.not.toBeInTheDocument()
+	})
+
+	test('steps aside while a text field has focus', async () => {
+		if (!isPhone()) return
+
+		const { screen } = await renderRoute({ path: '/recipes', session: member })
+		const nav = screen.getByRole('navigation', { name: 'Primary' })
+
+		await expect.element(nav).toBeVisible()
+		await screen.getByRole('searchbox', { name: 'Search recipes' }).click()
+		// Hidden elements drop out of the role tree.
+		await expect.element(nav).not.toBeInTheDocument()
 	})
 
 	test('offers sign in when signed out', async () => {

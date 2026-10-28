@@ -90,11 +90,22 @@ describe('ingredients', () => {
 		await expect.element(carrots).toBeVisible()
 	})
 
-	test('links back to recipes', async () => {
+	test('links back to recipes from the page on desktop, the tab bar on phones', async () => {
 		const { screen } = await renderRoute({ path: '/ingredients', session })
-		await expect
-			.element(screen.getByRole('main').getByRole('link', { name: 'recipes' }))
-			.toHaveAttribute('href', '/recipes')
+		const link = screen.getByRole('main').getByRole('link', { name: 'recipes' })
+
+		if (window.innerWidth < 768) {
+			await expect.element(link).not.toBeInTheDocument()
+			await expect
+				.element(
+					screen
+						.getByRole('navigation', { name: 'Primary' })
+						.getByRole('link', { name: 'recipes' }),
+				)
+				.toHaveAttribute('href', '/recipes')
+		} else {
+			await expect.element(link).toHaveAttribute('href', '/recipes')
+		}
 	})
 
 	test('invites an empty kitchen to add ingredients', async () => {
@@ -123,7 +134,8 @@ describe('ingredients', () => {
 
 	test('bulk adds picked and typed items from a section', async () => {
 		const { screen } = await renderRoute({ path: '/ingredients', session })
-		await screen.getByRole('link', { name: 'add', exact: true }).click()
+		// The page button on desktop, the tab bar's contextual add on phones.
+		await screen.getByRole('link', { name: /^add( ingredient)?$/ }).click()
 		await screen.getByRole('link', { name: /spices/ }).click()
 
 		await screen.getByRole('button', { name: 'cumin', exact: true }).click()

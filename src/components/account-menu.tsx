@@ -15,8 +15,16 @@ import { authClient } from '@/lib/auth/client'
 import { useShelfStats } from '@/lib/use-shelf-stats'
 import { cn } from '@/lib/utils/ui'
 
-const triggerClassName =
-	'order-first mr-auto flex shrink-0 items-center gap-2.5 border px-1.5 py-1.5 md:px-2.5 md:py-2 text-xs font-semibold whitespace-nowrap sm:mr-0 md:order-none md:mt-auto md:w-full'
+type Variant = 'rail' | 'tab'
+
+export const tabClassName =
+	'focus-visible:outline-kitchen-eggplant flex min-h-14 flex-1 flex-col items-center justify-center gap-1 text-xs font-semibold focus-visible:-outline-offset-2 focus-visible:outline-2'
+
+// The sidebar row on wide screens; a bottom-bar tab on phones.
+const triggerClassNames: Record<Variant, string> = {
+	rail: 'mt-auto flex w-full items-center gap-2.5 border px-2.5 py-2 text-xs font-semibold whitespace-nowrap',
+	tab: tabClassName,
+}
 
 const interactiveClassName =
 	'hover:bg-card hover:border-border focus-visible:outline-kitchen-eggplant focus-visible:outline-2 focus-visible:outline-offset-2 data-popup-open:bg-card data-popup-open:border-border data-popup-open:'
@@ -24,7 +32,7 @@ const interactiveClassName =
 const itemClassName =
 	'flex w-full cursor-default items-center gap-2.5 px-3 py-2.5 text-xs font-semibold outline-none select-none data-highlighted:bg-kitchen-yolk/40'
 
-export function AccountMenu() {
+export function AccountMenu({ variant }: { variant: Variant }) {
 	const session = authClient.useSession()
 	const router = useRouter()
 	const refetchSession = session.refetch
@@ -44,7 +52,10 @@ export function AccountMenu() {
 		return (
 			<div
 				aria-hidden
-				className={cn(triggerClassName, 'animate-pulse border-transparent')}
+				className={cn(
+					triggerClassNames[variant],
+					'animate-pulse border-transparent',
+				)}
 			>
 				<UserIcon size={18} />
 				account
@@ -57,12 +68,20 @@ export function AccountMenu() {
 			<Link
 				to="/auth/login"
 				className={cn(
-					triggerClassName,
+					triggerClassNames[variant],
 					interactiveClassName,
 					'border-transparent',
 				)}
 			>
-				<UserIcon size={18} aria-hidden />
+				<span
+					aria-hidden
+					className={cn(
+						'grid place-items-center',
+						variant === 'tab' && 'size-8',
+					)}
+				>
+					<UserIcon size={variant === 'tab' ? 22 : 18} />
+				</span>
 				sign in
 			</Link>
 		)
@@ -73,14 +92,22 @@ export function AccountMenu() {
 
 		return (
 			<AccountMenuShell
+				variant={variant}
 				label="Guest account"
 				trigger={
 					<>
-						<GuestAvatar className="size-6" iconSize={14} />
-						<span className="hidden min-w-0 flex-1 truncate text-left md:block">
+						<GuestAvatar
+							className={variant === 'tab' ? 'size-8' : 'size-6'}
+							iconSize={14}
+						/>
+						<span
+							className={cn(
+								variant === 'rail' && 'min-w-0 flex-1 truncate text-left',
+							)}
+						>
 							guest
 						</span>
-						{itemCount > 0 ? (
+						{variant === 'rail' && itemCount > 0 ? (
 							<span className="bg-foreground text-background px-1 font-mono text-xs leading-4 font-semibold">
 								{itemCount}
 							</span>
@@ -123,17 +150,25 @@ export function AccountMenu() {
 
 	return (
 		<AccountMenuShell
+			variant={variant}
 			label="Account"
 			trigger={
 				<>
 					<span
 						aria-hidden
-						className="border-border bg-kitchen-yolk grid size-6 shrink-0 place-items-center border text-xs font-bold"
+						className={cn(
+							'border-border bg-kitchen-yolk grid shrink-0 place-items-center border text-xs font-bold',
+							variant === 'tab' ? 'size-8' : 'size-6',
+						)}
 					>
 						{user.name.charAt(0)}
 					</span>
-					<span className="hidden min-w-0 flex-1 truncate text-left md:block">
-						{user.name}
+					<span
+						className={cn(
+							variant === 'rail' && 'min-w-0 flex-1 truncate text-left',
+						)}
+					>
+						{variant === 'tab' ? 'you' : user.name}
 					</span>
 				</>
 			}
@@ -157,12 +192,14 @@ export function AccountMenu() {
 }
 
 function AccountMenuShell({
+	variant,
 	label,
 	trigger,
 	triggerClassName: variantClassName,
 	header,
 	children,
 }: {
+	variant: Variant
 	label: string
 	trigger: ReactNode
 	triggerClassName: string
@@ -173,18 +210,24 @@ function AccountMenuShell({
 		<Menu.Root>
 			<Menu.Trigger
 				aria-label={label}
-				className={cn(triggerClassName, interactiveClassName, variantClassName)}
+				className={cn(
+					triggerClassNames[variant],
+					interactiveClassName,
+					variantClassName,
+				)}
 			>
 				{trigger}
-				<CaretUpDownIcon
-					size={14}
-					weight="bold"
-					aria-hidden
-					className="hidden md:block"
-				/>
+				{variant === 'rail' ? (
+					<CaretUpDownIcon size={14} weight="bold" aria-hidden />
+				) : null}
 			</Menu.Trigger>
 			<Menu.Portal>
-				<Menu.Positioner className="z-50" align="start" sideOffset={6}>
+				<Menu.Positioner
+					className="z-50"
+					side={variant === 'tab' ? 'top' : 'bottom'}
+					align={variant === 'tab' ? 'end' : 'start'}
+					sideOffset={6}
+				>
 					<Menu.Popup className="bg-background w-64 shadow-md outline-none">
 						<div className="border-border border-b px-3 py-3">{header}</div>
 						<div className="flex flex-col py-1">{children}</div>
