@@ -1,6 +1,7 @@
 import { createFileRoute, Outlet } from '@tanstack/react-router'
 
 import { AppNav, useTabBar } from '@/components/app-nav'
+import { NavigationProgress } from '@/components/navigation-progress'
 import { cn } from '@/lib/utils/ui'
 
 export const Route = createFileRoute('/_app')({ component: AppLayout })
@@ -16,6 +17,7 @@ function AppLayout() {
 				tabBar === 'bar-fab' && 'pb-tabbar-fab',
 			)}
 		>
+			<NavigationProgress />
 			<AppNav />
 			<Outlet />
 		</div>

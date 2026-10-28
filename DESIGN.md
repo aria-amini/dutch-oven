@@ -211,6 +211,13 @@ slot, empty states — are drawn dashed; once real, the border goes solid.
 - Selected = yolk tint (40%) with a hairline border; unselected = transparent
   with a faint border that strengthens on hover.
 
+### Loading
+
+- Switching pages never leaves the old page frozen. After 100ms a 4px eggplant
+  bar slides across the top; after 150ms the content area shows quiet paper
+  blocks that stay at least 400ms so they never flash. Quick loads show neither.
+  Reduced motion gets a still bar.
+
 ### Navigation
 
 - Left rail of full-width rows: Phosphor icon (18px, filled when active) +

@@ -121,6 +121,7 @@
 }
 
 @theme inline {
+	--animate-progress: progress-slide 1.2s ease-in-out infinite;
 	--color-background: var(--background);
 	--color-foreground: var(--foreground);
 	--color-card: var(--card);
@@ -218,6 +219,16 @@
 /* Room under page content for the mobile tab bar. */
 @utility pb-tabbar {
 	padding-bottom: calc(5rem + env(safe-area-inset-bottom));
+}
+
+@keyframes progress-slide {
+	from {
+		transform: translateX(-100%);
+	}
+
+	to {
+		transform: translateX(300%);
+	}
 }
 
 @layer base {

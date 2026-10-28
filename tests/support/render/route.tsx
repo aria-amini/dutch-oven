@@ -10,6 +10,8 @@ import { setMockSession, type MockSession } from '@tests/support/mocks/browser'
 import { Toaster } from 'sonner'
 import { render, type RenderResult } from 'vitest-browser-react'
 
+import { pendingOptions } from '@/components/page-pending'
+
 import { createTestQueryClient } from './component'
 
 type RouteTarget =
@@ -47,6 +49,7 @@ export async function renderRoute(
 
 	const router: AnyRouter = createRouter({
 		routeTree,
+		...pendingOptions,
 		history: createMemoryHistory({ initialEntries: [path] }),
 		scrollRestoration: false,
 		defaultPreloadStaleTime: 0,
