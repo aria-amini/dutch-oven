@@ -52,7 +52,7 @@ function Profile() {
 		return (
 			<main className="mx-auto min-h-dvh max-w-xl space-y-8 p-6">
 				<h1 className="text-4xl font-semibold">guest cook</h1>
-				<div className="border-border space-y-4 border border-dashed p-4">
+				<div className="border-border space-y-4 rounded-xl border border-dashed p-4">
 					<p className="text-sm font-semibold">
 						no account yet — your shelf lives only in this browser. make an
 						account to keep it on any device.
@@ -160,12 +160,12 @@ function AccountProfile({
 					<img
 						src={avatar}
 						alt="Profile avatar"
-						className="border-border size-24 border object-cover"
+						className="border-border size-24 rounded-xl border object-cover"
 					/>
 				) : (
 					<div
 						aria-hidden
-						className="bg-kitchen-yolk border-border flex size-24 items-center justify-center border text-3xl font-bold"
+						className="bg-kitchen-yolk border-border flex size-24 items-center justify-center rounded-md border text-3xl font-bold"
 					>
 						{name.charAt(0)}
 					</div>

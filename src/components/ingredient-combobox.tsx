@@ -117,7 +117,7 @@ export function IngredientCombobox({
 					if (!event.defaultPrevented) onKeyDown?.(event)
 				}}
 				className={cn(
-					'border-input bg-background focus-visible:outline-kitchen-eggplant w-full border focus-visible:outline-2 focus-visible:outline-offset-2',
+					'border-input bg-background focus-visible:outline-kitchen-eggplant w-full border focus-visible:outline-2 focus-visible:outline-offset-2 rounded-md',
 					placeholderClassName,
 					compact
 						? 'px-3 py-2 text-sm font-semibold'
@@ -129,7 +129,7 @@ export function IngredientCombobox({
 					id={listboxId}
 					role="listbox"
 					aria-label="Ingredient suggestions"
-					className="bg-card absolute inset-x-0 top-full z-10 mt-1.5 shadow-md"
+					className="bg-card absolute inset-x-0 top-full z-10 mt-1.5 overflow-hidden rounded-xl shadow-md"
 				>
 					{suggestions.map((suggestion, index) => (
 						<li

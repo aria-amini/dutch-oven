@@ -63,7 +63,7 @@ export const Route = createFileRoute('/_app/recipes/$recipeId')({
 })
 
 const fieldClassName =
-	'border-input bg-card focus-visible:outline-kitchen-eggplant border p-3 font-semibold focus-visible:outline-2 focus-visible:outline-offset-2'
+	'border-input bg-card focus-visible:outline-kitchen-eggplant border p-3 font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 rounded-md'
 
 const sectionLabelClassName =
 	'inline-block border-b-3 pb-0.5 text-xs font-semibold'
@@ -193,7 +193,7 @@ function RecipeView({
 						ingredients
 					</span>
 				</h2>
-				<ul className="border-border bg-card mt-4 border">
+				<ul className="border-border bg-card mt-4 overflow-hidden rounded-xl border">
 					{recipe.ingredients.length ? (
 						recipe.ingredients.map((ingredient, index) => {
 							const item = `i${index}`
@@ -244,7 +244,7 @@ function RecipeView({
 						steps
 					</span>
 				</h2>
-				<ol className="border-border bg-card mt-4 border">
+				<ol className="border-border bg-card mt-4 overflow-hidden rounded-xl border">
 					{recipe.steps.length ? (
 						recipe.steps.map((step, index) => {
 							const item = `s${index}`
@@ -291,7 +291,7 @@ function RecipeView({
 							notes
 						</span>
 					</h2>
-					<p className="border-border bg-card mt-4 border p-4 text-sm font-semibold whitespace-pre-line">
+					<p className="border-border bg-card mt-4 overflow-hidden rounded-xl border p-4 text-sm font-semibold whitespace-pre-line">
 						{recipe.notes}
 					</p>
 				</section>
@@ -393,7 +393,7 @@ function CookedButton({
 				type="button"
 				disabled={pending}
 				onClick={() => void cooked()}
-				className="bg-kitchen-yolk focus-visible:outline-kitchen-eggplant flex w-full items-center justify-center gap-2 px-4 py-3.5 text-base font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 md:inline-flex md:w-auto md:gap-1.5 md:px-3 md:py-1.5 md:text-xs"
+				className="bg-kitchen-yolk focus-visible:outline-kitchen-eggplant flex w-full items-center justify-center gap-2 rounded-md px-4 py-3.5 text-base font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 md:inline-flex md:w-auto md:gap-1.5 md:px-3 md:py-1.5 md:text-xs"
 			>
 				<CookingPot
 					size={14}
@@ -436,7 +436,7 @@ function BookPicker({ recipe, books }: { recipe: Recipe; books: Book[] }) {
 				value={recipe.collectionId ?? ''}
 				disabled={pending}
 				onChange={(event) => void move(event.target.value)}
-				className="border-input bg-card focus-visible:outline-kitchen-eggplant border px-2 py-2 text-xs font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50"
+				className="border-input bg-card focus-visible:outline-kitchen-eggplant rounded-md border px-2 py-2 text-xs font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50"
 			>
 				<option value="">no book</option>
 				{books.map((book) => (
@@ -543,7 +543,7 @@ function RecipeEditor({
 					<img
 						src={recipe.imageUrl}
 						alt=""
-						className="border-border size-24 shrink-0 border object-cover"
+						className="border-border size-24 shrink-0 rounded-xl border object-cover"
 					/>
 				) : null}
 			</div>
@@ -593,7 +593,7 @@ function RecipeEditor({
 								type="button"
 								disabled={pending}
 								onClick={() => void remove()}
-								className="bg-kitchen-tomato/40 hover:bg-kitchen-tomato/60 focus-visible:outline-kitchen-eggplant px-4 py-2.5 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50"
+								className="bg-kitchen-tomato/40 hover:bg-kitchen-tomato/60 focus-visible:outline-kitchen-eggplant rounded-md px-4 py-2.5 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50"
 							>
 								really delete
 							</button>

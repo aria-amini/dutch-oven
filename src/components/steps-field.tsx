@@ -27,7 +27,7 @@ export function StepsField({
 				defaultValue={defaultValue.join('\n')}
 				placeholder={'boil the pasta\nstir in the miso'}
 				className={cn(
-					'border-input bg-background focus-visible:outline-kitchen-eggplant field-sizing-content min-h-36 resize-y border px-3 py-2 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-2',
+					'border-input bg-background focus-visible:outline-kitchen-eggplant field-sizing-content min-h-36 resize-y border px-3 py-2 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 rounded-md',
 					placeholderClassName,
 				)}
 			/>

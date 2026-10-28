@@ -127,7 +127,7 @@
 			"refersTo": "tile",
 			"description": "The square unit of the shelf — an ingredient tint or a full-bleed photo with a cream title strip.",
 			"html": "<a class=\"ds-tile\" href=\"#\"><span class=\"ds-tile-title\">miso butter pasta</span></a>",
-			"css": ".ds-tile { position: relative; display: block; width: 148px; height: 148px; background: rgb(255 75 38 / 0.25); color: #16130e; border: 1px solid rgb(22 19 14 / 0.18); text-decoration: none; transition: box-shadow 0.2s; } .ds-tile:hover { box-shadow: 0 6px 20px -4px rgb(22 19 14 / 0.14), 0 1px 3px rgb(22 19 14 / 0.06); } .ds-tile:focus-visible { outline: 2px solid #5b3df5; outline-offset: 2px; } .ds-tile-title { position: absolute; right: 12px; bottom: 10px; left: 12px; font-size: 20px; font-weight: 700; line-height: 1.2; }"
+			"css": ".ds-tile { border-radius: 14px; position: relative; display: block; width: 148px; height: 148px; background: rgb(255 75 38 / 0.25); color: #16130e; border: 1px solid rgb(22 19 14 / 0.18); text-decoration: none; transition: box-shadow 0.2s; } .ds-tile:hover { box-shadow: 0 6px 20px -4px rgb(22 19 14 / 0.14), 0 1px 3px rgb(22 19 14 / 0.06); } .ds-tile:focus-visible { outline: 2px solid #5b3df5; outline-offset: 2px; } .ds-tile-title { position: absolute; right: 12px; bottom: 10px; left: 12px; font-size: 20px; font-weight: 700; line-height: 1.2; }"
 		},
 		{
 			"name": "Active Chip",
@@ -135,7 +135,7 @@
 			"refersTo": "tile",
 			"description": "A selected filter chip: yolk tint with a hairline border.",
 			"html": "<span class=\"ds-chip\">weeknight</span>",
-			"css": ".ds-chip { display: inline-block; background: rgb(255 194 28 / 0.4); color: #16130e; border: 1px solid rgb(22 19 14 / 0.18); padding: 6px 10px; font-size: 13px; font-weight: 600; }"
+			"css": ".ds-chip { border-radius: 8px; display: inline-block; background: rgb(255 194 28 / 0.4); color: #16130e; border: 1px solid rgb(22 19 14 / 0.18); padding: 6px 10px; font-size: 13px; font-weight: 600; }"
 		},
 		{
 			"name": "Add Tile",
@@ -143,7 +143,7 @@
 			"refersTo": "tile",
 			"description": "Dashed placeholder tile — 'not real yet'.",
 			"html": "<button class=\"ds-add-tile\" type=\"button\">+ recipe</button>",
-			"css": ".ds-add-tile { width: 148px; height: 148px; background: transparent; color: #16130e; border: 1px dashed rgb(22 19 14 / 0.4); font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.2s; } .ds-add-tile:hover { background: #fffdf8; } .ds-add-tile:focus-visible { outline: 2px solid #5b3df5; outline-offset: 2px; }"
+			"css": ".ds-add-tile { border-radius: 14px; width: 148px; height: 148px; background: transparent; color: #16130e; border: 1px dashed rgb(22 19 14 / 0.4); font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.2s; } .ds-add-tile:hover { background: #fffdf8; } .ds-add-tile:focus-visible { outline: 2px solid #5b3df5; outline-offset: 2px; }"
 		},
 		{
 			"name": "Primary Button",
@@ -151,7 +151,7 @@
 			"refersTo": "button-primary",
 			"description": "Basil save/confirm action: solid fill, no border, no shadow.",
 			"html": "<button class=\"ds-btn-primary\" type=\"button\">save to shelf</button>",
-			"css": ".ds-btn-primary { background: #2fa84f; color: #16130e; border: 0; padding: 8px 16px; font-size: 13px; font-weight: 600; cursor: pointer; transition: filter 0.2s; } .ds-btn-primary:hover { filter: brightness(0.95); } .ds-btn-primary:focus-visible { outline: 2px solid #5b3df5; outline-offset: 2px; } .ds-btn-primary:disabled { opacity: 0.5; }"
+			"css": ".ds-btn-primary { border-radius: 8px; background: #2fa84f; color: #16130e; border: 0; padding: 8px 16px; font-size: 13px; font-weight: 600; cursor: pointer; transition: filter 0.2s; } .ds-btn-primary:hover { filter: brightness(0.95); } .ds-btn-primary:focus-visible { outline: 2px solid #5b3df5; outline-offset: 2px; } .ds-btn-primary:disabled { opacity: 0.5; }"
 		},
 		{
 			"name": "Text Input",
@@ -159,7 +159,7 @@
 			"refersTo": "input-field",
 			"description": "Square paper field with a 1px field-line border; focus shows the eggplant outline.",
 			"html": "<input class=\"ds-input\" type=\"text\" placeholder=\"miso butter pasta\">",
-			"css": ".ds-input { background: #fdf6ec; color: #16130e; border: 1px solid rgb(22 19 14 / 0.4); border-radius: 0; padding: 8px 12px; font-size: 14px; font-weight: 600; } .ds-input::placeholder { opacity: 0.5; } .ds-input:focus-visible { outline: 2px solid #5b3df5; outline-offset: 2px; }"
+			"css": ".ds-input { background: #fdf6ec; color: #16130e; border: 1px solid rgb(22 19 14 / 0.4); border-radius: 8px; padding: 8px 12px; font-size: 14px; font-weight: 600; } .ds-input::placeholder { opacity: 0.5; } .ds-input:focus-visible { outline: 2px solid #5b3df5; outline-offset: 2px; }"
 		},
 		{
 			"name": "Nav Item",
@@ -167,16 +167,16 @@
 			"refersTo": "tile",
 			"description": "Left-rail row on desktop (a bottom tab on phones); the active row is a yolk 30% tint with a hairline border.",
 			"html": "<nav><a class=\"ds-nav-item ds-nav-item-active\" href=\"#\">recipes</a> <a class=\"ds-nav-item\" href=\"#\">ingredients</a></nav>",
-			"css": ".ds-nav-item { display: flex; align-items: center; gap: 8px; padding: 6px 10px; border: 1px solid transparent; color: #16130e; font-size: 13px; font-weight: 600; text-decoration: none; } .ds-nav-item:hover { background: #fffdf8; } .ds-nav-item-active { border-color: rgb(22 19 14 / 0.15); background: rgb(255 194 28 / 0.3); }"
+			"css": ".ds-nav-item { border-radius: 8px; display: flex; align-items: center; gap: 8px; padding: 6px 10px; border: 1px solid transparent; color: #16130e; font-size: 13px; font-weight: 600; text-decoration: none; } .ds-nav-item:hover { background: #fffdf8; } .ds-nav-item-active { border-color: rgb(22 19 14 / 0.15); background: rgb(255 194 28 / 0.3); }"
 		}
 	],
 	"narrative": {
 		"northStar": "The Soft Kitchen",
-		"overview": "dutch-oven looks like a well-used kitchen wall: butcher-paper ground, ink drawn as hairlines, and the colors of ingredients used as gentle tints. Flat, square and quiet; the left sidebar is the reference for everything. Rejected worlds: neobrutalist, metro tiles on pure black, pantry-shelf, diner ticket-rail.",
+		"overview": "dutch-oven looks like a well-used kitchen wall: butcher-paper ground, ink drawn as hairlines, and the colors of ingredients used as gentle tints. Flat, softly rounded and quiet; the left sidebar is the reference for everything. Rejected worlds: neobrutalist, metro tiles on pure black, pantry-shelf, diner ticket-rail.",
 		"keyCharacteristics": [
 			"Butcher-paper cream ground, never white, never dark",
 			"One 1px hairline weight: ink at 18% for surfaces, 40% for fields",
-			"Square corners, zero gradients, no shadow on resting surfaces",
+			"Soft corners (8px controls, 14px cards and tiles), zero gradients, no shadow on resting surfaces",
 			"Ingredient colors are tints; one solid primary action per screen",
 			"Lowercase semibold labels; weight and size carry hierarchy"
 		],

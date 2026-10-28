@@ -119,7 +119,7 @@ export function RecipeFinder({
 					className="flex flex-col gap-2 sm:flex-row"
 				>
 					{!hideSearch ? (
-						<label className="border-input bg-background focus-within:outline-kitchen-eggplant flex flex-1 items-center gap-2 border px-3 py-3 focus-within:outline-2 focus-within:outline-offset-2">
+						<label className="border-input bg-background focus-within:outline-kitchen-eggplant flex flex-1 items-center gap-2 rounded-md border px-3 py-3 focus-within:outline-2 focus-within:outline-offset-2">
 							{url ? (
 								<LinkSimple size={16} weight="bold" aria-hidden />
 							) : (
@@ -148,7 +148,7 @@ export function RecipeFinder({
 						<button
 							type="submit"
 							disabled={saving !== undefined}
-							className="bg-kitchen-basil px-4 py-2 text-xs font-semibold disabled:opacity-50"
+							className="bg-kitchen-basil rounded-md px-4 py-2 text-xs font-semibold disabled:opacity-50"
 						>
 							{saving
 								? 'importing…'
@@ -190,7 +190,7 @@ export function RecipeFinder({
 										disabled={saving !== undefined}
 										onClick={() => save(result.url)}
 										className={cn(
-											'border-border bg-background focus-visible:outline-kitchen-eggplant flex min-w-0 flex-1 items-center gap-2.5 border p-1.5 text-left focus-visible:outline-2 focus-visible:outline-offset-2',
+											'border-border bg-background focus-visible:outline-kitchen-eggplant flex min-w-0 flex-1 items-center gap-2.5 border p-1.5 text-left focus-visible:outline-2 focus-visible:outline-offset-2 rounded-md',
 											saving === undefined && '',
 											saving !== undefined &&
 												saving !== result.url &&
@@ -214,7 +214,7 @@ export function RecipeFinder({
 										target="_blank"
 										rel="noreferrer"
 										aria-label={`Open ${result.title} on ${result.siteName}`}
-										className="border-border bg-background focus-visible:outline-kitchen-eggplant grid w-9 shrink-0 place-items-center border focus-visible:outline-2 focus-visible:outline-offset-2"
+										className="border-border bg-background focus-visible:outline-kitchen-eggplant grid w-9 shrink-0 place-items-center rounded-md border focus-visible:outline-2 focus-visible:outline-offset-2"
 									>
 										<ArrowSquareOut size={14} weight="bold" aria-hidden />
 									</a>
@@ -276,7 +276,7 @@ function Thumb({ result }: { result: Result }) {
 		return (
 			<span
 				aria-hidden
-				className="bg-kitchen-yolk border-border grid size-10 shrink-0 place-items-center border text-sm font-bold"
+				className="bg-kitchen-yolk border-border grid size-10 shrink-0 place-items-center rounded-md border text-sm font-bold"
 			>
 				{result.title.charAt(0)}
 			</span>
@@ -289,7 +289,7 @@ function Thumb({ result }: { result: Result }) {
 			loading="lazy"
 			referrerPolicy="no-referrer"
 			onError={() => setBroken(true)}
-			className="border-border size-10 shrink-0 border object-cover"
+			className="border-border size-10 shrink-0 rounded-md border object-cover"
 		/>
 	)
 }

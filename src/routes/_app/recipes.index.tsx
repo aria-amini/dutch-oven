@@ -61,7 +61,7 @@ function Shelf() {
 			<motion.div {...enter} className="flex flex-col gap-6 p-6 md:p-10">
 				<h1 className="sr-only">your recipes</h1>
 				<div className="flex flex-wrap items-center gap-3">
-					<label className="border-input bg-background focus-within:border-input focus-within:outline-kitchen-eggplant flex max-w-md flex-1 items-center gap-2 border px-3 py-1.5 transition-colors focus-within:outline-2 focus-within:outline-offset-2">
+					<label className="border-input bg-background focus-within:border-input focus-within:outline-kitchen-eggplant flex max-w-md flex-1 items-center gap-2 rounded-md border px-3 py-1.5 transition-colors focus-within:outline-2 focus-within:outline-offset-2">
 						<MagnifyingGlass size={16} aria-hidden />
 						<span className="sr-only">Search recipes</span>
 						<input
@@ -127,7 +127,7 @@ function Shelf() {
 						to="/recipes/new"
 						className="border-border text-foreground hover:bg-card focus-visible:outline-kitchen-eggplant relative block aspect-square w-full max-w-md border-dashed text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 md:aspect-auto md:h-[calc(var(--spacing-tile)*2+16px)] md:w-[calc(var(--spacing-tile)*2+16px)]"
 					>
-						<span className="bg-kitchen-yolk/50 absolute top-3 left-4 inline-block px-2 py-0.5 text-xs leading-5 font-semibold">
+						<span className="bg-kitchen-yolk/50 absolute top-3 left-4 inline-block rounded-md px-2 py-0.5 text-xs leading-5 font-semibold">
 							no recipes yet
 						</span>
 						<span className="absolute right-4 bottom-3 left-4 text-3xl leading-none font-bold md:text-4xl">
@@ -181,7 +181,7 @@ function RecipeTile({ recipe, color }: { recipe: Recipe; color: TileColor }) {
 			to="/recipes/$recipeId"
 			params={{ recipeId: recipe.id }}
 			className={cn(
-				'border-border focus-visible:outline-kitchen-eggplant relative flex aspect-square flex-col overflow-hidden border transition-shadow hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 md:aspect-auto',
+				'border-border focus-visible:outline-kitchen-eggplant relative flex aspect-square flex-col overflow-hidden border transition-shadow hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 md:aspect-auto rounded-xl',
 				recipe.imageUrl ? 'bg-card text-foreground' : tileColors[color],
 			)}
 		>

@@ -50,7 +50,7 @@ export function FormActions({ children }: { children: React.ReactNode }) {
 }
 
 export const primaryActionClassName =
-	'bg-kitchen-basil focus-visible:outline-kitchen-eggplant px-5 py-2.5 text-sm font-semibold transition-colors hover:brightness-95 focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50'
+	'bg-kitchen-basil focus-visible:outline-kitchen-eggplant px-5 py-2.5 text-sm font-semibold transition-colors hover:brightness-95 focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 rounded-md'
 
 export const quietActionClassName =
 	'text-muted-foreground hover:text-foreground focus-visible:outline-kitchen-eggplant px-3 py-2.5 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50'

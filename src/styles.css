@@ -7,7 +7,7 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-	--radius: 0px;
+	--radius: 0.5rem;
 
 	--background: #fdf6ec;
 	--foreground: #16130e;

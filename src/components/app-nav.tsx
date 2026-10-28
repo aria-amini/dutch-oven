@@ -73,7 +73,7 @@ function Sidebar() {
 			<Link
 				to="/recipes"
 				aria-label="dutch-oven"
-				className="border-foreground/20 focus-visible:outline-kitchen-eggplant mb-6 flex w-full shrink-0 items-center justify-center gap-2 self-center border bg-white px-3 py-2 font-mono text-sm font-bold tracking-tight whitespace-nowrap lowercase focus-visible:outline-2 focus-visible:outline-offset-2"
+				className="border-foreground/20 focus-visible:outline-kitchen-eggplant mb-6 flex w-full shrink-0 items-center justify-center gap-2 self-center rounded-md border bg-white px-3 py-2 font-mono text-sm font-bold tracking-tight whitespace-nowrap lowercase focus-visible:outline-2 focus-visible:outline-offset-2"
 			>
 				<img
 					src="/icon-192.png"
@@ -91,7 +91,7 @@ function Sidebar() {
 						to={to}
 						aria-current={active ? 'page' : undefined}
 						className={cn(
-							'focus-visible:outline-kitchen-eggplant flex w-full shrink-0 items-center gap-2 border px-2.5 py-1.5 text-xs font-semibold focus-visible:outline-2 focus-visible:outline-offset-2',
+							'focus-visible:outline-kitchen-eggplant flex w-full shrink-0 items-center gap-2 border px-2.5 py-1.5 text-xs font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 rounded-md',
 							active
 								? 'border-foreground/15 bg-kitchen-yolk/30'
 								: 'border-transparent hover:bg-card focus-visible:border-border',

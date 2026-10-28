@@ -90,7 +90,9 @@ function SortableRow({
 			}}
 			className={cn(
 				'grid grid-cols-[auto_5rem_1fr_auto] items-start gap-2 sm:grid-cols-[auto_5rem_7rem_1fr_auto]',
-				isDragging ? 'bg-card relative z-10 shadow-md' : 'transition-transform',
+				isDragging
+					? 'bg-card relative z-10 rounded-md shadow-md'
+					: 'transition-transform',
 			)}
 		>
 			{children(
@@ -113,7 +115,7 @@ function SortableRow({
 }
 
 const controlClassName = cn(
-	'border-input bg-background focus-visible:outline-kitchen-eggplant w-full border px-3 py-2 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-2',
+	'border-input bg-background focus-visible:outline-kitchen-eggplant w-full border px-3 py-2 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 rounded-md',
 	placeholderClassName,
 )
 
@@ -239,7 +241,7 @@ export function IngredientListField({
 											) : (
 												<span
 													aria-hidden
-													className="border-border size-8 shrink-0 border border-dashed"
+													className="border-border size-8 shrink-0 rounded-md border border-dashed"
 												/>
 											)}
 											<div className="min-w-0 flex-1">
@@ -312,7 +314,7 @@ export function IngredientListField({
 			<button
 				type="button"
 				onClick={() => insertAfter(rows.length - 1, [''])}
-				className="border-input bg-background focus-visible:outline-kitchen-eggplant inline-flex items-center gap-1.5 self-start border px-3 py-1.5 text-xs font-semibold focus-visible:outline-2 focus-visible:outline-offset-2"
+				className="border-input bg-background focus-visible:outline-kitchen-eggplant inline-flex items-center gap-1.5 self-start rounded-md border px-3 py-1.5 text-xs font-semibold focus-visible:outline-2 focus-visible:outline-offset-2"
 			>
 				<Plus size={13} weight="bold" aria-hidden />
 				add ingredient

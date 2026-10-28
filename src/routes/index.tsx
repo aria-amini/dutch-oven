@@ -44,7 +44,7 @@ const features = [
 ]
 
 const buttonClassName =
-	'border-border focus-visible:outline-kitchen-eggplant inline-flex items-center border px-5 py-3 text-sm font-semibold transition-colors hover:brightness-95 focus-visible:outline-2 focus-visible:outline-offset-2'
+	'border-border focus-visible:outline-kitchen-eggplant inline-flex items-center border px-5 py-3 text-sm font-semibold transition-colors hover:brightness-95 focus-visible:outline-2 focus-visible:outline-offset-2 rounded-md'
 
 function Landing() {
 	return (
@@ -104,7 +104,7 @@ function Landing() {
 
 						<section
 							aria-label="Supported recipe sites"
-							className="border-border bg-card flex flex-col gap-3 border p-5"
+							className="border-border bg-card flex flex-col gap-3 rounded-xl border p-5"
 						>
 							<ul className="flex flex-wrap items-center gap-4">
 								{importSites.map((site) => (
@@ -134,11 +134,11 @@ function Landing() {
 							{features.map((feature) => (
 								<article
 									key={feature.title}
-									className="border-border bg-card flex flex-col gap-3 border p-5"
+									className="border-border bg-card flex flex-col gap-3 rounded-xl border p-5"
 								>
 									<span
 										className={cn(
-											'border-border grid size-12 place-items-center border',
+											'border-border grid size-12 place-items-center border rounded-md',
 											feature.color,
 										)}
 									>

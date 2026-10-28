@@ -38,7 +38,8 @@ typography:
     fontWeight: 600
     letterSpacing: '0'
 rounded:
-  none: '0px'
+  md: '8px'
+  xl: '14px'
 spacing:
   tile: 'clamp(8.5rem, 16vh, 10.5rem)'
   tile-gap: '16px'
@@ -46,19 +47,19 @@ components:
   tile:
     backgroundColor: '{colors.tomato}'
     textColor: '{colors.cast-iron}'
-    rounded: '{rounded.none}'
+    rounded: '{rounded.xl}'
     padding: '12px'
     width: '{spacing.tile}'
     height: '{spacing.tile}'
   button-primary:
     backgroundColor: '{colors.basil}'
     textColor: '{colors.cast-iron}'
-    rounded: '{rounded.none}'
+    rounded: '{rounded.md}'
     padding: '8px 16px'
   input-field:
     backgroundColor: '{colors.butcher-paper}'
     textColor: '{colors.cast-iron}'
-    rounded: '{rounded.none}'
+    rounded: '{rounded.md}'
     padding: '8px 12px'
 ---
 
@@ -71,9 +72,9 @@ components:
 dutch-oven looks like a well-used kitchen wall, not a dashboard and not a
 poster: butcher-paper ground, ink drawn as hairlines, and the colors of
 ingredients — tomato, yolk, basil, eggplant — used as gentle tints. Everything
-is flat and square, but quiet. The left sidebar is the reference for the whole
-system: a 20% ink hairline, a yolk-tinted active row, semibold lowercase type,
-no shadow.
+is flat and softly rounded, but quiet. The left sidebar is the reference for the
+whole system: a 20% ink hairline, a yolk-tinted active row, semibold lowercase
+type, no shadow.
 
 The world was re-pinned by the user (2026-10-27). The earlier neobrutalist
 kitchen (2px ink borders, hard offset shadows, uppercase stickers) was rejected
@@ -85,7 +86,8 @@ diner ticket-rail stay rejected too.
 - Butcher-paper cream ground, never white, never dark
 - One hairline weight (1px) on every surface, field and control; ink at 18% for
   surfaces, 40% for things you type into
-- Square corners, zero gradients
+- Soft corners: 8px on controls and chips, 14px on cards, tiles, lists and
+  photos, full circles for floating round buttons; zero gradients
 - Shadows only on things that float (menus, listboxes, toasts, drag); never on
   resting surfaces, never a hard offset
 - Ingredient colors appear as tints (15–40% over paper) for surfaces and as a
@@ -155,9 +157,9 @@ Case, no uppercase, no tracking.
 App pages sit behind a fixed left rail (~12rem). On phones the rail becomes a
 bottom tab bar in thumb reach: recipes, ingredients, a contextual add, and you.
 Pages are top-aligned: a plain title leads, with page-level tools beside it. The
-recipe grid is a single top-anchored flow of square tiles (`--spacing-tile`,
-16px gaps), newest first. Forms are one column, max ~42rem, grouped into soft
-sections separated by space rather than boxes.
+recipe grid is a single top-anchored flow of rounded square tiles
+(`--spacing-tile`, 16px gaps), newest first. Forms are one column, max ~42rem,
+grouped into soft sections separated by space rather than boxes.
 
 ## Elevation & Depth
 
@@ -179,15 +181,17 @@ never both. No hard offset shadows anywhere.
 
 ## Shapes
 
-Everything is a square or rectangle with sharp corners (`0px` radius), by the
-user's choice. Unrealized things — the add tile, an empty photo slot, empty
-states — are drawn dashed; once real, the border goes solid.
+Corners are soft, in two sizes. Controls, chips and nav rows use `--radius`
+(8px); cards, tiles, lists, photo slots and popups use 14px. Floating round
+actions are full circles. Full-width bars (the tab bar, pinned action bars) stay
+square-edged to the screen. Unrealized things — the add tile, an empty photo
+slot, empty states — are drawn dashed; once real, the border goes solid.
 
 ## Components
 
 ### Recipe Tile
 
-- **Shape:** square (`--spacing-tile`), hairline border.
+- **Shape:** rounded square (`--spacing-tile`, 14px), hairline border.
 - **Color:** ingredient tint (tomato 25%, yolk 35%, basil 25%, eggplant 15%,
   cream) or a full-bleed photo with its title on a cream strip.
 - **Hover:** soft shadow fades in. Focus: eggplant 2px outline, offset 2px.
@@ -199,7 +203,7 @@ states — are drawn dashed; once real, the border goes solid.
 
 ### Inputs
 
-- Paper (or card-cream) fill, 1px field-line border, square, semibold text.
+- Paper (or card-cream) fill, 1px field-line border, 8px corners, semibold text.
   Focus shows the eggplant outline.
 
 ### Chips and Active States

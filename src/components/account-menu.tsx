@@ -22,7 +22,7 @@ export const tabClassName =
 
 // The sidebar row on wide screens; a bottom-bar tab on phones.
 const triggerClassNames: Record<Variant, string> = {
-	rail: 'mt-auto flex w-full items-center gap-2.5 border px-2.5 py-2 text-xs font-semibold whitespace-nowrap',
+	rail: 'mt-auto flex w-full items-center gap-2.5 border px-2.5 py-2 text-xs font-semibold whitespace-nowrap rounded-md',
 	tab: tabClassName,
 }
 
@@ -157,7 +157,7 @@ export function AccountMenu({ variant }: { variant: Variant }) {
 					<span
 						aria-hidden
 						className={cn(
-							'border-border bg-kitchen-yolk grid shrink-0 place-items-center border text-xs font-bold',
+							'border-border bg-kitchen-yolk grid shrink-0 place-items-center border text-xs font-bold rounded-md',
 							variant === 'tab' ? 'size-8' : 'size-6',
 						)}
 					>
@@ -228,7 +228,7 @@ function AccountMenuShell({
 					align={variant === 'tab' ? 'end' : 'start'}
 					sideOffset={6}
 				>
-					<Menu.Popup className="bg-background w-64 shadow-md outline-none">
+					<Menu.Popup className="bg-background w-64 overflow-hidden rounded-xl shadow-md outline-none">
 						<div className="border-border border-b px-3 py-3">{header}</div>
 						<div className="flex flex-col py-1">{children}</div>
 					</Menu.Popup>
@@ -280,7 +280,7 @@ function GuestAvatar({
 		<span
 			aria-hidden
 			className={cn(
-				'border-border bg-card grid shrink-0 place-items-center border border-dashed',
+				'border-border bg-card grid shrink-0 place-items-center border border-dashed rounded-md',
 				className,
 			)}
 		>
