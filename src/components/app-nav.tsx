@@ -14,12 +14,19 @@ const navItems = [
 // actions) leave the tab bar out; the rest of the app shows it.
 const tabBarRoutes = new Set(['/recipes', '/ingredients', '/profile'])
 
-export function useTabBarVisible() {
+type TabBarMode = 'none' | 'bar' | 'bar-fab'
+
+// The round add button belongs to the recipes shelf alone.
+export function useTabBar(): TabBarMode {
 	const pathname = useRouterState({
 		select: (state) => state.location.pathname,
 	})
 
-	return tabBarRoutes.has(pathname.replace(/\/$/, '') || '/')
+	const path = pathname.replace(/\/$/, '') || '/'
+
+	if (path === '/recipes') return 'bar-fab'
+
+	return tabBarRoutes.has(path) ? 'bar' : 'none'
 }
 
 // The on-screen keyboard shoves fixed bars up over the field being typed in,
@@ -107,62 +114,55 @@ function Sidebar() {
 	)
 }
 
-// Thumb-reach navigation on phones: the two places you go, the one thing you
-// do most there, and you.
+// Thumb-reach navigation on phones: the two places you go, and you. The recipes
+// shelf adds one round action for its one job.
 function TabBar() {
-	const visible = useTabBarVisible()
+	const mode = useTabBar()
 	const typing = useTyping()
 
 	const pathname = useRouterState({
 		select: (state) => state.location.pathname,
 	})
 
-	if (!visible) return null
-
-	const ingredients = pathname.startsWith('/ingredients')
+	if (mode === 'none' || typing) return null
 
 	return (
-		<nav
-			aria-label="Primary"
-			className={cn(
-				'border-border bg-background pb-safe fixed inset-x-0 bottom-0 z-20 flex items-stretch border-t md:hidden',
-				typing && 'hidden',
-			)}
-		>
-			{navItems.map(({ label, icon: Icon, to }) => {
-				const active = pathname === to || pathname.startsWith(`${to}/`)
-
-				return (
-					<Link
-						key={to}
-						to={to}
-						aria-current={active ? 'page' : undefined}
-						className={cn(
-							tabClassName,
-							active ? 'bg-kitchen-yolk/30' : 'hover:bg-card',
-						)}
-					>
-						<span aria-hidden className="grid size-8 place-items-center">
-							<Icon size={22} weight={active ? 'fill' : 'regular'} />
-						</span>
-						{label}
-					</Link>
-				)
-			})}
-			<Link
-				to={ingredients ? '/ingredients/bulk' : '/recipes/new'}
-				aria-label={ingredients ? 'add ingredient' : 'add recipe'}
-				className={tabClassName}
+		<>
+			<nav
+				aria-label="Primary"
+				className="border-border bg-background pb-safe fixed inset-x-0 bottom-0 z-20 flex items-stretch border-t md:hidden"
 			>
-				<span
-					aria-hidden
-					className="bg-kitchen-yolk grid size-8 place-items-center"
+				{navItems.map(({ label, icon: Icon, to }) => {
+					const active = pathname === to || pathname.startsWith(`${to}/`)
+
+					return (
+						<Link
+							key={to}
+							to={to}
+							aria-current={active ? 'page' : undefined}
+							className={cn(
+								tabClassName,
+								active ? 'bg-kitchen-yolk/30' : 'hover:bg-card',
+							)}
+						>
+							<span aria-hidden className="grid size-8 place-items-center">
+								<Icon size={22} weight={active ? 'fill' : 'regular'} />
+							</span>
+							{label}
+						</Link>
+					)
+				})}
+				<AccountMenu variant="tab" />
+			</nav>
+			{mode === 'bar-fab' ? (
+				<Link
+					to="/recipes/new"
+					aria-label="add recipe"
+					className="bg-kitchen-yolk focus-visible:outline-kitchen-eggplant bottom-fab fixed right-4 z-20 grid size-14 place-items-center rounded-full shadow-md transition-colors hover:brightness-95 focus-visible:outline-2 focus-visible:outline-offset-2 md:hidden"
 				>
-					<PlusIcon size={18} weight="bold" />
-				</span>
-				add
-			</Link>
-			<AccountMenu variant="tab" />
-		</nav>
+					<PlusIcon size={26} weight="bold" aria-hidden />
+				</Link>
+			) : null}
+		</>
 	)
 }

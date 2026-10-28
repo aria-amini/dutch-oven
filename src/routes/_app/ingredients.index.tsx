@@ -99,7 +99,7 @@ function Pantry() {
 						<Link
 							to="/ingredients/bulk"
 							search={bulkSearch(cat)}
-							className="bg-kitchen-yolk focus-visible:outline-kitchen-eggplant hidden items-center gap-2 rounded-md px-4 py-2.5 text-sm font-bold transition-colors hover:brightness-95 focus-visible:outline-2 focus-visible:outline-offset-2 md:inline-flex"
+							className="bg-kitchen-yolk focus-visible:outline-kitchen-eggplant inline-flex items-center gap-2 rounded-md px-4 py-2.5 text-sm font-bold transition-colors hover:brightness-95 focus-visible:outline-2 focus-visible:outline-offset-2"
 						>
 							<Plus size={18} weight="bold" aria-hidden />
 							add

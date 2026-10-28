@@ -111,31 +111,38 @@ describe('app nav', () => {
 				window.innerHeight,
 			)
 			await expect
-				.element(nav.getByRole('link', { name: 'add ingredient' }))
-				.toHaveAttribute('href', '/ingredients/bulk')
-			await expect
 				.element(nav.getByRole('button', { name: 'Account' }))
 				.toBeVisible()
+			// The round add belongs to the recipes shelf alone.
+			await expect
+				.element(screen.getByRole('link', { name: 'add recipe' }))
+				.not.toBeInTheDocument()
 		} else {
 			expect(position()).toBe('sticky')
-			await expect
-				.element(nav.getByRole('link', { name: 'add ingredient' }))
-				.not.toBeInTheDocument()
 		}
 	})
 
-	test('adds a recipe from the tab bar on the shelf', async () => {
+	test('adds a recipe from a round button on the shelf, on phones', async () => {
 		const { screen } = await renderRoute({ path: '/recipes', session: member })
 
 		if (!isPhone()) return
 
+		const add = screen.getByRole('link', { name: 'add recipe' })
+
+		await expect.element(add).toHaveAttribute('href', '/recipes/new')
+
+		const box = add.element().getBoundingClientRect()
+
+		expect(box.width).toBe(box.height)
+		expect(getComputedStyle(add.element()).position).toBe('fixed')
+		expect(box.bottom).toBeLessThan(window.innerHeight)
 		await expect
 			.element(
 				screen
 					.getByRole('navigation', { name: 'Primary' })
 					.getByRole('link', { name: 'add recipe' }),
 			)
-			.toHaveAttribute('href', '/recipes/new')
+			.not.toBeInTheDocument()
 	})
 
 	test('leaves the tab bar off screens that pin their own actions', async () => {
@@ -161,6 +168,9 @@ describe('app nav', () => {
 		await screen.getByRole('searchbox', { name: 'Search recipes' }).click()
 		// Hidden elements drop out of the role tree.
 		await expect.element(nav).not.toBeInTheDocument()
+		await expect
+			.element(screen.getByRole('link', { name: 'add recipe' }))
+			.not.toBeInTheDocument()
 	})
 
 	test('offers sign in when signed out', async () => {

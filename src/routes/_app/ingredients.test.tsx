@@ -134,8 +134,7 @@ describe('ingredients', () => {
 
 	test('bulk adds picked and typed items from a section', async () => {
 		const { screen } = await renderRoute({ path: '/ingredients', session })
-		// The page button on desktop, the tab bar's contextual add on phones.
-		await screen.getByRole('link', { name: /^add( ingredient)?$/ }).click()
+		await screen.getByRole('link', { name: 'add', exact: true }).click()
 		await screen.getByRole('link', { name: /spices/ }).click()
 
 		await screen.getByRole('button', { name: 'cumin', exact: true }).click()
