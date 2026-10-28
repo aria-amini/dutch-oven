@@ -33,6 +33,11 @@ export default defineToolkit({
 				telemetry: Boolean(process.env.SENTRY_AUTH_TOKEN),
 				silent: !process.env.CI,
 				tunnelRoute: true,
+				sourcemaps: {
+					// The default `./**/*.map` skips dot directories, so it never
+					// matched the public maps under .output.
+					filesToDeleteAfterUpload: ['.output/public/**/*.map'],
+				},
 			}),
 		],
 	},
