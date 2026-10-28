@@ -87,7 +87,12 @@ function RecipeDetail() {
 	const checklist = useChecklist(recipe.id)
 
 	return (
-		<main className="bg-background text-foreground min-h-dvh p-6 md:p-10">
+		<main
+			className={cn(
+				'bg-background text-foreground min-h-dvh p-6 md:p-10',
+				!editing && 'pb-tabbar md:pb-10',
+			)}
+		>
 			<div className="max-w-2xl">
 				<Link
 					to="/recipes"
@@ -380,16 +385,25 @@ function CookedButton({
 		}
 	}
 
+	// Pinned to the bottom on phones so a wet thumb can always reach it; inline
+	// with the other actions from md up.
 	return (
-		<button
-			type="button"
-			disabled={pending}
-			onClick={() => void cooked()}
-			className="bg-kitchen-yolk focus-visible:outline-kitchen-eggplant inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50"
-		>
-			<CookingPot size={14} weight="bold" aria-hidden />
-			cooked it
-		</button>
+		<div className="border-border bg-background pb-bar fixed inset-x-0 bottom-0 z-20 border-t px-3 pt-3 md:static md:border-t-0 md:bg-transparent md:p-0">
+			<button
+				type="button"
+				disabled={pending}
+				onClick={() => void cooked()}
+				className="bg-kitchen-yolk focus-visible:outline-kitchen-eggplant flex w-full items-center justify-center gap-2 px-4 py-3.5 text-base font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 md:inline-flex md:w-auto md:gap-1.5 md:px-3 md:py-1.5 md:text-xs"
+			>
+				<CookingPot
+					size={14}
+					weight="bold"
+					aria-hidden
+					className="size-5 md:size-3.5"
+				/>
+				cooked it
+			</button>
+		</div>
 	)
 }
 

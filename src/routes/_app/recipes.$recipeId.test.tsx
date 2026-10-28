@@ -420,6 +420,30 @@ describe('recipe detail', () => {
 			.toHaveDisplayValue('weeknight')
 	})
 
+	test('pins cooked it to the bottom on phones', async () => {
+		const { screen } = await renderRoute({
+			path: '/recipes/recipe-1',
+			session,
+		})
+
+		const button = screen.getByRole('button', { name: 'cooked it' })
+
+		await expect.element(button).toBeVisible()
+
+		const bar = button.element().parentElement
+
+		if (!bar) throw new Error('missing action bar')
+
+		if (window.innerWidth < 768) {
+			expect(getComputedStyle(bar).position).toBe('fixed')
+			expect(button.element().getBoundingClientRect().bottom).toBeLessThan(
+				window.innerHeight,
+			)
+		} else {
+			expect(getComputedStyle(bar).position).toBe('static')
+		}
+	})
+
 	test('logs a cook with one tap and can undo it', async () => {
 		const { screen } = await renderRoute({
 			path: '/recipes/recipe-1',
