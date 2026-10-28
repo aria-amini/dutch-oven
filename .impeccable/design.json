@@ -165,7 +165,7 @@
 			"name": "Nav Item",
 			"kind": "nav",
 			"refersTo": "tile",
-			"description": "Left-rail row on desktop (a bottom tab on phones); the active row is a yolk 30% tint with a hairline border.",
+			"description": "Left-rail row on desktop (a bottom tab on phones; the account moves to a header avatar); the active row is a yolk 30% tint with a hairline border.",
 			"html": "<nav><a class=\"ds-nav-item ds-nav-item-active\" href=\"#\">recipes</a> <a class=\"ds-nav-item\" href=\"#\">ingredients</a></nav>",
 			"css": ".ds-nav-item { border-radius: 8px; display: flex; align-items: center; gap: 8px; padding: 6px 10px; border: 1px solid transparent; color: #16130e; font-size: 13px; font-weight: 600; text-decoration: none; } .ds-nav-item:hover { background: #fffdf8; } .ds-nav-item-active { border-color: rgb(22 19 14 / 0.15); background: rgb(255 194 28 / 0.3); }"
 		}

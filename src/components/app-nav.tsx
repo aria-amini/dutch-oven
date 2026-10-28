@@ -61,6 +61,7 @@ function useTyping() {
 export function AppNav() {
 	return (
 		<>
+			<MobileHeader />
 			<Sidebar />
 			<TabBar />
 		</>
@@ -114,8 +115,34 @@ function Sidebar() {
 	)
 }
 
-// Thumb-reach navigation on phones: the two places you go, and you. The recipes
-// shelf adds one round action for its one job.
+// The account is a rare visit, so on phones it lives in a slim header instead of
+// taking a tab.
+function MobileHeader() {
+	const mode = useTabBar()
+
+	if (mode === 'none') return null
+
+	return (
+		<header className="flex items-center justify-between px-6 pt-3 md:hidden">
+			<Link
+				to="/recipes"
+				aria-label="dutch-oven"
+				className="focus-visible:outline-kitchen-eggplant flex items-center gap-2 rounded-md font-mono text-sm font-bold tracking-tight lowercase focus-visible:outline-2 focus-visible:outline-offset-2"
+			>
+				<img
+					src="/icon-192.png"
+					alt=""
+					className="size-7 shrink-0 [image-rendering:pixelated]"
+				/>
+				dutch-oven
+			</Link>
+			<AccountMenu variant="avatar" />
+		</header>
+	)
+}
+
+// Thumb-reach navigation on phones: the two places you go. The recipes shelf
+// adds one round action for its one job.
 function TabBar() {
 	const mode = useTabBar()
 	const typing = useTyping()
@@ -152,7 +179,6 @@ function TabBar() {
 						</Link>
 					)
 				})}
-				<AccountMenu variant="tab" />
 			</nav>
 			{mode === 'bar-fab' ? (
 				<Link

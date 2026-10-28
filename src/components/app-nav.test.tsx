@@ -110,8 +110,14 @@ describe('app nav', () => {
 			expect(nav.element().getBoundingClientRect().bottom).toBe(
 				window.innerHeight,
 			)
+			// The account is a rare visit: an avatar in the header, not a tab.
 			await expect
 				.element(nav.getByRole('button', { name: 'Account' }))
+				.not.toBeInTheDocument()
+			await expect
+				.element(
+					screen.getByRole('banner').getByRole('button', { name: 'Account' }),
+				)
 				.toBeVisible()
 			// The round add belongs to the recipes shelf alone.
 			await expect

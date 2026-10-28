@@ -15,15 +15,17 @@ import { authClient } from '@/lib/auth/client'
 import { useShelfStats } from '@/lib/use-shelf-stats'
 import { cn } from '@/lib/utils/ui'
 
-type Variant = 'rail' | 'tab'
+type Variant = 'rail' | 'avatar'
 
 export const tabClassName =
 	'focus-visible:outline-kitchen-eggplant flex min-h-14 flex-1 flex-col items-center justify-center gap-1 text-xs font-semibold focus-visible:-outline-offset-2 focus-visible:outline-2'
 
-// The sidebar row on wide screens; a bottom-bar tab on phones.
+// The sidebar row on wide screens; a small avatar button in the header on
+// phones, where the account is a rare visit and not worth a tab.
 const triggerClassNames: Record<Variant, string> = {
 	rail: 'mt-auto flex w-full items-center gap-2.5 border px-2.5 py-2 text-xs font-semibold whitespace-nowrap rounded-md',
-	tab: tabClassName,
+	avatar:
+		'relative flex h-11 min-w-11 shrink-0 items-center justify-center rounded-md px-1 text-sm font-semibold',
 }
 
 const interactiveClassName =
@@ -73,15 +75,7 @@ export function AccountMenu({ variant }: { variant: Variant }) {
 					'border-transparent',
 				)}
 			>
-				<span
-					aria-hidden
-					className={cn(
-						'grid place-items-center',
-						variant === 'tab' && 'size-8',
-					)}
-				>
-					<UserIcon size={variant === 'tab' ? 22 : 18} />
-				</span>
+				{variant === 'rail' ? <UserIcon size={18} aria-hidden /> : null}
 				sign in
 			</Link>
 		)
@@ -97,18 +91,19 @@ export function AccountMenu({ variant }: { variant: Variant }) {
 				trigger={
 					<>
 						<GuestAvatar
-							className={variant === 'tab' ? 'size-8' : 'size-6'}
+							className={variant === 'avatar' ? 'size-8' : 'size-6'}
 							iconSize={14}
 						/>
-						<span
-							className={cn(
-								variant === 'rail' && 'min-w-0 flex-1 truncate text-left',
-							)}
-						>
-							guest
-						</span>
-						{variant === 'rail' && itemCount > 0 ? (
-							<span className="bg-foreground text-background px-1 font-mono text-xs leading-4 font-semibold">
+						{variant === 'rail' ? (
+							<span className="min-w-0 flex-1 truncate text-left">guest</span>
+						) : null}
+						{itemCount > 0 ? (
+							<span
+								className={cn(
+									'bg-foreground text-background rounded-md px-1 font-mono text-xs leading-4 font-semibold',
+									variant === 'avatar' && 'absolute -top-0.5 -right-0.5',
+								)}
+							>
 								{itemCount}
 							</span>
 						) : null}
@@ -158,18 +153,16 @@ export function AccountMenu({ variant }: { variant: Variant }) {
 						aria-hidden
 						className={cn(
 							'border-border bg-kitchen-yolk grid shrink-0 place-items-center border text-xs font-bold rounded-md',
-							variant === 'tab' ? 'size-8' : 'size-6',
+							variant === 'avatar' ? 'size-8' : 'size-6',
 						)}
 					>
 						{user.name.charAt(0)}
 					</span>
-					<span
-						className={cn(
-							variant === 'rail' && 'min-w-0 flex-1 truncate text-left',
-						)}
-					>
-						{variant === 'tab' ? 'you' : user.name}
-					</span>
+					{variant === 'rail' ? (
+						<span className="min-w-0 flex-1 truncate text-left">
+							{user.name}
+						</span>
+					) : null}
 				</>
 			}
 			triggerClassName="border-transparent"
@@ -224,8 +217,7 @@ function AccountMenuShell({
 			<Menu.Portal>
 				<Menu.Positioner
 					className="z-50"
-					side={variant === 'tab' ? 'top' : 'bottom'}
-					align={variant === 'tab' ? 'end' : 'start'}
+					align={variant === 'avatar' ? 'end' : 'start'}
 					sideOffset={6}
 				>
 					<Menu.Popup className="bg-background w-64 overflow-hidden rounded-xl shadow-md outline-none">
