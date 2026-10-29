@@ -1,4 +1,4 @@
-import { MagnifyingGlass, Plus } from '@phosphor-icons/react'
+import { ArrowRight, MagnifyingGlass, Plus } from '@phosphor-icons/react'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { motion, useReducedMotion } from 'framer-motion'
 import { useState } from 'react'
@@ -125,19 +125,17 @@ function Shelf() {
 				{isEmpty && !searchQuery ? (
 					<Link
 						to="/recipes/new"
-						className="border-border text-foreground hover:bg-card focus-visible:outline-kitchen-eggplant relative block aspect-square w-full max-w-md border-dashed text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 md:aspect-auto md:h-[calc(var(--spacing-tile)*2+16px)] md:w-[calc(var(--spacing-tile)*2+16px)]"
+						className="border-foreground/50 bg-kitchen-yolk/25 text-foreground hover:bg-kitchen-yolk/40 focus-visible:outline-kitchen-eggplant relative block aspect-square w-full max-w-md rounded-xl border border-dashed text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 md:aspect-auto md:h-[calc(var(--spacing-tile)*2+16px)] md:w-[calc(var(--spacing-tile)*2+16px)]"
 					>
-						<span className="bg-kitchen-yolk/50 absolute top-3 left-4 inline-block rounded-md px-2 py-0.5 text-xs leading-5 font-semibold">
+						<span className="bg-card absolute top-4 left-4 inline-block rounded-md px-2 py-0.5 text-xs leading-5 font-semibold">
 							no recipes yet
 						</span>
-						<span className="absolute right-4 bottom-3 left-4 text-3xl leading-none font-bold md:text-4xl">
+						<span className="bg-kitchen-yolk absolute top-3 right-4 grid size-12 place-items-center rounded-full">
+							<ArrowRight weight="bold" className="size-6" aria-hidden />
+						</span>
+						<span className="absolute right-4 bottom-4 left-4 text-3xl leading-none font-bold md:text-4xl">
 							save your first recipe
 						</span>
-						<Plus
-							weight="bold"
-							className="absolute top-3 right-4 size-8"
-							aria-hidden
-						/>
 					</Link>
 				) : null}
 				<div className="grid grid-cols-2 gap-4 md:auto-rows-[var(--spacing-tile)] md:grid-cols-[repeat(auto-fill,var(--spacing-tile))]">
@@ -157,7 +155,7 @@ function Shelf() {
 					))}
 				</div>
 				{searchQuery && !url && !shelved.length ? (
-					<p className="border-border max-w-md border-dashed p-4 text-sm font-semibold">
+					<p className="border-input max-w-md rounded-xl border border-dashed p-4 text-sm font-semibold">
 						no recipes match &ldquo;{searchQuery}&rdquo;.
 					</p>
 				) : null}
