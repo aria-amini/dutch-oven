@@ -1,4 +1,4 @@
-import { ArrowLeft, GlobeIcon, PencilSimpleIcon } from '@phosphor-icons/react'
+import { ArrowLeft, PencilSimpleIcon } from '@phosphor-icons/react'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { motion, useReducedMotion } from 'framer-motion'
 import { useState } from 'react'
@@ -16,6 +16,7 @@ import {
 import { RecipePhotoField } from '@/components/recipe-photo-field'
 import { StepsField, stepsFrom } from '@/components/steps-field'
 import { authClient } from '@/lib/auth/client'
+import { importSiteLogo, importSites } from '@/lib/import/sites'
 import { recipeTitleMax } from '@/lib/recipes/model'
 import { createRecipe } from '@/lib/recipes/server'
 import { formField } from '@/lib/utils/form'
@@ -33,9 +34,26 @@ export const Route = createFileRoute('/_app/recipes/new')({
 })
 
 const modes = [
-	{ value: 'write', label: 'write your own', icon: PencilSimpleIcon },
-	{ value: 'web', label: 'from the web', icon: GlobeIcon },
+	{ value: 'write', label: 'write your own' },
+	{ value: 'web', label: 'from the web' },
 ] as const
+
+// A few of the sites the importer is checked against, overlapped, so the web
+// tab shows where recipes come from.
+function SiteLogos() {
+	return (
+		<span aria-hidden className="flex -space-x-1">
+			{importSites.slice(0, 3).map((site) => (
+				<img
+					key={site.id}
+					src={importSiteLogo(site.id)}
+					alt=""
+					className="ring-muted size-4 rounded-full object-cover ring-2"
+				/>
+			))}
+		</span>
+	)
+}
 
 const ease = [0.16, 1, 0.3, 1] as const
 
@@ -74,7 +92,7 @@ function NewRecipe() {
 					aria-label="How to add"
 					className="bg-muted flex gap-1 rounded-xl p-1"
 				>
-					{modes.map(({ value, label, icon: Icon }) => (
+					{modes.map(({ value, label }) => (
 						<Link
 							key={value}
 							to="/recipes/new"
@@ -82,17 +100,21 @@ function NewRecipe() {
 							replace
 							aria-current={mode === value ? 'page' : undefined}
 							className={cn(
-								'focus-visible:outline-kitchen-eggplant flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2',
+								'focus-visible:outline-kitchen-eggplant flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-sm font-semibold whitespace-nowrap transition-colors focus-visible:outline-2 focus-visible:outline-offset-2',
 								mode === value
 									? 'bg-card'
 									: 'text-muted-foreground hover:text-foreground',
 							)}
 						>
-							<Icon
-								size={18}
-								weight={mode === value ? 'fill' : 'regular'}
-								aria-hidden
-							/>
+							{value === 'web' ? (
+								<SiteLogos />
+							) : (
+								<PencilSimpleIcon
+									size={18}
+									weight={mode === value ? 'fill' : 'regular'}
+									aria-hidden
+								/>
+							)}
 							{label}
 						</Link>
 					))}
@@ -171,7 +193,7 @@ function ManualForm() {
 				<RecipeNameField
 					label="Recipe name"
 					maxLength={recipeTitleMax}
-					placeholder="miso butter pasta"
+					placeholder="recipe title"
 				/>
 			</RecipeIntro>
 			<IngredientListField />

@@ -57,7 +57,7 @@ export function RecipeNameField({
 			placeholder={placeholder}
 			className={cn(
 				fieldClassName,
-				'min-w-0 py-3.5 text-xl font-bold tracking-tight md:text-3xl',
+				'min-w-0 py-3.5 text-xl font-bold tracking-tight placeholder:text-base placeholder:font-normal md:text-3xl md:placeholder:text-lg',
 				placeholderClassName,
 			)}
 		/>
