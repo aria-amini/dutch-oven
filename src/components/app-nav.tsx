@@ -1,4 +1,9 @@
-import { CarrotIcon, CookingPotIcon, PlusIcon } from '@phosphor-icons/react'
+import {
+	CarrotIcon,
+	CookingPotIcon,
+	PlusIcon,
+	ShoppingCartIcon,
+} from '@phosphor-icons/react'
 import { Link, useRouterState } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 
@@ -8,11 +13,17 @@ import { cn } from '@/lib/utils/ui'
 const navItems = [
 	{ label: 'recipes', icon: CookingPotIcon, to: '/recipes' },
 	{ label: 'ingredients', icon: CarrotIcon, to: '/ingredients' },
+	{ label: 'groceries', icon: ShoppingCartIcon, to: '/groceries' },
 ] as const
 
 // Screens that own their bottom edge (forms and the cooking view pin their own
 // actions) leave the tab bar out; the rest of the app shows it.
-const tabBarRoutes = new Set(['/recipes', '/ingredients', '/profile'])
+const tabBarRoutes = new Set([
+	'/recipes',
+	'/ingredients',
+	'/groceries',
+	'/profile',
+])
 
 type TabBarMode = 'none' | 'bar' | 'bar-fab'
 

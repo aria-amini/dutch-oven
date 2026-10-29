@@ -14,9 +14,11 @@ export type MockSession = {
 const authState = vi.hoisted<{
 	session: MockSession | null
 	sessionError: Error | null
+	sessionPending: boolean
 }>(() => ({
 	session: null,
 	sessionError: null,
+	sessionPending: false,
 }))
 
 const authMocks = vi.hoisted(() => ({
@@ -32,6 +34,11 @@ export function getAuthMocks() {
 export function setMockSession(session: MockSession | null) {
 	authState.session = session
 	authState.sessionError = null
+	authState.sessionPending = false
+}
+
+export function setMockSessionPending() {
+	authState.sessionPending = true
 }
 
 export function setMockSessionError(error: Error) {
@@ -47,7 +54,7 @@ vi.mock('@/lib/auth/client', () => ({
 	authClient: {
 		useSession: () => ({
 			data: authState.session,
-			isPending: false,
+			isPending: authState.sessionPending,
 			error: authState.sessionError,
 			refetch: authMocks.refetchSession,
 		}),

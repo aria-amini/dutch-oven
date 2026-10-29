@@ -1,3 +1,4 @@
+import { setMockSessionPending } from '@tests/support/mocks/browser'
 import { renderRoute } from '@tests/support/render/route'
 import { describe, expect, test, vi } from 'vite-plus/test'
 import { page } from 'vitest/browser'
@@ -40,7 +41,7 @@ const guest = {
 const isPhone = () => window.innerWidth < 768
 
 describe('app nav', () => {
-	test('keeps two destinations and opens the shelf from the root', async () => {
+	test('keeps three destinations and opens the shelf from the root', async () => {
 		const { screen, router } = await renderRoute({ path: '/', session: member })
 
 		const nav = screen.getByRole('navigation', { name: 'Primary' })
@@ -50,6 +51,9 @@ describe('app nav', () => {
 		await expect
 			.element(nav.getByRole('link', { name: 'ingredients' }))
 			.toBeVisible()
+		await expect
+			.element(nav.getByRole('link', { name: 'groceries' }))
+			.toHaveAttribute('href', '/groceries')
 		expect(router.state.location.pathname).toBe('/recipes')
 		expect(
 			nav
@@ -57,7 +61,7 @@ describe('app nav', () => {
 				.elements()
 				.map((link) => link.textContent)
 				.filter((label) => label !== 'dutch-oven' && label !== 'add'),
-		).toEqual(['recipes', 'ingredients'])
+		).toEqual(['recipes', 'ingredients', 'groceries'])
 	})
 
 	test('puts profile and sign out in the account menu', async () => {
@@ -198,13 +202,25 @@ describe('app nav', () => {
 		)
 	})
 
-	test('falls back to an initial for an account and a dashed icon for a guest', async () => {
-		const { screen } = await renderRoute({ path: '/recipes', session: member })
-		const account = screen.getByRole('button', { name: 'Account' })
+	test('holds the avatar spot while the session loads, with no label', async () => {
+		const { screen } = await renderRoute({
+			path: '/recipes',
+			session: member,
+			setup: () => setMockSessionPending(),
+		})
 
-		await expect.element(account).toBeVisible()
-		expect(account.element().querySelector('img')).toBeNull()
-		expect(account.element().textContent).toContain('A')
+		const area = isPhone()
+			? screen.getByRole('banner')
+			: screen.getByRole('navigation', { name: 'Primary' })
+
+		await expect.element(area).toBeVisible()
+		expect(area.element().textContent).not.toContain('account')
+
+		const spot = area.element().querySelector('.animate-pulse')
+
+		if (!spot) throw new Error('missing placeholder')
+		// The same footprint as the avatar that replaces it, so nothing shifts.
+		expect(spot.getBoundingClientRect().width).toBe(isPhone() ? 32 : 24)
 	})
 
 	test('offers sign in when signed out', async () => {

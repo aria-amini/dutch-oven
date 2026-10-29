@@ -57,13 +57,17 @@ export function AccountMenu({ variant }: { variant: Variant }) {
 		return (
 			<div
 				aria-hidden
-				className={cn(
-					triggerClassNames[variant],
-					'animate-pulse border-transparent',
-				)}
+				className={cn(triggerClassNames[variant], 'border-transparent')}
 			>
-				<UserIcon size={18} />
-				account
+				<span
+					className={cn(
+						'bg-muted animate-pulse rounded-md',
+						variant === 'avatar' ? 'size-8' : 'size-6',
+					)}
+				/>
+				{variant === 'rail' ? (
+					<span className="bg-muted h-3 w-16 animate-pulse rounded-md" />
+				) : null}
 			</div>
 		)
 	}

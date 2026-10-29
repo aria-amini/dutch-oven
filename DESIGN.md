@@ -224,19 +224,20 @@ slot, empty states — are drawn dashed; once real, the border goes solid.
   is one; otherwise a yolk initial for an account and a dashed outline with a
   user glyph for a guest whose shelf is not saved yet. Radius scales with size
   (8px small, 10px, 14px on the profile page) and every size has a hairline
-  border.
+  border. While the session loads, a soft tile of the same footprint holds the
+  spot (no label), so nothing shifts when the avatar arrives.
 
 ### Navigation
 
 - Left rail of full-width rows: Phosphor icon (18px, filled when active) +
   lowercase 13px semibold label. Active row = yolk 30% tint with a hairline
   border; hover = card fill.
-- Phone tab bar: two equal tabs (recipes, ingredients; icon over label, 56px
-  tall, safe-area padded) pinned to the bottom behind a hairline. The recipes
-  shelf alone adds a round yolk button (56px, soft float shadow) floating at the
-  bottom right above the bar to add a recipe. The bar leaves screens that pin
-  their own actions (forms, the recipe view) and, with the round button, steps
-  aside while a text field has focus.
+- Phone tab bar: three equal tabs (recipes, ingredients, groceries; icon over
+  label, 56px tall, safe-area padded) pinned to the bottom behind a hairline.
+  The recipes shelf alone adds a round yolk button (56px, soft float shadow)
+  floating at the bottom right above the bar to add a recipe. The bar leaves
+  screens that pin their own actions (forms, the recipe view) and, with the
+  round button, steps aside while a text field has focus.
 - Phone header: a slim row with the wordmark left and the account as a small
   avatar button right (a count badge for guests with saved items). Account is a
   rare visit, so it never takes a tab; the desktop sidebar keeps it at the

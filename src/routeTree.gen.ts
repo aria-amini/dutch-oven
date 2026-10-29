@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppRouteImport } from './routes/_app'
+import { Route as AppGroceriesRouteImport } from './routes/_app/groceries'
 import { Route as AppHomeRouteImport } from './routes/_app/home'
 import { Route as AppPantryRouteImport } from './routes/_app/pantry'
 import { Route as AppProfileRouteImport } from './routes/_app/profile'
@@ -34,6 +35,11 @@ const IndexRoute = IndexRouteImport.update({
 const AppRoute = AppRouteImport.update({
   id: '/_app',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AppGroceriesRoute = AppGroceriesRouteImport.update({
+  id: '/groceries',
+  path: '/groceries',
+  getParentRoute: () => AppRoute,
 } as any)
 const AppHomeRoute = AppHomeRouteImport.update({
   id: '/home',
@@ -108,6 +114,7 @@ const ApiIngestSplatRoute = ApiIngestSplatRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/groceries': typeof AppGroceriesRoute
   '/home': typeof AppHomeRoute
   '/pantry': typeof AppPantryRoute
   '/profile': typeof AppProfileRoute
@@ -125,6 +132,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/groceries': typeof AppGroceriesRoute
   '/home': typeof AppHomeRoute
   '/pantry': typeof AppPantryRoute
   '/profile': typeof AppProfileRoute
@@ -144,6 +152,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
+  '/_app/groceries': typeof AppGroceriesRoute
   '/_app/home': typeof AppHomeRoute
   '/_app/pantry': typeof AppPantryRoute
   '/_app/profile': typeof AppProfileRoute
@@ -163,6 +172,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/groceries'
     | '/home'
     | '/pantry'
     | '/profile'
@@ -180,6 +190,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/groceries'
     | '/home'
     | '/pantry'
     | '/profile'
@@ -198,6 +209,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_app'
+    | '/_app/groceries'
     | '/_app/home'
     | '/_app/pantry'
     | '/_app/profile'
@@ -239,6 +251,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof AppRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_app/groceries': {
+      id: '/_app/groceries'
+      path: '/groceries'
+      fullPath: '/groceries'
+      preLoaderRoute: typeof AppGroceriesRouteImport
+      parentRoute: typeof AppRoute
     }
     '/_app/home': {
       id: '/_app/home'
@@ -342,6 +361,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AppRouteChildren {
+  AppGroceriesRoute: typeof AppGroceriesRoute
   AppHomeRoute: typeof AppHomeRoute
   AppPantryRoute: typeof AppPantryRoute
   AppProfileRoute: typeof AppProfileRoute
@@ -354,6 +374,7 @@ interface AppRouteChildren {
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppGroceriesRoute: AppGroceriesRoute,
   AppHomeRoute: AppHomeRoute,
   AppPantryRoute: AppPantryRoute,
   AppProfileRoute: AppProfileRoute,
