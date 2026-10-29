@@ -218,6 +218,14 @@ slot, empty states — are drawn dashed; once real, the border goes solid.
   blocks that stay at least 400ms so they never flash. Quick loads show neither.
   Reduced motion gets a still bar.
 
+### Avatar
+
+- One component everywhere (menu, header, popup, profile). The photo when there
+  is one; otherwise a yolk initial for an account and a dashed outline with a
+  user glyph for a guest whose shelf is not saved yet. Radius scales with size
+  (8px small, 10px, 14px on the profile page) and every size has a hairline
+  border.
+
 ### Navigation
 
 - Left rail of full-width rows: Phosphor icon (18px, filled when active) +

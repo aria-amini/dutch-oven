@@ -38,6 +38,11 @@ export function setMockSessionError(error: Error) {
 	authState.sessionError = error
 }
 
+// Tests never reach storage: an avatar key resolves to itself.
+vi.mock('@/lib/use-avatar-url', () => ({
+	useAvatarUrl: (image: string | null | undefined) => image ?? undefined,
+}))
+
 vi.mock('@/lib/auth/client', () => ({
 	authClient: {
 		useSession: () => ({

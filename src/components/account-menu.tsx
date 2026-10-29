@@ -10,8 +10,10 @@ import { Link, useNavigate, useRouter } from '@tanstack/react-router'
 import { useEffect, useState, type ReactNode } from 'react'
 import { toast } from 'sonner'
 
+import { Avatar } from '@/components/avatar'
 import { Badge } from '@/components/ui/badge'
 import { authClient } from '@/lib/auth/client'
+import { useAvatarUrl } from '@/lib/use-avatar-url'
 import { useShelfStats } from '@/lib/use-shelf-stats'
 import { cn } from '@/lib/utils/ui'
 
@@ -48,6 +50,7 @@ export function AccountMenu({ variant }: { variant: Variant }) {
 	)
 
 	const user = session.data?.user
+	const avatarUrl = useAvatarUrl(user?.image)
 	const stats = useShelfStats(user?.isAnonymous ? user.id : undefined)
 
 	if (session.isPending) {
@@ -90,9 +93,10 @@ export function AccountMenu({ variant }: { variant: Variant }) {
 				label="Guest account"
 				trigger={
 					<>
-						<GuestAvatar
-							className={variant === 'avatar' ? 'size-8' : 'size-6'}
-							iconSize={14}
+						<Avatar
+							guest
+							name="guest"
+							size={variant === 'avatar' ? 'md' : 'sm'}
 						/>
 						{variant === 'rail' ? (
 							<span className="min-w-0 flex-1 truncate text-left">guest</span>
@@ -112,7 +116,7 @@ export function AccountMenu({ variant }: { variant: Variant }) {
 				triggerClassName="border-border border-dashed"
 				header={
 					<div className="flex items-center gap-3">
-						<GuestAvatar className="size-10" iconSize={22} />
+						<Avatar guest name="guest" size="lg" />
 						<div className="min-w-0">
 							<p className="text-sm font-bold">guest account</p>
 							<p className="text-muted-foreground mt-1 text-xs font-semibold">
@@ -149,15 +153,11 @@ export function AccountMenu({ variant }: { variant: Variant }) {
 			label="Account"
 			trigger={
 				<>
-					<span
-						aria-hidden
-						className={cn(
-							'border-border bg-kitchen-yolk grid shrink-0 place-items-center border text-xs font-bold rounded-md',
-							variant === 'avatar' ? 'size-8' : 'size-6',
-						)}
-					>
-						{user.name.charAt(0)}
-					</span>
+					<Avatar
+						name={user.name}
+						src={avatarUrl}
+						size={variant === 'avatar' ? 'md' : 'sm'}
+					/>
 					{variant === 'rail' ? (
 						<span className="min-w-0 flex-1 truncate text-left">
 							{user.name}
@@ -167,12 +167,15 @@ export function AccountMenu({ variant }: { variant: Variant }) {
 			}
 			triggerClassName="border-transparent"
 			header={
-				<>
-					<p className="truncate text-sm font-bold">{user.name}</p>
-					<p className="text-muted-foreground mt-1 truncate text-xs font-semibold">
-						{user.email}
-					</p>
-				</>
+				<div className="flex items-center gap-3">
+					<Avatar name={user.name} src={avatarUrl} size="lg" />
+					<div className="min-w-0">
+						<p className="truncate text-sm font-bold">{user.name}</p>
+						<p className="text-muted-foreground mt-1 truncate text-xs font-semibold">
+							{user.email}
+						</p>
+					</div>
+				</div>
 			}
 		>
 			<Menu.LinkItem className={itemClassName} render={<Link to="/profile" />}>
@@ -258,25 +261,5 @@ function SignOutItem() {
 			<SignOutIcon size={16} weight="bold" aria-hidden />
 			{signingOut ? 'signing out…' : 'sign out'}
 		</Menu.Item>
-	)
-}
-
-function GuestAvatar({
-	className,
-	iconSize,
-}: {
-	className: string
-	iconSize: number
-}) {
-	return (
-		<span
-			aria-hidden
-			className={cn(
-				'border-border bg-card grid shrink-0 place-items-center border border-dashed rounded-md',
-				className,
-			)}
-		>
-			<UserIcon size={iconSize} weight="bold" />
-		</span>
 	)
 }

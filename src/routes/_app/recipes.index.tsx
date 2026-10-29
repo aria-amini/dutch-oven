@@ -127,14 +127,16 @@ function Shelf() {
 						to="/recipes/new"
 						className="border-foreground/50 bg-kitchen-yolk/25 text-foreground hover:bg-kitchen-yolk/40 focus-visible:outline-kitchen-eggplant relative block aspect-square w-full max-w-md rounded-xl border border-dashed text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 md:aspect-auto md:h-[calc(var(--spacing-tile)*2+16px)] md:w-[calc(var(--spacing-tile)*2+16px)]"
 					>
-						<span className="bg-card absolute top-4 left-4 inline-block rounded-md px-2 py-0.5 text-xs leading-5 font-semibold">
-							no recipes yet
-						</span>
-						<span className="bg-kitchen-yolk absolute top-3 right-4 grid size-12 place-items-center rounded-full">
+						<span className="bg-kitchen-yolk absolute top-4 right-4 grid size-12 place-items-center rounded-full">
 							<ArrowRight weight="bold" className="size-6" aria-hidden />
 						</span>
-						<span className="absolute right-4 bottom-4 left-4 text-3xl leading-none font-bold md:text-4xl">
-							save your first recipe
+						<span className="absolute right-4 bottom-4 left-4 flex flex-col gap-2">
+							<span className="text-3xl leading-none font-bold md:text-4xl">
+								save your first recipe
+							</span>
+							<span className="text-foreground/70 text-sm font-semibold">
+								paste a link or write your own
+							</span>
 						</span>
 					</Link>
 				) : null}

@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
+import { Avatar } from '@/components/avatar'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { authClient } from '@/lib/auth/client'
@@ -156,20 +157,7 @@ function AccountProfile({
 			<div className="space-y-4">
 				<p>{name}</p>
 				<p className="text-muted-foreground">{email}</p>
-				{avatar ? (
-					<img
-						src={avatar}
-						alt="Profile avatar"
-						className="border-border size-24 rounded-xl border object-cover"
-					/>
-				) : (
-					<div
-						aria-hidden
-						className="bg-kitchen-yolk border-border flex size-24 items-center justify-center rounded-md border text-3xl font-bold"
-					>
-						{name.charAt(0)}
-					</div>
-				)}
+				<Avatar name={name} src={avatar} size="xl" alt="Profile avatar" />
 				<Input
 					aria-label="Profile photo"
 					type="file"

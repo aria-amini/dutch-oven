@@ -179,6 +179,34 @@ describe('app nav', () => {
 			.not.toBeInTheDocument()
 	})
 
+	test('shows the account photo, or the same initial fallback without one', async () => {
+		const withPhoto = {
+			...member,
+			user: { ...member.user, image: '/sprites/pantry/apple.png' },
+		}
+
+		const { screen } = await renderRoute({
+			path: '/recipes',
+			session: withPhoto,
+		})
+
+		const button = screen.getByRole('button', { name: 'Account' })
+
+		await expect.element(button).toBeVisible()
+		expect(button.element().querySelector('img')?.getAttribute('src')).toBe(
+			'/sprites/pantry/apple.png',
+		)
+	})
+
+	test('falls back to an initial for an account and a dashed icon for a guest', async () => {
+		const { screen } = await renderRoute({ path: '/recipes', session: member })
+		const account = screen.getByRole('button', { name: 'Account' })
+
+		await expect.element(account).toBeVisible()
+		expect(account.element().querySelector('img')).toBeNull()
+		expect(account.element().textContent).toContain('A')
+	})
+
 	test('offers sign in when signed out', async () => {
 		const { screen } = await renderRoute({ path: '/recipes' })
 
