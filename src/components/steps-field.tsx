@@ -1,6 +1,8 @@
 import {
-	placeholderClassName,
+	fieldClassName,
+	fieldHintClassName,
 	fieldLabelClassName,
+	placeholderClassName,
 } from '@/components/recipe-form'
 import { formField } from '@/lib/utils/form'
 import { cn } from '@/lib/utils/ui'
@@ -13,21 +15,23 @@ export function StepsField({
 	defaultValue?: string[] | undefined
 }) {
 	return (
-		<div className="flex flex-col gap-2">
+		<div className="flex flex-col gap-1">
 			<label className={fieldLabelClassName} htmlFor="steps">
-				steps{' '}
-				<span className="text-muted-foreground font-normal">
-					(one per line)
-				</span>
+				steps
 			</label>
+			<p id="steps-hint" className={cn(fieldHintClassName, 'mb-2')}>
+				one per line, in the order you cook
+			</p>
 			<textarea
 				id="steps"
 				name="steps"
 				rows={6}
+				aria-describedby="steps-hint"
 				defaultValue={defaultValue.join('\n')}
 				placeholder={'boil the pasta\nstir in the miso'}
 				className={cn(
-					'border-input bg-background focus-visible:outline-kitchen-eggplant field-sizing-content min-h-36 resize-y border px-3 py-2 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 rounded-md',
+					fieldClassName,
+					'field-sizing-content min-h-40 resize-y leading-relaxed',
 					placeholderClassName,
 				)}
 			/>

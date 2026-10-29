@@ -30,6 +30,7 @@ export function IngredientCombobox({
 	placeholder = 'carrots',
 	label,
 	compact = false,
+	bare = false,
 	inputRef,
 	onKeyDown,
 	onPaste,
@@ -42,6 +43,9 @@ export function IngredientCombobox({
 	placeholder?: string
 	label?: string
 	compact?: boolean
+	// Drops the field's own border and fill and anchors the suggestions to the
+	// nearest positioned ancestor, for a field that lives inside a row.
+	bare?: boolean
 	inputRef?: React.Ref<HTMLInputElement>
 	// Runs for keys the suggestion list does not handle.
 	onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>
@@ -81,7 +85,7 @@ export function IngredientCombobox({
 	}
 
 	return (
-		<div className="relative">
+		<div className={bare ? undefined : 'relative'}>
 			<input
 				ref={inputRef}
 				id={id}
@@ -117,11 +121,15 @@ export function IngredientCombobox({
 					if (!event.defaultPrevented) onKeyDown?.(event)
 				}}
 				className={cn(
-					'border-input bg-background focus-visible:outline-kitchen-eggplant w-full border focus-visible:outline-2 focus-visible:outline-offset-2 rounded-md',
+					'w-full',
+					bare
+						? 'bg-transparent px-3 py-2.5 text-sm font-semibold outline-none'
+						: 'border-input bg-card focus-visible:outline-kitchen-eggplant rounded-xl border focus-visible:outline-2 focus-visible:outline-offset-2',
 					placeholderClassName,
-					compact
-						? 'px-3 py-2 text-sm font-semibold'
-						: 'px-3 py-3 text-lg font-semibold',
+					!bare &&
+						(compact
+							? 'px-3 py-2 text-sm font-semibold'
+							: 'px-3 py-3 text-lg font-semibold'),
 				)}
 			/>
 			{expanded ? (

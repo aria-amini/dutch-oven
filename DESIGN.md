@@ -206,6 +206,28 @@ slot, empty states — are drawn dashed; once real, the border goes solid.
 - Paper (or card-cream) fill, 1px field-line border, 8px corners, semibold text.
   Focus shows the eggplant outline.
 
+### Search
+
+- One field above the shelf with a floating dropdown (Float shadow, no border,
+  14px). Focus alone shows recent recipes; typing lists shelf matches with the
+  match in bold, how often each was cooked, and a tinted thumbnail. A closing
+  row, "find “x” online", searches the recipe sites only when asked and lists
+  results under an "online" label. A pasted link collapses it to one row,
+  "import this link". Arrow keys move a yolk 30% highlight; Enter picks; Escape
+  closes.
+
+### Recipe Form
+
+- One job at a time. A two-way switch under the title (write your own, from the
+  web) shows either the form or the web import, never both; writing is the
+  default, and the mode lives in the URL. The shelf search covers quick link
+  imports, so the web mode only needs a calm field and one sentence.
+- Writing leads with the photo slot beside a large name field, then ingredients
+  and steps with bold headings and a one-line hint each.
+- An ingredient is one outlined line: sprite, quantity, unit and name divided by
+  hairlines inside a single row; phones stack the name over quantity and unit.
+  The add row is dashed.
+
 ### Chips and Active States
 
 - Selected = yolk tint (40%) with a hairline border; unselected = transparent

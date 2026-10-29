@@ -1,14 +1,38 @@
 import { cn } from '@/lib/utils/ui'
 
 // Section headings inside a recipe form: one step above the fields they name.
-export const fieldLabelClassName = 'text-sm font-semibold'
+export const fieldLabelClassName = 'text-base font-bold'
+
+// The line under a section heading that says how the section works.
+export const fieldHintClassName = 'text-muted-foreground text-sm'
 
 // Placeholders read as hints, not values: regular weight, muted ink (≥4.5:1).
 export const placeholderClassName =
 	'placeholder:text-muted-foreground placeholder:font-normal'
 
-// The recipe's name is the form's title: the biggest thing on it, drawn as a
-// line on the page rather than a boxed field.
+// A filled, softly rounded field: the one look every text control in a recipe
+// form shares.
+export const fieldClassName =
+	'border-input bg-card focus-visible:outline-kitchen-eggplant w-full rounded-xl border px-4 py-3 text-base font-medium focus-visible:outline-2 focus-visible:outline-offset-2'
+
+// The photo slot beside the recipe's name: the two things that say what this
+// recipe is, side by side at the top of the form.
+export function RecipeIntro({
+	photo,
+	children,
+}: {
+	photo?: React.ReactNode
+	children: React.ReactNode
+}) {
+	return (
+		<div className="flex items-start gap-4">
+			{photo}
+			<div className="min-w-0 flex-1">{children}</div>
+		</div>
+	)
+}
+
+// The recipe's name is the form's title: the biggest thing on it.
 export function RecipeNameField({
 	label,
 	id,
@@ -32,7 +56,8 @@ export function RecipeNameField({
 			defaultValue={defaultValue}
 			placeholder={placeholder}
 			className={cn(
-				'border-input focus-visible:outline-kitchen-eggplant w-full min-w-0 border-b bg-transparent py-2 text-3xl font-bold tracking-tight focus-visible:outline-2 focus-visible:outline-offset-4',
+				fieldClassName,
+				'min-w-0 py-3.5 text-xl font-bold tracking-tight md:text-3xl',
 				placeholderClassName,
 			)}
 		/>
@@ -50,7 +75,7 @@ export function FormActions({ children }: { children: React.ReactNode }) {
 }
 
 export const primaryActionClassName =
-	'bg-kitchen-basil focus-visible:outline-kitchen-eggplant px-5 py-2.5 text-sm font-semibold transition-colors hover:brightness-95 focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 rounded-md'
+	'bg-kitchen-basil focus-visible:outline-kitchen-eggplant px-6 py-3 text-sm font-semibold transition-colors hover:brightness-95 focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 rounded-xl'
 
 export const quietActionClassName =
-	'text-muted-foreground hover:text-foreground focus-visible:outline-kitchen-eggplant px-3 py-2.5 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50'
+	'text-muted-foreground hover:text-foreground focus-visible:outline-kitchen-eggplant px-3 py-3 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 rounded-xl'

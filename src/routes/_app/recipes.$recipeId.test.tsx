@@ -163,7 +163,7 @@ describe('recipe detail', () => {
 		await screen.getByRole('combobox', { name: 'Unit 2' }).selectOptions('tbsp')
 		await screen.getByRole('combobox', { name: 'Ingredient 2' }).fill('butter')
 		await screen
-			.getByRole('textbox', { name: 'steps (one per line)' })
+			.getByRole('textbox', { name: 'steps' })
 			.fill('boil the pasta\n\nstir in the butter')
 		await screen.getByRole('button', { name: 'save', exact: true }).click()
 

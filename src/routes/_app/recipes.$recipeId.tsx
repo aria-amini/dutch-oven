@@ -11,12 +11,14 @@ import { toast } from 'sonner'
 
 import { IngredientListField } from '@/components/ingredient-list-field'
 import {
+	fieldClassName,
+	fieldLabelClassName,
 	FormActions,
 	placeholderClassName,
 	primaryActionClassName,
 	quietActionClassName,
+	RecipeIntro,
 	RecipeNameField,
-	fieldLabelClassName,
 } from '@/components/recipe-form'
 import { RecipePhotoField } from '@/components/recipe-photo-field'
 import { StepsField, stepsFrom } from '@/components/steps-field'
@@ -61,9 +63,6 @@ export const Route = createFileRoute('/_app/recipes/$recipeId')({
 	},
 	component: RecipeDetail,
 })
-
-const fieldClassName =
-	'border-input bg-card focus-visible:outline-kitchen-eggplant border p-3 font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 rounded-md'
 
 const sectionLabelClassName =
 	'inline-block border-b-3 pb-0.5 text-xs font-semibold'
@@ -516,7 +515,7 @@ function RecipeEditor({
 
 	return (
 		<form
-			className="flex flex-col gap-8"
+			className="flex flex-col gap-10"
 			onSubmit={(event) => {
 				event.preventDefault()
 				void save(new FormData(event.currentTarget))
@@ -527,26 +526,29 @@ function RecipeEditor({
 					draft — check it over, then finalize
 				</p>
 			) : null}
-			<div className="flex flex-col gap-4">
+			<RecipeIntro
+				photo={
+					canAddPhoto ? (
+						<RecipePhotoField
+							current={recipe.imageUrl}
+							onBusyChange={setPhotoBusy}
+						/>
+					) : recipe.imageUrl ? (
+						<img
+							src={recipe.imageUrl}
+							alt=""
+							className="border-border size-24 shrink-0 rounded-xl border object-cover"
+						/>
+					) : null
+				}
+			>
 				<RecipeNameField
 					id="edit-title"
 					label="name"
 					maxLength={recipeTitleMax}
 					defaultValue={recipe.title}
 				/>
-				{canAddPhoto ? (
-					<RecipePhotoField
-						current={recipe.imageUrl}
-						onBusyChange={setPhotoBusy}
-					/>
-				) : recipe.imageUrl ? (
-					<img
-						src={recipe.imageUrl}
-						alt=""
-						className="border-border size-24 shrink-0 rounded-xl border object-cover"
-					/>
-				) : null}
-			</div>
+			</RecipeIntro>
 			<IngredientListField defaultValue={recipe.ingredients} />
 			<StepsField defaultValue={recipe.steps} />
 			<div className="flex flex-col gap-2">

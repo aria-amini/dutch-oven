@@ -1,7 +1,8 @@
-import { ArrowLeft } from '@phosphor-icons/react'
+import { ArrowLeft, GlobeIcon, PencilSimpleIcon } from '@phosphor-icons/react'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { motion, useReducedMotion } from 'framer-motion'
 import { useState } from 'react'
+import { z } from 'zod'
 
 import { IngredientListField } from '@/components/ingredient-list-field'
 import { RecipeFinder } from '@/components/recipe-finder'
@@ -9,6 +10,7 @@ import {
 	FormActions,
 	primaryActionClassName,
 	quietActionClassName,
+	RecipeIntro,
 	RecipeNameField,
 } from '@/components/recipe-form'
 import { RecipePhotoField } from '@/components/recipe-photo-field'
@@ -17,16 +19,30 @@ import { authClient } from '@/lib/auth/client'
 import { recipeTitleMax } from '@/lib/recipes/model'
 import { createRecipe } from '@/lib/recipes/server'
 import { formField } from '@/lib/utils/form'
+import { cn } from '@/lib/utils/ui'
+
+// Adding a recipe is one of two jobs, never both at once: write it yourself
+// (the default) or copy one from the web.
+const newRecipeSearch = z.object({
+	mode: z.enum(['write', 'web']).optional().catch(undefined),
+})
 
 export const Route = createFileRoute('/_app/recipes/new')({
+	validateSearch: newRecipeSearch,
 	component: NewRecipe,
 })
+
+const modes = [
+	{ value: 'write', label: 'write your own', icon: PencilSimpleIcon },
+	{ value: 'web', label: 'from the web', icon: GlobeIcon },
+] as const
 
 const ease = [0.16, 1, 0.3, 1] as const
 
 function NewRecipe() {
 	const navigate = useNavigate()
 	const reduce = useReducedMotion()
+	const mode = Route.useSearch().mode ?? 'write'
 
 	const enter = reduce
 		? {}
@@ -40,7 +56,7 @@ function NewRecipe() {
 		<main className="flex-1">
 			<motion.div
 				{...enter}
-				className="flex max-w-2xl flex-col gap-8 p-6 md:p-10"
+				className="flex max-w-2xl flex-col gap-10 p-6 md:p-10"
 			>
 				<div>
 					<Link
@@ -54,17 +70,51 @@ function NewRecipe() {
 						add a recipe
 					</h1>
 				</div>
-				<RecipeFinder
-					onImported={(recipeId) =>
-						void navigate({ to: '/recipes/$recipeId', params: { recipeId } })
-					}
-				/>
-				<div className="text-muted-foreground flex items-center gap-3 text-sm font-semibold">
-					<span aria-hidden className="bg-border h-px flex-1" />
-					or write your own
-					<span aria-hidden className="bg-border h-px flex-1" />
-				</div>
-				<ManualForm />
+				<nav
+					aria-label="How to add"
+					className="bg-muted flex gap-1 rounded-xl p-1"
+				>
+					{modes.map(({ value, label, icon: Icon }) => (
+						<Link
+							key={value}
+							to="/recipes/new"
+							search={{ mode: value }}
+							replace
+							aria-current={mode === value ? 'page' : undefined}
+							className={cn(
+								'focus-visible:outline-kitchen-eggplant flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2',
+								mode === value
+									? 'bg-card'
+									: 'text-muted-foreground hover:text-foreground',
+							)}
+						>
+							<Icon
+								size={18}
+								weight={mode === value ? 'fill' : 'regular'}
+								aria-hidden
+							/>
+							{label}
+						</Link>
+					))}
+				</nav>
+				{mode === 'web' ? (
+					<div className="flex flex-col gap-4">
+						<p className="text-muted-foreground text-sm">
+							paste a link or search the recipe sites. we copy it to your shelf
+							so you can tweak it.
+						</p>
+						<RecipeFinder
+							onImported={(recipeId) =>
+								void navigate({
+									to: '/recipes/$recipeId',
+									params: { recipeId },
+								})
+							}
+						/>
+					</div>
+				) : (
+					<ManualForm />
+				)}
 			</motion.div>
 		</main>
 	)
@@ -81,7 +131,7 @@ function ManualForm() {
 
 	return (
 		<form
-			className="flex flex-col gap-8"
+			className="flex flex-col gap-10"
 			onSubmit={async (event) => {
 				event.preventDefault()
 				const form = new FormData(event.currentTarget)
@@ -113,14 +163,17 @@ function ManualForm() {
 				}
 			}}
 		>
-			<div className="flex flex-col gap-4">
+			<RecipeIntro
+				photo={
+					canAddPhoto ? <RecipePhotoField onBusyChange={setPhotoBusy} /> : null
+				}
+			>
 				<RecipeNameField
 					label="Recipe name"
 					maxLength={recipeTitleMax}
 					placeholder="miso butter pasta"
 				/>
-				{canAddPhoto ? <RecipePhotoField onBusyChange={setPhotoBusy} /> : null}
-			</div>
+			</RecipeIntro>
 			<IngredientListField />
 			<StepsField />
 			{error ? (

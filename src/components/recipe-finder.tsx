@@ -25,24 +25,74 @@ export function asRecipeUrl(value: string) {
 	return undefined
 }
 
-export function RecipeFinder({
-	onImported,
-	initialQuery = '',
-	hideSearch = false,
-}: {
-	onImported: (recipeId: string) => void
-	initialQuery?: string
-	hideSearch?: boolean
-}) {
-	const [query, setQuery] = useState(initialQuery)
-	const [results, setResults] = useState<Result[]>([])
-	const [loading, setLoading] = useState(Boolean(initialQuery))
-	const [warming, setWarming] = useState(false)
+type OnlineSearch = {
+	results: Result[]
+	loading: boolean
+	warming: boolean
+	failed: boolean
+}
+
+type Settled = Omit<OnlineSearch, 'loading'> & { query?: string }
+
+// Searches the recipe sites for `query` once it settles. Pass `undefined` to
+// stay idle. The first search starts the crawl, so keep asking while sites load.
+export function useOnlineRecipes(query: string | undefined): OnlineSearch {
+	const [settled, setSettled] = useState<Settled>({
+		results: [],
+		warming: false,
+		failed: false,
+	})
+
+	useEffect(() => {
+		if (query === undefined) return
+
+		let cancelled = false
+		let timer: ReturnType<typeof setTimeout>
+
+		async function run(q: string) {
+			try {
+				const found = await searchRecipes({ data: { q: q.slice(0, 80) } })
+
+				if (cancelled) return
+				setSettled({
+					query: q,
+					results: found.results,
+					warming: found.warming,
+					failed: false,
+				})
+
+				if (found.warming) timer = setTimeout(() => void run(q), WARM_POLL_MS)
+			} catch {
+				if (!cancelled)
+					setSettled({ query: q, results: [], warming: false, failed: true })
+			}
+		}
+
+		timer = setTimeout(() => void run(query), query ? 200 : 0)
+
+		return () => {
+			cancelled = true
+			clearTimeout(timer)
+		}
+	}, [query])
+
+	// Results belong to the query that fetched them; a new query starts empty.
+	const current = query !== undefined && settled.query === query
+
+	return {
+		results: current ? settled.results : [],
+		warming: current && settled.warming,
+		failed: current && settled.failed,
+		loading: query !== undefined && !current,
+	}
+}
+
+// Imports a recipe by link and reports success to `onImported`. One import runs
+// at a time; a failure leaves the message in `error`.
+export function useRecipeImport(onImported: (recipeId: string) => void) {
 	const [saving, setSaving] = useState<string>()
 	const [error, setError] = useState<string>()
 	const active = useRef(true)
-	const trimmed = query.trim()
-	const url = asRecipeUrl(trimmed)
 
 	useEffect(() => {
 		active.current = true
@@ -51,41 +101,6 @@ export function RecipeFinder({
 			active.current = false
 		}
 	}, [])
-
-	useEffect(() => {
-		if (url) return
-
-		let cancelled = false
-		let timer: ReturnType<typeof setTimeout>
-
-		async function run() {
-			try {
-				const found = await searchRecipes({ data: { q: trimmed.slice(0, 80) } })
-
-				if (cancelled) return
-				setResults(found.results)
-				setWarming(found.warming)
-				setLoading(false)
-
-				// The first search starts the crawl; keep asking while sites load.
-				if (found.warming) timer = setTimeout(run, WARM_POLL_MS)
-			} catch {
-				if (!cancelled) {
-					setResults([])
-					setLoading(false)
-					setWarming(false)
-					setError("couldn't search recipes — try again")
-				}
-			}
-		}
-
-		timer = setTimeout(run, trimmed ? 200 : 0)
-
-		return () => {
-			cancelled = true
-			clearTimeout(timer)
-		}
-	}, [trimmed, url])
 
 	async function save(target: string) {
 		if (saving) return
@@ -107,58 +122,76 @@ export function RecipeFinder({
 		}
 	}
 
+	return { saving, error, save, clearError: () => setError(undefined) }
+}
+
+export function RecipeFinder({
+	onImported,
+}: {
+	onImported: (recipeId: string) => void
+}) {
+	const [query, setQuery] = useState('')
+	const trimmed = query.trim()
+	const url = asRecipeUrl(trimmed)
+
+	const {
+		saving,
+		error: importError,
+		save,
+		clearError,
+	} = useRecipeImport(onImported)
+
+	const online = useOnlineRecipes(url ? undefined : trimmed)
+	const { results, loading, warming } = online
+
+	const error =
+		importError ??
+		(online.failed && !url ? "couldn't search recipes — try again" : undefined)
+
 	return (
 		<div className="flex flex-col gap-3">
-			{!hideSearch || url ? (
-				<form
-					onSubmit={(event) => {
-						event.preventDefault()
+			<form
+				onSubmit={(event) => {
+					event.preventDefault()
 
-						if (url) void save(url)
-					}}
-					className="flex flex-col gap-2 sm:flex-row"
-				>
-					{!hideSearch ? (
-						<label className="border-input bg-background focus-within:outline-kitchen-eggplant flex flex-1 items-center gap-2 rounded-md border px-3 py-3 focus-within:outline-2 focus-within:outline-offset-2">
-							{url ? (
-								<LinkSimple size={16} weight="bold" aria-hidden />
-							) : (
-								<MagnifyingGlass size={16} weight="bold" aria-hidden />
-							)}
-							<span className="sr-only">Search recipes or paste a link</span>
-							<input
-								type="text"
-								inputMode="search"
-								value={query}
-								maxLength={500}
-								autoComplete="off"
-								placeholder="search recipes or paste a link"
-								onChange={(event) => {
-									setQuery(event.target.value)
-									setError(undefined)
-								}}
-								className={cn(
-									'w-full bg-transparent text-sm font-semibold outline-none',
-									placeholderClassName,
-								)}
-							/>
-						</label>
-					) : null}
+					if (url) void save(url)
+				}}
+				className="flex flex-col gap-2 sm:flex-row"
+			>
+				<label className="border-input bg-card focus-within:outline-kitchen-eggplant flex flex-1 items-center gap-2.5 rounded-xl border px-3.5 py-3 focus-within:outline-2 focus-within:outline-offset-2">
 					{url ? (
-						<button
-							type="submit"
-							disabled={saving !== undefined}
-							className="bg-kitchen-basil rounded-md px-4 py-2 text-xs font-semibold disabled:opacity-50"
-						>
-							{saving
-								? 'importing…'
-								: hideSearch
-									? 'import this link'
-									: 'import'}
-						</button>
-					) : null}
-				</form>
-			) : null}
+						<LinkSimple size={18} weight="bold" aria-hidden />
+					) : (
+						<MagnifyingGlass size={18} weight="bold" aria-hidden />
+					)}
+					<span className="sr-only">Search recipes or paste a link</span>
+					<input
+						type="text"
+						inputMode="search"
+						value={query}
+						maxLength={500}
+						autoComplete="off"
+						placeholder="search recipes or paste a link"
+						onChange={(event) => {
+							setQuery(event.target.value)
+							clearError()
+						}}
+						className={cn(
+							'w-full bg-transparent text-base font-semibold outline-none',
+							placeholderClassName,
+						)}
+					/>
+				</label>
+				{url ? (
+					<button
+						type="submit"
+						disabled={saving !== undefined}
+						className="bg-kitchen-basil rounded-xl px-5 py-2.5 text-sm font-semibold disabled:opacity-50"
+					>
+						{saving ? 'importing…' : 'import'}
+					</button>
+				) : null}
+			</form>
 
 			{url ? (
 				<>
@@ -183,21 +216,23 @@ export function RecipeFinder({
 							aria-label="Recipe results"
 							className="-mx-1 flex max-h-80 flex-col gap-1.5 overflow-y-auto px-1 py-0.5"
 						>
-							{(hideSearch ? results.slice(0, 5) : results).map((result) => (
+							{results.map((result) => (
 								<li key={result.url} className="flex items-stretch gap-1.5">
 									<button
 										type="button"
 										disabled={saving !== undefined}
 										onClick={() => save(result.url)}
 										className={cn(
-											'border-border bg-background focus-visible:outline-kitchen-eggplant flex min-w-0 flex-1 items-center gap-2.5 border p-1.5 text-left focus-visible:outline-2 focus-visible:outline-offset-2 rounded-md',
-											saving === undefined && '',
+											'border-border bg-card focus-visible:outline-kitchen-eggplant flex min-w-0 flex-1 items-center gap-2.5 rounded-xl border p-1.5 text-left focus-visible:outline-2 focus-visible:outline-offset-2',
 											saving !== undefined &&
 												saving !== result.url &&
 												'opacity-50',
 										)}
 									>
-										<Thumb result={result} />
+										<RecipeThumb
+											imageUrl={result.imageUrl}
+											title={result.title}
+										/>
 										<span className="min-w-0 flex-1">
 											<span className="block truncate text-sm font-bold">
 												{result.title}
@@ -214,7 +249,7 @@ export function RecipeFinder({
 										target="_blank"
 										rel="noreferrer"
 										aria-label={`Open ${result.title} on ${result.siteName}`}
-										className="border-border bg-background focus-visible:outline-kitchen-eggplant grid w-9 shrink-0 place-items-center rounded-md border focus-visible:outline-2 focus-visible:outline-offset-2"
+										className="border-border bg-card focus-visible:outline-kitchen-eggplant grid w-10 shrink-0 place-items-center rounded-xl border focus-visible:outline-2 focus-visible:outline-offset-2"
 									>
 										<ArrowSquareOut size={14} weight="bold" aria-hidden />
 									</a>
@@ -239,14 +274,8 @@ export function RecipeFinder({
 						</p>
 					) : null}
 					<p className="text-muted-foreground text-xs">
-						{hideSearch ? (
-							'Import a copy to review.'
-						) : (
-							<>
-								from {recipeSites.map((site) => site.name).join(', ')}. tap to
-								import a copy — it links back to the original.
-							</>
-						)}
+						from {recipeSites.map((site) => site.name).join(', ')}. tap to
+						import a copy — it links back to the original.
 					</p>
 				</>
 			) : (
@@ -269,27 +298,42 @@ export function RecipeFinder({
 	)
 }
 
-function Thumb({ result }: { result: Result }) {
+// A recipe's picture, or its first letter on a yolk tile when it has none.
+export function RecipeThumb({
+	imageUrl,
+	title,
+	className,
+}: {
+	imageUrl?: string | null | undefined
+	title: string
+	className?: string
+}) {
 	const [broken, setBroken] = useState(false)
 
-	if (!result.imageUrl || broken)
+	if (!imageUrl || broken)
 		return (
 			<span
 				aria-hidden
-				className="bg-kitchen-yolk border-border grid size-10 shrink-0 place-items-center rounded-md border text-sm font-bold"
+				className={cn(
+					'bg-kitchen-yolk border-border grid size-10 shrink-0 place-items-center rounded-lg border text-sm font-bold',
+					className,
+				)}
 			>
-				{result.title.charAt(0)}
+				{title.charAt(0)}
 			</span>
 		)
 
 	return (
 		<img
-			src={result.imageUrl}
+			src={imageUrl}
 			alt=""
 			loading="lazy"
 			referrerPolicy="no-referrer"
 			onError={() => setBroken(true)}
-			className="border-border size-10 shrink-0 rounded-md border object-cover"
+			className={cn(
+				'border-border size-10 shrink-0 rounded-lg border object-cover',
+				className,
+			)}
 		/>
 	)
 }

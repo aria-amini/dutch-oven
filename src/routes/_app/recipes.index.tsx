@@ -1,11 +1,17 @@
-import { ArrowRight, MagnifyingGlass, Plus } from '@phosphor-icons/react'
+import { ArrowRight, Plus } from '@phosphor-icons/react'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { motion, useReducedMotion } from 'framer-motion'
 import { useState } from 'react'
 
-import { asRecipeUrl, RecipeFinder } from '@/components/recipe-finder'
+import { asRecipeUrl } from '@/components/recipe-finder'
+import { RecipeSearch } from '@/components/recipe-search'
 import { matchesRecipeQuery, shelfSearch } from '@/lib/recipes/model'
 import { listShelf } from '@/lib/recipes/server'
+import {
+	tileColorFor,
+	tileColors,
+	type TileColor,
+} from '@/lib/recipes/tile-color'
 import { cn } from '@/lib/utils/ui'
 
 export const Route = createFileRoute('/_app/recipes/')({
@@ -16,25 +22,12 @@ export const Route = createFileRoute('/_app/recipes/')({
 
 const ease = [0.16, 1, 0.3, 1] as const
 
-const tileColors = {
-	tomato: 'bg-kitchen-tomato/25 text-foreground',
-	yolk: 'bg-kitchen-yolk/35 text-foreground',
-	basil: 'bg-kitchen-basil/25 text-foreground',
-	eggplant: 'bg-kitchen-eggplant/15 text-foreground',
-	cream: 'bg-card text-foreground',
-} as const
-
-type TileColor = keyof typeof tileColors
-
-const tileCycle: TileColor[] = ['tomato', 'yolk', 'basil', 'eggplant', 'cream']
-
 type Recipe = Awaited<ReturnType<typeof listShelf>>['recipes'][number]
 
 function Shelf() {
 	const { recipes: userRecipes } = Route.useLoaderData()
 	const { q } = Route.useSearch()
 	const [linkQuery, setLinkQuery] = useState('')
-	const [onlineQuery, setOnlineQuery] = useState<string>()
 	const url = asRecipeUrl(linkQuery.trim())
 	const searchQuery = url ? linkQuery : (q ?? '')
 	const navigate = useNavigate({ from: Route.fullPath })
@@ -61,31 +54,34 @@ function Shelf() {
 			<motion.div {...enter} className="flex flex-col gap-6 p-6 md:p-10">
 				<h1 className="sr-only">your recipes</h1>
 				<div className="flex flex-wrap items-center gap-3">
-					<label className="border-input bg-background focus-within:border-input focus-within:outline-kitchen-eggplant flex max-w-md flex-1 items-center gap-2 rounded-md border px-3 py-1.5 transition-colors focus-within:outline-2 focus-within:outline-offset-2">
-						<MagnifyingGlass size={16} aria-hidden />
-						<span className="sr-only">Search recipes</span>
-						<input
-							type="search"
-							defaultValue={q ?? ''}
-							placeholder="search or paste a link"
-							onChange={(event) => {
-								const value = event.target.value
-								setLinkQuery(value)
-								setOnlineQuery(undefined)
+					<RecipeSearch
+						recipes={userRecipes}
+						defaultValue={q ?? ''}
+						onQueryChange={(value) => {
+							setLinkQuery(value)
 
-								if (!asRecipeUrl(value.trim()))
-									void navigate({
-										search: (prev) => ({
-											...prev,
-											q: value.trim().slice(0, 120) || undefined,
-										}),
-										replace: true,
-									})
-							}}
-							maxLength={2000}
-							className="w-full bg-transparent text-sm font-semibold outline-none placeholder:opacity-50"
-						/>
-					</label>
+							if (!asRecipeUrl(value.trim()))
+								void navigate({
+									search: (prev) => ({
+										...prev,
+										q: value.trim().slice(0, 120) || undefined,
+									}),
+									replace: true,
+								})
+						}}
+						onOpenRecipe={(recipeId) =>
+							void navigate({
+								to: '/recipes/$recipeId',
+								params: { recipeId },
+							})
+						}
+						onImported={(recipeId) =>
+							void navigate({
+								to: '/recipes/$recipeId',
+								params: { recipeId },
+							})
+						}
+					/>
 					<Link
 						to="/recipes/new"
 						className="focus-visible:outline-kitchen-eggplant hidden items-center gap-1.5 px-2 py-2 text-xs font-semibold underline focus-visible:outline-2 focus-visible:outline-offset-2 md:inline-flex"
@@ -93,35 +89,6 @@ function Shelf() {
 						<Plus size={16} aria-hidden /> add recipe
 					</Link>
 				</div>
-				{url || onlineQuery ? (
-					<section
-						aria-label="Online recipes"
-						className="border-foreground/20 max-w-md border-t pt-3"
-					>
-						<h2 className="mb-3 text-xs font-semibold">
-							{url ? 'Import a link' : 'Online recipes'}
-						</h2>
-						<RecipeFinder
-							key={url ?? onlineQuery}
-							initialQuery={url ?? onlineQuery ?? ''}
-							hideSearch
-							onImported={(recipeId) =>
-								void navigate({
-									to: '/recipes/$recipeId',
-									params: { recipeId },
-								})
-							}
-						/>
-						<button
-							type="button"
-							onClick={() => setOnlineQuery(undefined)}
-							hidden={Boolean(url)}
-							className="mt-3 text-xs underline"
-						>
-							close online results
-						</button>
-					</section>
-				) : null}
 				{isEmpty && !searchQuery ? (
 					<Link
 						to="/recipes/new"
@@ -145,14 +112,7 @@ function Shelf() {
 						<RecipeTile
 							key={recipe.id}
 							recipe={recipe}
-							color={
-								tileCycle[
-									Array.from(recipe.id).reduce(
-										(hash, char) => (hash * 31 + char.charCodeAt(0)) >>> 0,
-										0,
-									) % tileCycle.length
-								] ?? 'cream'
-							}
+							color={tileColorFor(recipe.id)}
 						/>
 					))}
 				</div>
@@ -160,15 +120,6 @@ function Shelf() {
 					<p className="border-input max-w-md rounded-xl border border-dashed p-4 text-sm font-semibold">
 						no recipes match &ldquo;{searchQuery}&rdquo;.
 					</p>
-				) : null}
-				{searchQuery && !url && !onlineQuery ? (
-					<button
-						type="button"
-						onClick={() => setOnlineQuery(searchQuery)}
-						className="focus-visible:outline-kitchen-eggplant self-start text-sm font-semibold underline focus-visible:outline-2 focus-visible:outline-offset-2"
-					>
-						find “{searchQuery}” online
-					</button>
 				) : null}
 			</motion.div>
 		</main>

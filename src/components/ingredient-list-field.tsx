@@ -15,13 +15,14 @@ import {
 	verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { DotsSixVertical, Plus, X } from '@phosphor-icons/react'
+import { CarrotIcon, DotsSixVertical, Plus, X } from '@phosphor-icons/react'
 import { useEffect, useRef, useState } from 'react'
 
 import { IngredientCombobox } from '@/components/ingredient-combobox'
 import {
-	placeholderClassName,
+	fieldHintClassName,
 	fieldLabelClassName,
+	placeholderClassName,
 } from '@/components/recipe-form'
 import { resolveSpriteSrc } from '@/lib/pantry/sprites'
 import {
@@ -59,7 +60,7 @@ function lineOf(row: Row) {
 }
 
 const iconButtonClassName =
-	'text-muted-foreground hover:text-foreground hover:bg-card focus-visible:outline-kitchen-eggplant grid size-11 place-items-center focus-visible:outline-2 focus-visible:outline-offset-2 sm:size-10'
+	'text-muted-foreground hover:text-foreground focus-visible:outline-kitchen-eggplant grid place-items-center focus-visible:outline-2 focus-visible:outline-offset-2'
 
 // One draggable row; `children` receives the drag handle to place in the grid.
 function SortableRow({
@@ -88,10 +89,11 @@ function SortableRow({
 				// oxlint-disable-next-line shadcn/no-inline-styles
 				transform: CSS.Translate.toString(transform),
 			}}
+			data-dragging={isDragging}
 			className={cn(
-				'grid grid-cols-[auto_5rem_1fr_auto] items-start gap-2 sm:grid-cols-[auto_5rem_7rem_1fr_auto]',
+				'group flex items-stretch gap-1',
 				isDragging
-					? 'bg-card relative z-10 rounded-md shadow-md'
+					? 'bg-card relative z-10 rounded-xl shadow-md'
 					: 'transition-transform',
 			)}
 		>
@@ -104,7 +106,7 @@ function SortableRow({
 					aria-label={label}
 					className={cn(
 						iconButtonClassName,
-						'cursor-grab touch-none active:cursor-grabbing',
+						'w-8 shrink-0 cursor-grab touch-none active:cursor-grabbing',
 					)}
 				>
 					<DotsSixVertical size={16} weight="bold" aria-hidden />
@@ -114,8 +116,10 @@ function SortableRow({
 	)
 }
 
-const controlClassName = cn(
-	'border-input bg-background focus-visible:outline-kitchen-eggplant w-full border px-3 py-2 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 rounded-md',
+// One ingredient is one line: the bare fields share a single outlined row and
+// are told apart by hairlines, not by boxes.
+const cellClassName = cn(
+	'w-full bg-transparent px-3 py-2.5 text-sm font-semibold outline-none',
 	placeholderClassName,
 )
 
@@ -178,7 +182,10 @@ export function IngredientListField({
 
 	return (
 		<fieldset className="flex flex-col gap-2">
-			<legend className={cn(fieldLabelClassName, 'mb-2')}>ingredients</legend>
+			<legend className={fieldLabelClassName}>ingredients</legend>
+			<p className={cn(fieldHintClassName, 'mb-1')}>
+				paste a whole list and it splits into rows
+			</p>
 			<DndContext
 				sensors={sensors}
 				collisionDetection={closestCenter}
@@ -203,106 +210,129 @@ export function IngredientListField({
 											name="ingredient"
 											value={lineOf(row)}
 										/>
-										<input
-											type="number"
-											inputMode="decimal"
-											min={0}
-											step="any"
-											value={row.quantity}
-											placeholder="qty"
-											aria-label={`Quantity ${index + 1}`}
-											onChange={(event) =>
-												update(row.id, { quantity: event.target.value })
-											}
-											className={controlClassName}
-										/>
-										<select
-											value={row.unit}
-											aria-label={`Unit ${index + 1}`}
-											onChange={(event) =>
-												update(row.id, { unit: event.target.value })
-											}
-											className={controlClassName}
+										<div
+											data-row
+											className="border-input bg-card focus-within:outline-kitchen-eggplant relative flex min-w-0 flex-1 flex-col rounded-xl border group-data-[dragging=true]:border-transparent focus-within:outline-2 focus-within:outline-offset-2 sm:flex-row sm:items-stretch"
 										>
-											<option value="">unit</option>
-											{ingredientUnits.map((unit) => (
-												<option key={unit.value} value={unit.value}>
-													{unit.value}
-												</option>
-											))}
-										</select>
-										<div className="col-span-3 col-start-2 row-start-2 flex items-center gap-2 sm:col-span-1 sm:col-start-auto sm:row-start-auto">
-											{row.name.trim() ? (
-												<img
-													src={resolveSpriteSrc(row.name)}
-													alt=""
-													className="size-8 shrink-0 object-contain [image-rendering:pixelated]"
-												/>
-											) : (
+											<div className="flex items-center sm:contents">
 												<span
 													aria-hidden
-													className="border-border size-8 shrink-0 rounded-md border border-dashed"
-												/>
-											)}
-											<div className="min-w-0 flex-1">
-												<IngredientCombobox
-													compact
-													required={false}
-													name="ingredient-name"
-													label={`Ingredient ${index + 1}`}
-													placeholder={index === 0 ? 'pasta' : 'miso'}
-													value={row.name}
-													onChange={(name) => update(row.id, { name })}
-													inputRef={(node) => {
-														if (node) nameInputs.current.set(row.id, node)
-														else nameInputs.current.delete(row.id)
-													}}
-													onKeyDown={(event) => {
-														if (event.key === 'Enter') {
-															event.preventDefault()
+													className="grid size-11 shrink-0 place-items-center sm:order-1"
+												>
+													{row.name.trim() ? (
+														<img
+															src={resolveSpriteSrc(row.name)}
+															alt=""
+															className="size-8 object-contain [image-rendering:pixelated]"
+														/>
+													) : (
+														<CarrotIcon
+															size={20}
+															className="text-foreground/25"
+														/>
+													)}
+												</span>
+												<div className="min-w-0 flex-1 sm:order-4">
+													<div className="sm:border-border sm:border-l">
+														<IngredientCombobox
+															bare
+															compact
+															required={false}
+															name="ingredient-name"
+															label={`Ingredient ${index + 1}`}
+															placeholder={index === 0 ? 'pasta' : 'miso'}
+															value={row.name}
+															onChange={(name) => update(row.id, { name })}
+															inputRef={(node) => {
+																if (node) nameInputs.current.set(row.id, node)
+																else nameInputs.current.delete(row.id)
+															}}
+															onKeyDown={(event) => {
+																if (event.key === 'Enter') {
+																	event.preventDefault()
 
-															if (row.name.trim()) insertAfter(index, [''])
-														} else if (
-															event.key === 'Backspace' &&
-															!row.name &&
-															!row.quantity &&
-															rows.length > 1
-														) {
-															event.preventDefault()
-															removeAt(index)
-														}
-													}}
-													onPaste={(event) => {
-														const lines = event.clipboardData
-															.getData('text')
-															.split(/\r?\n/)
-															.map((line) => line.trim())
-															.filter(Boolean)
+																	if (row.name.trim()) insertAfter(index, [''])
+																} else if (
+																	event.key === 'Backspace' &&
+																	!row.name &&
+																	!row.quantity &&
+																	rows.length > 1
+																) {
+																	event.preventDefault()
+																	removeAt(index)
+																}
+															}}
+															onPaste={(event) => {
+																const lines = event.clipboardData
+																	.getData('text')
+																	.split(/\r?\n/)
+																	.map((line) => line.trim())
+																	.filter(Boolean)
 
-														if (lines.length < 2) return
-														event.preventDefault()
+																if (lines.length < 2) return
+																event.preventDefault()
 
-														const [first = '', ...rest] = lines
-														const [filled] = toRows([first])
-														update(row.id, {
-															quantity: filled?.quantity ?? '',
-															unit: filled?.unit ?? '',
-															name: filled?.name ?? '',
-														})
-														insertAfter(index, rest)
-													}}
-												/>
+																const [first = '', ...rest] = lines
+																const [filled] = toRows([first])
+																update(row.id, {
+																	quantity: filled?.quantity ?? '',
+																	unit: filled?.unit ?? '',
+																	name: filled?.name ?? '',
+																})
+																insertAfter(index, rest)
+															}}
+														/>
+													</div>
+												</div>
+												<button
+													type="button"
+													onClick={() => removeAt(index)}
+													aria-label={`Remove ingredient ${index + 1}`}
+													className={cn(
+														iconButtonClassName,
+														'size-11 shrink-0 sm:order-5',
+													)}
+												>
+													<X size={14} weight="bold" aria-hidden />
+												</button>
 											</div>
-										</div>
-										<div className="col-start-4 row-start-1 sm:col-start-5">
-											<button
-												type="button"
-												onClick={() => removeAt(index)}
-												aria-label={`Remove ingredient ${index + 1}`}
-												className={iconButtonClassName}
-											>
-												<X size={14} weight="bold" aria-hidden />
-											</button>
+											<div className="border-border flex border-t sm:contents">
+												<input
+													type="number"
+													inputMode="decimal"
+													min={0}
+													step="any"
+													value={row.quantity}
+													placeholder="qty"
+													aria-label={`Quantity ${index + 1}`}
+													onChange={(event) =>
+														update(row.id, { quantity: event.target.value })
+													}
+													className={cn(
+														cellClassName,
+														'border-border w-24 border-r sm:order-2 sm:w-20 sm:border-r-0 sm:border-l',
+													)}
+												/>
+												<select
+													value={row.unit}
+													aria-label={`Unit ${index + 1}`}
+													onChange={(event) =>
+														update(row.id, { unit: event.target.value })
+													}
+													className={cn(
+														cellClassName,
+														!row.unit && 'text-muted-foreground font-normal',
+														'flex-1 sm:order-3 sm:w-28 sm:flex-none sm:border-l sm:border-border',
+													)}
+												>
+													<option value="">unit</option>
+													{ingredientUnits.map((unit) => (
+														<option key={unit.value} value={unit.value}>
+															{unit.value}
+														</option>
+													))}
+												</select>
+											</div>
 										</div>
 									</>
 								)}
@@ -314,9 +344,9 @@ export function IngredientListField({
 			<button
 				type="button"
 				onClick={() => insertAfter(rows.length - 1, [''])}
-				className="border-input bg-background focus-visible:outline-kitchen-eggplant inline-flex items-center gap-1.5 self-start rounded-md border px-3 py-1.5 text-xs font-semibold focus-visible:outline-2 focus-visible:outline-offset-2"
+				className="border-input text-muted-foreground hover:text-foreground hover:bg-card focus-visible:outline-kitchen-eggplant ml-9 flex items-center justify-center gap-1.5 rounded-xl border border-dashed py-2.5 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
 			>
-				<Plus size={13} weight="bold" aria-hidden />
+				<Plus size={14} weight="bold" aria-hidden />
 				add ingredient
 			</button>
 		</fieldset>

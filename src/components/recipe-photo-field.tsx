@@ -68,7 +68,7 @@ export function RecipePhotoField({
 	}
 
 	return (
-		<div className="relative size-24 shrink-0">
+		<div className="relative size-20 shrink-0 md:size-24">
 			<label
 				className={cn(
 					'border-input bg-background focus-within:outline-kitchen-eggplant hover:bg-card grid size-full cursor-pointer place-items-center overflow-hidden rounded-xl border focus-within:outline-2 focus-within:outline-offset-2',

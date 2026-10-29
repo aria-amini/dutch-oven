@@ -175,7 +175,7 @@ describe('app nav', () => {
 		const nav = screen.getByRole('navigation', { name: 'Primary' })
 
 		await expect.element(nav).toBeVisible()
-		await screen.getByRole('searchbox', { name: 'Search recipes' }).click()
+		await screen.getByRole('combobox', { name: 'Search recipes' }).click()
 		// Hidden elements drop out of the role tree.
 		await expect.element(nav).not.toBeInTheDocument()
 		await expect

@@ -37,7 +37,7 @@ describe('page loading', () => {
 		})
 
 		await expect
-			.element(screen.getByRole('searchbox', { name: 'Search recipes' }))
+			.element(screen.getByRole('combobox', { name: 'Search recipes' }))
 			.toBeVisible()
 
 		void router.navigate({ to: '/ingredients' })
@@ -62,7 +62,7 @@ describe('page loading', () => {
 		await expect.element(screen.getByText('nothing here yet')).toBeVisible()
 		await router.navigate({ to: '/recipes' })
 		await expect
-			.element(screen.getByRole('searchbox', { name: 'Search recipes' }))
+			.element(screen.getByRole('combobox', { name: 'Search recipes' }))
 			.toBeVisible()
 		await expect
 			.element(page.getByRole('progressbar', { name: 'loading page' }))

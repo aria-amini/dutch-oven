@@ -74,24 +74,34 @@ describe('add a recipe', () => {
 		state.imported = []
 	})
 
-	test('puts one find-or-paste field above the manual form', async () => {
-		const { screen } = await renderRoute({
+	test('starts with writing your own, with the web import one tap away', async () => {
+		const { router, screen } = await renderRoute({
 			path: '/recipes/new',
 			session: testSession,
 		})
 
 		await expect
+			.element(screen.getByRole('textbox', { name: 'Recipe name' }))
+			.toBeVisible()
+		await expect
+			.element(
+				screen.getByRole('textbox', { name: 'Search recipes or paste a link' }),
+			)
+			.not.toBeInTheDocument()
+		await expect
+			.element(screen.getByRole('link', { name: 'write your own' }))
+			.toHaveAttribute('aria-current', 'page')
+
+		await screen.getByRole('link', { name: 'from the web' }).click()
+		await expect
 			.element(
 				screen.getByRole('textbox', { name: 'Search recipes or paste a link' }),
 			)
 			.toBeVisible()
-		await expect.element(screen.getByText('or write your own')).toBeVisible()
 		await expect
 			.element(screen.getByRole('textbox', { name: 'Recipe name' }))
-			.toBeVisible()
-		await expect
-			.element(screen.getByLabelText('Photo URL'))
 			.not.toBeInTheDocument()
+		expect(router.state.location.search).toEqual({ mode: 'web' })
 		await expect
 			.element(screen.getByRole('button', { name: 'import' }))
 			.not.toBeInTheDocument()
@@ -99,7 +109,7 @@ describe('add a recipe', () => {
 
 	test('searches recipe sites and saves a result in one tap', async () => {
 		const { router, screen } = await renderRoute({
-			path: '/recipes/new',
+			path: '/recipes/new?mode=web',
 			session: testSession,
 		})
 
@@ -123,7 +133,7 @@ describe('add a recipe', () => {
 
 	test('says when a recipe search finds nothing', async () => {
 		const { screen } = await renderRoute({
-			path: '/recipes/new',
+			path: '/recipes/new?mode=web',
 			session: testSession,
 		})
 
@@ -137,7 +147,7 @@ describe('add a recipe', () => {
 
 	test('imports a pasted link instead of searching', async () => {
 		const { router, screen } = await renderRoute({
-			path: '/recipes/new',
+			path: '/recipes/new?mode=web',
 			session: testSession,
 		})
 
@@ -193,7 +203,7 @@ describe('add a recipe', () => {
 
 		await screen.getByRole('textbox', { name: 'Recipe name' }).fill('Toast')
 		await screen
-			.getByRole('textbox', { name: 'steps (one per line)' })
+			.getByRole('textbox', { name: 'steps' })
 			.fill('slice the bread\n\ntoast it')
 		await screen.getByRole('button', { name: 'save to shelf' }).click()
 
