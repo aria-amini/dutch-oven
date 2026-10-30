@@ -24,10 +24,23 @@ export const Route = createRootRoute({
 	head: () => ({
 		meta: [
 			{ charSet: 'utf-8' },
-			{ name: 'viewport', content: 'width=device-width, initial-scale=1' },
+			{
+				name: 'viewport',
+				content: 'width=device-width, initial-scale=1, viewport-fit=cover',
+			},
 			{ title: 'dutch-oven' },
 		],
-		links: [{ rel: 'stylesheet', href: appCss }],
+		links: [
+			{ rel: 'stylesheet', href: appCss },
+			{ rel: 'icon', href: '/favicon.ico', sizes: '48x48' },
+			{
+				rel: 'icon',
+				type: 'image/png',
+				href: '/icon-192.png',
+				sizes: '192x192',
+			},
+			{ rel: 'apple-touch-icon', href: '/apple-touch-icon.png' },
+		],
 	}),
 	component: RootComponent,
 })
@@ -52,11 +65,12 @@ function RootComponent() {
 				</QueryClientProvider>
 				<Toaster
 					position="bottom-right"
+					mobileOffset={{ bottom: 'calc(5rem + env(safe-area-inset-bottom))' }}
 					toastOptions={{
 						unstyled: true,
 						classNames: {
 							toast:
-								'border-foreground bg-card text-foreground flex w-full items-center gap-3 border-2 px-4 py-3 text-sm font-semibold shadow-md',
+								'bg-card text-foreground flex w-full items-center gap-3 px-4 py-3 text-sm font-semibold shadow-md rounded-xl overflow-hidden',
 							error: 'bg-kitchen-tomato text-black',
 							success: 'bg-kitchen-basil text-black',
 						},

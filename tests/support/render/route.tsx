@@ -7,7 +7,10 @@ import {
 	type AnyRouter,
 } from '@tanstack/react-router'
 import { setMockSession, type MockSession } from '@tests/support/mocks/browser'
+import { Toaster } from 'sonner'
 import { render, type RenderResult } from 'vitest-browser-react'
+
+import { pendingOptions } from '@/components/page-pending'
 
 import { createTestQueryClient } from './component'
 
@@ -46,6 +49,7 @@ export async function renderRoute(
 
 	const router: AnyRouter = createRouter({
 		routeTree,
+		...pendingOptions,
 		history: createMemoryHistory({ initialEntries: [path] }),
 		scrollRestoration: false,
 		defaultPreloadStaleTime: 0,
@@ -67,6 +71,8 @@ export async function renderRoute(
 	const screen = await render(
 		<QueryClientProvider client={queryClient}>
 			<RouterProvider router={router} />
+			{/* the app's Toaster lives in the document shell, which tests don't mount */}
+			<Toaster />
 		</QueryClientProvider>,
 		{ container },
 	)
