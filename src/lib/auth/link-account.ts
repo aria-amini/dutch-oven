@@ -1,7 +1,13 @@
-import { eq } from 'drizzle-orm'
+import { and, eq, inArray } from 'drizzle-orm'
 
 import { type Database, getDb } from '@/db/connection'
-import { collections, mealLogs, recipes } from '@/db/schema'
+import {
+	collections,
+	mealLogs,
+	pantryItems,
+	recipes,
+	shelfRecipes,
+} from '@/db/schema'
 
 interface LinkAccountParams {
 	anonymousUser: { user: { id: string } }
@@ -20,7 +26,29 @@ export async function moveGuestDataToNewUser(
 	if (fromId === toId) return
 
 	await database.transaction(async (tx) => {
-		for (const table of [recipes, collections, mealLogs]) {
+		// A recipe both accounts saved keeps the account's shelf row.
+		await tx
+			.delete(shelfRecipes)
+			.where(
+				and(
+					eq(shelfRecipes.userId, fromId),
+					inArray(
+						shelfRecipes.recipeId,
+						tx
+							.select({ recipeId: shelfRecipes.recipeId })
+							.from(shelfRecipes)
+							.where(eq(shelfRecipes.userId, toId)),
+					),
+				),
+			)
+
+		for (const table of [
+			recipes,
+			shelfRecipes,
+			collections,
+			mealLogs,
+			pantryItems,
+		]) {
 			await tx
 				.update(table)
 				.set({ userId: toId })

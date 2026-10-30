@@ -25,7 +25,7 @@ const updateCalls = vi.hoisted(() => {
 vi.mock('@/lib/recipes/server', () => ({
 	listShelf: () => Promise.resolve({ recipes: [], collections: [] }),
 	getRecipe: () => Promise.resolve(recipeState.recipe),
-	updateRecipeContent: async ({
+	updateRecipe: async ({
 		data,
 	}: {
 		data: { ingredients: string[]; steps: string[] }
