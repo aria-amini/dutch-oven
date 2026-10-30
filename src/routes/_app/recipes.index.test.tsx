@@ -35,6 +35,11 @@ vi.mock('@/lib/recipes/server', () => ({
 		Promise.resolve(
 			shelfState.recipes.find((recipe) => recipe.id === data.id) ?? null,
 		),
+	listBooks: () => Promise.resolve(shelfState.collections),
+	moveRecipe: () => Promise.resolve(),
+	saveRecipe: () => Promise.resolve(),
+	updateRecipe: () => Promise.resolve(),
+	deleteRecipe: () => Promise.resolve(),
 	createRecipe: async ({
 		data,
 	}: {
