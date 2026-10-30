@@ -238,6 +238,8 @@
 
 	body {
 		@apply bg-background text-foreground;
+		/* viewport-fit=cover runs the page under the notch. */
+		padding-top: env(safe-area-inset-top);
 	}
 
 	html {

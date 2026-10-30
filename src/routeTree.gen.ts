@@ -9,12 +9,12 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppRouteImport } from './routes/_app'
-import { Route as AppIndexRouteImport } from './routes/_app/index'
+import { Route as AppGroceriesRouteImport } from './routes/_app/groceries'
 import { Route as AppHomeRouteImport } from './routes/_app/home'
 import { Route as AppPantryRouteImport } from './routes/_app/pantry'
 import { Route as AppProfileRouteImport } from './routes/_app/profile'
-import { Route as AppSettingsRouteImport } from './routes/_app/settings'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as AuthSignupRouteImport } from './routes/auth/signup'
 import { Route as AppIngredientsIndexRouteImport } from './routes/_app/ingredients.index'
@@ -26,13 +26,18 @@ import { Route as AppRecipesNewRouteImport } from './routes/_app/recipes.new'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth.$'
 import { Route as ApiIngestSplatRouteImport } from './routes/api/ingest.$'
 
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppRoute = AppRouteImport.update({
   id: '/_app',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AppIndexRoute = AppIndexRouteImport.update({
-  id: '/',
-  path: '/',
+const AppGroceriesRoute = AppGroceriesRouteImport.update({
+  id: '/groceries',
+  path: '/groceries',
   getParentRoute: () => AppRoute,
 } as any)
 const AppHomeRoute = AppHomeRouteImport.update({
@@ -48,11 +53,6 @@ const AppPantryRoute = AppPantryRouteImport.update({
 const AppProfileRoute = AppProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppSettingsRoute = AppSettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
   getParentRoute: () => AppRoute,
 } as any)
 const AuthLoginRoute = AuthLoginRouteImport.update({
@@ -107,11 +107,11 @@ const ApiIngestSplatRoute = ApiIngestSplatRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof AppIndexRoute
+  '/': typeof IndexRoute
+  '/groceries': typeof AppGroceriesRoute
   '/home': typeof AppHomeRoute
   '/pantry': typeof AppPantryRoute
   '/profile': typeof AppProfileRoute
-  '/settings': typeof AppSettingsRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/signup': typeof AuthSignupRoute
   '/ingredients/bulk': typeof AppIngredientsBulkRoute
@@ -124,13 +124,13 @@ export interface FileRoutesByFullPath {
   '/recipes/': typeof AppRecipesIndexRoute
 }
 export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/groceries': typeof AppGroceriesRoute
   '/home': typeof AppHomeRoute
   '/pantry': typeof AppPantryRoute
   '/profile': typeof AppProfileRoute
-  '/settings': typeof AppSettingsRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/signup': typeof AuthSignupRoute
-  '/': typeof AppIndexRoute
   '/ingredients/bulk': typeof AppIngredientsBulkRoute
   '/ingredients/new': typeof AppIngredientsNewRoute
   '/recipes/$recipeId': typeof AppRecipesRecipeIdRoute
@@ -142,14 +142,14 @@ export interface FileRoutesByTo {
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
+  '/_app/groceries': typeof AppGroceriesRoute
   '/_app/home': typeof AppHomeRoute
   '/_app/pantry': typeof AppPantryRoute
   '/_app/profile': typeof AppProfileRoute
-  '/_app/settings': typeof AppSettingsRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/signup': typeof AuthSignupRoute
-  '/_app/': typeof AppIndexRoute
   '/_app/ingredients/bulk': typeof AppIngredientsBulkRoute
   '/_app/ingredients/new': typeof AppIngredientsNewRoute
   '/_app/recipes/$recipeId': typeof AppRecipesRecipeIdRoute
@@ -163,10 +163,10 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/groceries'
     | '/home'
     | '/pantry'
     | '/profile'
-    | '/settings'
     | '/auth/login'
     | '/auth/signup'
     | '/ingredients/bulk'
@@ -179,13 +179,13 @@ export interface FileRouteTypes {
     | '/recipes/'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/'
+    | '/groceries'
     | '/home'
     | '/pantry'
     | '/profile'
-    | '/settings'
     | '/auth/login'
     | '/auth/signup'
-    | '/'
     | '/ingredients/bulk'
     | '/ingredients/new'
     | '/recipes/$recipeId'
@@ -196,14 +196,14 @@ export interface FileRouteTypes {
     | '/recipes'
   id:
     | '__root__'
+    | '/'
     | '/_app'
+    | '/_app/groceries'
     | '/_app/home'
     | '/_app/pantry'
     | '/_app/profile'
-    | '/_app/settings'
     | '/auth/login'
     | '/auth/signup'
-    | '/_app/'
     | '/_app/ingredients/bulk'
     | '/_app/ingredients/new'
     | '/_app/recipes/$recipeId'
@@ -215,6 +215,7 @@ export interface FileRouteTypes {
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
   AuthLoginRoute: typeof AuthLoginRoute
   AuthSignupRoute: typeof AuthSignupRoute
@@ -224,6 +225,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_app': {
       id: '/_app'
       path: ''
@@ -231,11 +239,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_app/': {
-      id: '/_app/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof AppIndexRouteImport
+    '/_app/groceries': {
+      id: '/_app/groceries'
+      path: '/groceries'
+      fullPath: '/groceries'
+      preLoaderRoute: typeof AppGroceriesRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/home': {
@@ -257,13 +265,6 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof AppProfileRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/settings': {
-      id: '/_app/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof AppSettingsRouteImport
       parentRoute: typeof AppRoute
     }
     '/auth/login': {
@@ -340,11 +341,10 @@ declare module '@tanstack/react-router' {
 }
 
 interface AppRouteChildren {
+  AppGroceriesRoute: typeof AppGroceriesRoute
   AppHomeRoute: typeof AppHomeRoute
   AppPantryRoute: typeof AppPantryRoute
   AppProfileRoute: typeof AppProfileRoute
-  AppSettingsRoute: typeof AppSettingsRoute
-  AppIndexRoute: typeof AppIndexRoute
   AppIngredientsBulkRoute: typeof AppIngredientsBulkRoute
   AppIngredientsNewRoute: typeof AppIngredientsNewRoute
   AppRecipesRecipeIdRoute: typeof AppRecipesRecipeIdRoute
@@ -354,11 +354,10 @@ interface AppRouteChildren {
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppGroceriesRoute: AppGroceriesRoute,
   AppHomeRoute: AppHomeRoute,
   AppPantryRoute: AppPantryRoute,
   AppProfileRoute: AppProfileRoute,
-  AppSettingsRoute: AppSettingsRoute,
-  AppIndexRoute: AppIndexRoute,
   AppIngredientsBulkRoute: AppIngredientsBulkRoute,
   AppIngredientsNewRoute: AppIngredientsNewRoute,
   AppRecipesRecipeIdRoute: AppRecipesRecipeIdRoute,
@@ -370,6 +369,7 @@ const AppRouteChildren: AppRouteChildren = {
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
   AuthLoginRoute: AuthLoginRoute,
   AuthSignupRoute: AuthSignupRoute,
