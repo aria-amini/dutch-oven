@@ -12,10 +12,14 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as AppHomeRouteImport } from './routes/_app/home'
+import { Route as AppPantryRouteImport } from './routes/_app/pantry'
 import { Route as AppProfileRouteImport } from './routes/_app/profile'
 import { Route as AppSettingsRouteImport } from './routes/_app/settings'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as AuthSignupRouteImport } from './routes/auth/signup'
+import { Route as AppIngredientsIndexRouteImport } from './routes/_app/ingredients.index'
+import { Route as AppIngredientsBulkRouteImport } from './routes/_app/ingredients.bulk'
+import { Route as AppIngredientsNewRouteImport } from './routes/_app/ingredients.new'
 import { Route as AppRecipesIndexRouteImport } from './routes/_app/recipes.index'
 import { Route as AppRecipesRecipeIdRouteImport } from './routes/_app/recipes.$recipeId'
 import { Route as AppRecipesNewRouteImport } from './routes/_app/recipes.new'
@@ -34,6 +38,11 @@ const AppIndexRoute = AppIndexRouteImport.update({
 const AppHomeRoute = AppHomeRouteImport.update({
   id: '/home',
   path: '/home',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPantryRoute = AppPantryRouteImport.update({
+  id: '/pantry',
+  path: '/pantry',
   getParentRoute: () => AppRoute,
 } as any)
 const AppProfileRoute = AppProfileRouteImport.update({
@@ -55,6 +64,21 @@ const AuthSignupRoute = AuthSignupRouteImport.update({
   id: '/auth/signup',
   path: '/auth/signup',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AppIngredientsIndexRoute = AppIngredientsIndexRouteImport.update({
+  id: '/ingredients/',
+  path: '/ingredients/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppIngredientsBulkRoute = AppIngredientsBulkRouteImport.update({
+  id: '/ingredients/bulk',
+  path: '/ingredients/bulk',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppIngredientsNewRoute = AppIngredientsNewRouteImport.update({
+  id: '/ingredients/new',
+  path: '/ingredients/new',
+  getParentRoute: () => AppRoute,
 } as any)
 const AppRecipesIndexRoute = AppRecipesIndexRouteImport.update({
   id: '/recipes/',
@@ -85,42 +109,54 @@ const ApiIngestSplatRoute = ApiIngestSplatRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
   '/home': typeof AppHomeRoute
+  '/pantry': typeof AppPantryRoute
   '/profile': typeof AppProfileRoute
   '/settings': typeof AppSettingsRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/signup': typeof AuthSignupRoute
+  '/ingredients/bulk': typeof AppIngredientsBulkRoute
+  '/ingredients/new': typeof AppIngredientsNewRoute
   '/recipes/$recipeId': typeof AppRecipesRecipeIdRoute
   '/recipes/new': typeof AppRecipesNewRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/ingest/$': typeof ApiIngestSplatRoute
+  '/ingredients/': typeof AppIngredientsIndexRoute
   '/recipes/': typeof AppRecipesIndexRoute
 }
 export interface FileRoutesByTo {
   '/home': typeof AppHomeRoute
+  '/pantry': typeof AppPantryRoute
   '/profile': typeof AppProfileRoute
   '/settings': typeof AppSettingsRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/signup': typeof AuthSignupRoute
   '/': typeof AppIndexRoute
+  '/ingredients/bulk': typeof AppIngredientsBulkRoute
+  '/ingredients/new': typeof AppIngredientsNewRoute
   '/recipes/$recipeId': typeof AppRecipesRecipeIdRoute
   '/recipes/new': typeof AppRecipesNewRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/ingest/$': typeof ApiIngestSplatRoute
+  '/ingredients': typeof AppIngredientsIndexRoute
   '/recipes': typeof AppRecipesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_app': typeof AppRouteWithChildren
   '/_app/home': typeof AppHomeRoute
+  '/_app/pantry': typeof AppPantryRoute
   '/_app/profile': typeof AppProfileRoute
   '/_app/settings': typeof AppSettingsRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/signup': typeof AuthSignupRoute
   '/_app/': typeof AppIndexRoute
+  '/_app/ingredients/bulk': typeof AppIngredientsBulkRoute
+  '/_app/ingredients/new': typeof AppIngredientsNewRoute
   '/_app/recipes/$recipeId': typeof AppRecipesRecipeIdRoute
   '/_app/recipes/new': typeof AppRecipesNewRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/ingest/$': typeof ApiIngestSplatRoute
+  '/_app/ingredients/': typeof AppIngredientsIndexRoute
   '/_app/recipes/': typeof AppRecipesIndexRoute
 }
 export interface FileRouteTypes {
@@ -128,41 +164,53 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/home'
+    | '/pantry'
     | '/profile'
     | '/settings'
     | '/auth/login'
     | '/auth/signup'
+    | '/ingredients/bulk'
+    | '/ingredients/new'
     | '/recipes/$recipeId'
     | '/recipes/new'
     | '/api/auth/$'
     | '/api/ingest/$'
+    | '/ingredients/'
     | '/recipes/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/home'
+    | '/pantry'
     | '/profile'
     | '/settings'
     | '/auth/login'
     | '/auth/signup'
     | '/'
+    | '/ingredients/bulk'
+    | '/ingredients/new'
     | '/recipes/$recipeId'
     | '/recipes/new'
     | '/api/auth/$'
     | '/api/ingest/$'
+    | '/ingredients'
     | '/recipes'
   id:
     | '__root__'
     | '/_app'
     | '/_app/home'
+    | '/_app/pantry'
     | '/_app/profile'
     | '/_app/settings'
     | '/auth/login'
     | '/auth/signup'
     | '/_app/'
+    | '/_app/ingredients/bulk'
+    | '/_app/ingredients/new'
     | '/_app/recipes/$recipeId'
     | '/_app/recipes/new'
     | '/api/auth/$'
     | '/api/ingest/$'
+    | '/_app/ingredients/'
     | '/_app/recipes/'
   fileRoutesById: FileRoutesById
 }
@@ -197,6 +245,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppHomeRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/pantry': {
+      id: '/_app/pantry'
+      path: '/pantry'
+      fullPath: '/pantry'
+      preLoaderRoute: typeof AppPantryRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/profile': {
       id: '/_app/profile'
       path: '/profile'
@@ -224,6 +279,27 @@ declare module '@tanstack/react-router' {
       fullPath: '/auth/signup'
       preLoaderRoute: typeof AuthSignupRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_app/ingredients/': {
+      id: '/_app/ingredients/'
+      path: '/ingredients'
+      fullPath: '/ingredients/'
+      preLoaderRoute: typeof AppIngredientsIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/ingredients/bulk': {
+      id: '/_app/ingredients/bulk'
+      path: '/ingredients/bulk'
+      fullPath: '/ingredients/bulk'
+      preLoaderRoute: typeof AppIngredientsBulkRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/ingredients/new': {
+      id: '/_app/ingredients/new'
+      path: '/ingredients/new'
+      fullPath: '/ingredients/new'
+      preLoaderRoute: typeof AppIngredientsNewRouteImport
+      parentRoute: typeof AppRoute
     }
     '/_app/recipes/': {
       id: '/_app/recipes/'
@@ -265,21 +341,29 @@ declare module '@tanstack/react-router' {
 
 interface AppRouteChildren {
   AppHomeRoute: typeof AppHomeRoute
+  AppPantryRoute: typeof AppPantryRoute
   AppProfileRoute: typeof AppProfileRoute
   AppSettingsRoute: typeof AppSettingsRoute
   AppIndexRoute: typeof AppIndexRoute
+  AppIngredientsBulkRoute: typeof AppIngredientsBulkRoute
+  AppIngredientsNewRoute: typeof AppIngredientsNewRoute
   AppRecipesRecipeIdRoute: typeof AppRecipesRecipeIdRoute
   AppRecipesNewRoute: typeof AppRecipesNewRoute
+  AppIngredientsIndexRoute: typeof AppIngredientsIndexRoute
   AppRecipesIndexRoute: typeof AppRecipesIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppHomeRoute: AppHomeRoute,
+  AppPantryRoute: AppPantryRoute,
   AppProfileRoute: AppProfileRoute,
   AppSettingsRoute: AppSettingsRoute,
   AppIndexRoute: AppIndexRoute,
+  AppIngredientsBulkRoute: AppIngredientsBulkRoute,
+  AppIngredientsNewRoute: AppIngredientsNewRoute,
   AppRecipesRecipeIdRoute: AppRecipesRecipeIdRoute,
   AppRecipesNewRoute: AppRecipesNewRoute,
+  AppIngredientsIndexRoute: AppIngredientsIndexRoute,
   AppRecipesIndexRoute: AppRecipesIndexRoute,
 }
 
