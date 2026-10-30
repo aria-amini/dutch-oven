@@ -15,12 +15,7 @@ export const categorySprites: Record<PantryCategory, string> = {
 	other: 'fallback-other',
 }
 
-type CatalogCategory = Exclude<PantryCategory, 'other'>
-
-const section = <const Id extends CatalogCategory>(
-	id: Id,
-	items: string[],
-) => ({
+const section = <const Id extends PantryCategory>(id: Id, items: string[]) => ({
 	id,
 	items,
 })
@@ -268,6 +263,21 @@ export const catalogSections = [
 		'waffles',
 		'ice cream',
 		'ice',
+	]),
+	section('other', [
+		'coffee',
+		'tea',
+		'cashews',
+		'pecans',
+		'dried fruit',
+		'granola',
+		'popcorn',
+		'chips',
+		'pretzels',
+		'trail mix',
+		'sprinkles',
+		'protein powder',
+		'gelatin',
 	]),
 ] as const
 

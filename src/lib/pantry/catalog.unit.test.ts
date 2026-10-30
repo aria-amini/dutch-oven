@@ -5,6 +5,7 @@ import {
 	filterCatalogItems,
 	normalizeIngredientName,
 } from './catalog'
+import { pantryCategories } from './model'
 
 describe('ingredient catalog', () => {
 	test('stores normalized, unique names in every section', () => {
@@ -15,6 +16,12 @@ describe('ingredient catalog', () => {
 
 			expect(new Set(section.items).size).toBe(section.items.length)
 		}
+	})
+
+	test('has a section for every category, so each can be stocked', () => {
+		expect(catalogSections.map((section) => section.id).sort()).toEqual(
+			[...pantryCategories].sort(),
+		)
 	})
 
 	test.each([
