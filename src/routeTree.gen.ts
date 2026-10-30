@@ -15,6 +15,7 @@ import { Route as AppGroceriesRouteImport } from './routes/_app/groceries'
 import { Route as AppHomeRouteImport } from './routes/_app/home'
 import { Route as AppPantryRouteImport } from './routes/_app/pantry'
 import { Route as AppProfileRouteImport } from './routes/_app/profile'
+import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as AuthSignupRouteImport } from './routes/auth/signup'
 import { Route as AppIngredientsIndexRouteImport } from './routes/_app/ingredients.index'
@@ -54,6 +55,11 @@ const AppProfileRoute = AppProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
   getParentRoute: () => AppRoute,
+} as any)
+const ApiHealthRoute = ApiHealthRouteImport.update({
+  id: '/api/health',
+  path: '/api/health',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthLoginRoute = AuthLoginRouteImport.update({
   id: '/auth/login',
@@ -112,6 +118,7 @@ export interface FileRoutesByFullPath {
   '/home': typeof AppHomeRoute
   '/pantry': typeof AppPantryRoute
   '/profile': typeof AppProfileRoute
+  '/api/health': typeof ApiHealthRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/signup': typeof AuthSignupRoute
   '/ingredients/bulk': typeof AppIngredientsBulkRoute
@@ -129,6 +136,7 @@ export interface FileRoutesByTo {
   '/home': typeof AppHomeRoute
   '/pantry': typeof AppPantryRoute
   '/profile': typeof AppProfileRoute
+  '/api/health': typeof ApiHealthRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/signup': typeof AuthSignupRoute
   '/ingredients/bulk': typeof AppIngredientsBulkRoute
@@ -148,6 +156,7 @@ export interface FileRoutesById {
   '/_app/home': typeof AppHomeRoute
   '/_app/pantry': typeof AppPantryRoute
   '/_app/profile': typeof AppProfileRoute
+  '/api/health': typeof ApiHealthRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/signup': typeof AuthSignupRoute
   '/_app/ingredients/bulk': typeof AppIngredientsBulkRoute
@@ -167,6 +176,7 @@ export interface FileRouteTypes {
     | '/home'
     | '/pantry'
     | '/profile'
+    | '/api/health'
     | '/auth/login'
     | '/auth/signup'
     | '/ingredients/bulk'
@@ -184,6 +194,7 @@ export interface FileRouteTypes {
     | '/home'
     | '/pantry'
     | '/profile'
+    | '/api/health'
     | '/auth/login'
     | '/auth/signup'
     | '/ingredients/bulk'
@@ -202,6 +213,7 @@ export interface FileRouteTypes {
     | '/_app/home'
     | '/_app/pantry'
     | '/_app/profile'
+    | '/api/health'
     | '/auth/login'
     | '/auth/signup'
     | '/_app/ingredients/bulk'
@@ -217,6 +229,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
+  ApiHealthRoute: typeof ApiHealthRoute
   AuthLoginRoute: typeof AuthLoginRoute
   AuthSignupRoute: typeof AuthSignupRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
@@ -266,6 +279,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/profile'
       preLoaderRoute: typeof AppProfileRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/api/health': {
+      id: '/api/health'
+      path: '/api/health'
+      fullPath: '/api/health'
+      preLoaderRoute: typeof ApiHealthRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/auth/login': {
       id: '/auth/login'
@@ -371,6 +391,7 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
+  ApiHealthRoute: ApiHealthRoute,
   AuthLoginRoute: AuthLoginRoute,
   AuthSignupRoute: AuthSignupRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,

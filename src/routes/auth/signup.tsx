@@ -8,6 +8,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { authClient } from '@/lib/auth/client'
 import { redirectAuthenticatedUsers } from '@/lib/auth/functions'
+import { formatShelfStats, useShelfStats } from '@/lib/use-shelf-stats'
 
 export const Route = createFileRoute('/auth/signup')({
 	beforeLoad: redirectAuthenticatedUsers,
@@ -18,16 +19,29 @@ function Signup() {
 	const navigate = useNavigate()
 	const session = authClient.useSession()
 	const isGuest = Boolean(session.data?.user.isAnonymous)
+	const stats = useShelfStats(isGuest ? session.data?.user.id : undefined)
+	const shelfSummary = stats ? formatShelfStats(stats) : ''
 	const [name, setName] = useState('')
 	const [email, setEmail] = useState('')
 	const [password, setPassword] = useState('')
+	const [pending, setPending] = useState(false)
 
 	const submit = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault()
-		const { error } = await authClient.signUp.email({ name, email, password })
 
-		if (error) toast.error(error.message)
-		else await navigate({ to: '/recipes' })
+		if (pending) return
+		setPending(true)
+
+		try {
+			const { error } = await authClient.signUp.email({ name, email, password })
+
+			if (error) toast.error(error.message)
+			else await navigate({ to: '/recipes' })
+		} catch {
+			toast.error('Could not create your account. Try again.')
+		} finally {
+			setPending(false)
+		}
 	}
 
 	return (
@@ -40,8 +54,9 @@ function Signup() {
 						</h1>
 						{isGuest ? (
 							<p className="text-muted-foreground text-sm">
-								Your guest recipes come with you — this just makes them yours on
-								any device.
+								{shelfSummary
+									? `Keep your ${shelfSummary} on any device when you create an account.`
+									: 'Your guest shelf comes with you when you create an account.'}
 							</p>
 						) : null}
 						<GoogleAuthButton fallbackRedirect="/recipes" className="w-full" />
@@ -67,8 +82,8 @@ function Signup() {
 								value={password}
 								onChange={(event) => setPassword(event.target.value)}
 							/>
-							<Button type="submit" className="w-full">
-								Sign up
+							<Button type="submit" className="w-full" disabled={pending}>
+								{pending ? 'Signing up…' : 'Sign up'}
 							</Button>
 						</form>
 						<Link to="/auth/login" className="text-sm underline">
