@@ -8,6 +8,7 @@ import type { ReadableStream } from 'node:stream/web'
 import { promisify } from 'node:util'
 
 import { Agent, fetch } from 'undici'
+import { z } from 'zod'
 
 import importFetchScript from '../../../scripts/import-fetch.py?raw'
 import importFetchLock from '../../../scripts/import-fetch.py.lock?raw'
@@ -344,8 +345,48 @@ export type FetchedRecipePage = {
 	recipe: ImportedRecipe | null
 }
 
+// A relay on a home connection, for sites that refuse datacenter addresses.
+// See relay.ts.
+export type RelayConfig = { url: string; token: string }
+
+const RELAY_TIMEOUT_MS = 75_000
+
+const relayResponse = z.object({ html: z.string().max(MAX_HTML_BYTES) })
+
+export async function fetchViaRelay(rawUrl: string, relay: RelayConfig) {
+	try {
+		const response = await fetch(new URL('/fetch', relay.url), {
+			method: 'POST',
+			headers: {
+				authorization: `Bearer ${relay.token}`,
+				'content-type': 'application/json',
+			},
+			body: JSON.stringify({ url: rawUrl }),
+			signal: AbortSignal.timeout(RELAY_TIMEOUT_MS),
+		})
+
+		if (!response.ok) {
+			await response.body?.cancel()
+
+			return null
+		}
+
+		const body = relayResponse.safeParse(await response.json())
+
+		return body.success ? body.data.html : null
+	} catch (error) {
+		console.warn(
+			'recipe relay failed:',
+			error instanceof Error ? error.message : error,
+		)
+
+		return null
+	}
+}
+
 export async function fetchRecipeHtml(
 	rawUrl: string,
+	relay?: RelayConfig,
 ): Promise<FetchedRecipePage | null> {
 	await assertPublicHttpUrl(rawUrl)
 
@@ -362,8 +403,13 @@ export async function fetchRecipeHtml(
 	}
 
 	const html = await fetchImpersonated(rawUrl)
+	const impersonated = html ? { html, recipe: parseRecipe(html, rawUrl) } : null
 
-	if (!html) return null
+	if (impersonated?.recipe || !relay) return impersonated
 
-	return { html, recipe: parseRecipe(html, rawUrl) }
+	const relayed = await fetchViaRelay(rawUrl, relay)
+
+	return relayed
+		? { html: relayed, recipe: parseRecipe(relayed, rawUrl) }
+		: impersonated
 }

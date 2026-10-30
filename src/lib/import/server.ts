@@ -2,11 +2,19 @@ import { createServerFn } from '@tanstack/react-start'
 import { getRequestIP } from '@tanstack/react-start/server'
 import { z } from 'zod'
 
+import { serverEnv as env } from '@/env.server'
 import { requireUserId } from '@/lib/auth/session'
 import { createRecipeForUser } from '@/lib/recipes/repository'
 
-import { fetchRecipeHtml } from './fetch'
+import { fetchRecipeHtml, type RelayConfig } from './fetch'
 import { rateLimit, withImportSlot } from './rate-limit'
+
+// Set only where datacenter addresses get blocked, which is every deploy.
+function relayConfig(): RelayConfig | undefined {
+	return env.IMPORT_RELAY_URL && env.IMPORT_RELAY_TOKEN
+		? { url: env.IMPORT_RELAY_URL, token: env.IMPORT_RELAY_TOKEN }
+		: undefined
+}
 
 export const importRecipe = createServerFn({ method: 'POST' })
 	.validator(z.object({ url: z.url({ protocol: /^https?$/ }).max(2000) }))
@@ -17,7 +25,7 @@ export const importRecipe = createServerFn({ method: 'POST' })
 		rateLimit(`ip:${ip}`, 20)
 
 		return withImportSlot(userId, async () => {
-			const page = await fetchRecipeHtml(data.url)
+			const page = await fetchRecipeHtml(data.url, relayConfig())
 
 			if (!page) throw new Error("that site won't let us in — try another link")
 
