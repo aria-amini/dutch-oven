@@ -17,6 +17,9 @@ catalog:
 # Matches the CI install policy, so local resolution never picks a release
 # that CI rejects.
 minimumReleaseAge: 1440
+# First-party; a toolkit release is adopted as soon as it ships.
+minimumReleaseAgeExclude:
+  - '@aamini/config'
 overrides:
   vite@*: 'catalog:'
   vitest@*: 'catalog:'

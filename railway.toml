@@ -1,15 +1,22 @@
 [build]
 builder = "RAILPACK"
-# Prune devDependencies after the build so the runtime image carries only
-# production packages. Nitro already bundles the server into .output.
-buildCommand = "vp run build && pnpm prune --prod --ignore-scripts"
+# Resolve the env from OpenBao once, then prune devDependencies so the runtime
+# image carries only production packages. Nitro already bundles the server into
+# .output.
+# The frozen env is baked into the image for one tier, so keep Skipped Builds
+# off for this service: it would reuse a preview image in production. Each
+# environment's _VARLOCK_ENV_KEY differs, so a reused image fails to start
+# instead of serving preview secrets.
+buildCommand = "vp run build && pnpm exec varlock freeze && pnpm prune --prod --ignore-scripts"
 
 [deploy]
 # vite-plus is a devDependency and is pruned, so run scripts through pnpm.
-preDeployCommand = "pnpm run db:migrate"
+# `vp run` would load the Vite config and resolve the env live again, so these
+# use the frozen env: restarts, crashes and rollbacks never contact OpenBao.
+preDeployCommand = "pnpm exec varlock run --frozen -- node mise-tasks/migrate.ts"
 runtime = "V2"
 numReplicas = 1
-startCommand = "pnpm run start"
+startCommand = "pnpm exec varlock run --frozen -- node --import ./.output/server/instrument.server.mjs .output/server/index.mjs"
 healthcheckPath = "/"
 useLegacyStacker = false
 restartPolicyType = "ALWAYS"
