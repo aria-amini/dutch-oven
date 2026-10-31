@@ -1,165 +1,213 @@
 import {
+	CarrotIcon,
 	CookingPotIcon,
-	FingerprintIcon,
-	GearIcon,
-	HouseIcon,
-	SignOutIcon,
-	SquaresFourIcon,
+	PlusIcon,
+	ShoppingCartIcon,
 } from '@phosphor-icons/react'
-import { Link, useNavigate, useRouterState } from '@tanstack/react-router'
+import { Link, useRouterState } from '@tanstack/react-router'
+import { useEffect, useState } from 'react'
 
-import { authClient } from '@/lib/auth/client'
+import { AccountMenu, tabClassName } from '@/components/account-menu'
 import { cn } from '@/lib/utils/ui'
 
 const navItems = [
-	{ label: 'home', icon: HouseIcon, to: '/' as const, match: ['/'] },
-	{
-		label: 'recipes',
-		icon: SquaresFourIcon,
-		to: '/recipes' as const,
-		match: ['/recipes'],
-	},
-	{ label: 'start meal', icon: CookingPotIcon, disabled: true },
-	{
-		label: 'settings',
-		icon: GearIcon,
-		to: '/settings' as const,
-		match: ['/settings', '/profile'],
-		bottom: true,
-	},
-]
+	{ label: 'recipes', icon: CookingPotIcon, to: '/recipes' },
+	{ label: 'ingredients', icon: CarrotIcon, to: '/ingredients' },
+	{ label: 'groceries', icon: ShoppingCartIcon, to: '/groceries' },
+] as const
 
-export function AppNav() {
+// Screens that own their bottom edge (forms and the cooking view pin their own
+// actions) leave the tab bar out; the rest of the app shows it.
+const tabBarRoutes = new Set([
+	'/recipes',
+	'/ingredients',
+	'/groceries',
+	'/profile',
+])
+
+type TabBarMode = 'none' | 'bar' | 'bar-fab'
+
+// The round add button belongs to the recipes shelf alone.
+export function useTabBar(): TabBarMode {
 	const pathname = useRouterState({
 		select: (state) => state.location.pathname,
 	})
 
-	const session = authClient.useSession()
-	const user = session.data?.user
-	const isGuest = Boolean(user?.isAnonymous)
+	const path = pathname.replace(/\/$/, '') || '/'
+
+	if (path === '/recipes') return 'bar-fab'
+
+	return tabBarRoutes.has(path) ? 'bar' : 'none'
+}
+
+// The on-screen keyboard shoves fixed bars up over the field being typed in,
+// so the tab bar steps aside while a text field has focus.
+function useTyping() {
+	const [typing, setTyping] = useState(false)
+
+	useEffect(() => {
+		const update = () =>
+			setTimeout(
+				() =>
+					setTyping(
+						document.activeElement?.matches(
+							'textarea, select, input:not([type=checkbox], [type=radio], [type=button], [type=submit], [type=file])',
+						) ?? false,
+					),
+				0,
+			)
+
+		document.addEventListener('focusin', update)
+		document.addEventListener('focusout', update)
+
+		return () => {
+			document.removeEventListener('focusin', update)
+			document.removeEventListener('focusout', update)
+		}
+	}, [])
+
+	return typing
+}
+
+// Whether the tab bar is on screen, for what has to sit above it.
+export function useTabBarVisible() {
+	const mode = useTabBar()
+	const typing = useTyping()
+
+	return mode !== 'none' && !typing
+}
+
+export function AppNav() {
+	return (
+		<>
+			<MobileHeader />
+			<Sidebar />
+			<TabBar />
+		</>
+	)
+}
+
+function Sidebar() {
+	const pathname = useRouterState({
+		select: (state) => state.location.pathname,
+	})
 
 	return (
 		<nav
 			aria-label="Primary"
-			className="border-foreground/20 bg-background sticky top-0 z-10 flex items-center gap-1 overflow-x-auto border-b px-3 py-2 md:h-dvh md:w-48 md:shrink-0 md:flex-col md:items-stretch md:gap-1.5 md:overflow-visible md:border-r md:border-b-0 md:py-6"
+			className="border-foreground/20 bg-background sticky top-0 hidden h-dvh w-48 shrink-0 flex-col items-stretch gap-1.5 border-r px-3 py-6 md:flex"
 		>
 			<Link
-				to="/"
-				className="mr-auto shrink-0 px-2 py-1 font-mono text-sm font-extrabold tracking-tight whitespace-nowrap lowercase md:mr-0 md:mb-6"
+				to="/recipes"
+				aria-label="dutch-oven"
+				className="border-foreground/20 focus-visible:outline-kitchen-eggplant mb-6 flex w-full shrink-0 items-center justify-center gap-2 self-center rounded-md border bg-white px-3 py-2 font-mono text-sm font-bold tracking-tight whitespace-nowrap lowercase focus-visible:outline-2 focus-visible:outline-offset-2"
 			>
+				<img
+					src="/icon-192.png"
+					alt=""
+					className="size-7 shrink-0 [image-rendering:pixelated]"
+				/>
 				dutch-oven
 			</Link>
-			{navItems.map((item) => (
-				<NavItem
-					key={item.label}
-					{...item}
-					bottom={'bottom' in item && item.bottom && !user}
-					active={
-						'match' in item &&
-						item.match?.some(
-							(prefix) =>
-								pathname === prefix || pathname.startsWith(`${prefix}/`),
-						)
-					}
-				/>
-			))}
-			{isGuest ? <GuestSticker /> : null}
-			{user && !isGuest ? <AccountControls name={user.name} /> : null}
+			{navItems.map(({ label, icon: Icon, to }) => {
+				const active = pathname === to || pathname.startsWith(`${to}/`)
+
+				return (
+					<Link
+						key={to}
+						to={to}
+						aria-current={active ? 'page' : undefined}
+						className={cn(
+							'focus-visible:outline-kitchen-eggplant flex w-full shrink-0 items-center gap-2 border px-2.5 py-1.5 text-xs font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 rounded-md',
+							active
+								? 'border-foreground/15 bg-kitchen-yolk/30'
+								: 'border-transparent hover:bg-card focus-visible:border-border',
+						)}
+					>
+						<Icon size={18} weight={active ? 'fill' : 'regular'} aria-hidden />
+						{label}
+					</Link>
+				)
+			})}
+			<AccountMenu variant="rail" />
 		</nav>
 	)
 }
 
-function AccountControls({ name }: { name: string }) {
-	const navigate = useNavigate()
+// The account is a rare visit, so on phones it lives in a slim header instead of
+// taking a tab.
+function MobileHeader() {
+	const mode = useTabBar()
 
-	const signOut = async () => {
-		await authClient.signOut()
-		await navigate({ to: '/' })
-	}
+	if (mode === 'none') return null
 
 	return (
-		<div className="order-first flex items-center gap-2.5 px-2.5 py-2 md:order-none md:mt-auto md:w-full">
-			<span className="text-muted-foreground min-w-0 flex-1 truncate text-xs font-bold tracking-wide uppercase">
-				{name}
-			</span>
-			<button
-				type="button"
-				onClick={signOut}
-				aria-label="Sign out"
-				title="Sign out"
-				className="border-foreground hover:bg-card focus-visible:outline-kitchen-eggplant border-2 p-1.5 transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2"
+		<header className="flex items-center justify-between px-6 pt-3 md:hidden">
+			<Link
+				to="/recipes"
+				aria-label="dutch-oven"
+				className="focus-visible:outline-kitchen-eggplant flex items-center gap-2 rounded-md font-mono text-sm font-bold tracking-tight lowercase focus-visible:outline-2 focus-visible:outline-offset-2"
 			>
-				<SignOutIcon size={16} weight="bold" aria-hidden />
-			</button>
-		</div>
+				<img
+					src="/icon-192.png"
+					alt=""
+					className="size-7 shrink-0 [image-rendering:pixelated]"
+				/>
+				dutch-oven
+			</Link>
+			<AccountMenu variant="avatar" />
+		</header>
 	)
 }
 
-function GuestSticker() {
+// Thumb-reach navigation on phones: the two places you go. The recipes shelf
+// adds one round action for its one job.
+function TabBar() {
+	const mode = useTabBar()
+	const visible = useTabBarVisible()
+
+	const pathname = useRouterState({
+		select: (state) => state.location.pathname,
+	})
+
+	if (!visible) return null
+
 	return (
-		<Link
-			to="/auth/signup"
-			className="border-foreground hover:bg-card focus-visible:outline-kitchen-eggplant order-first flex items-center gap-2.5 border-2 border-dashed px-2.5 py-2 text-xs font-bold tracking-wide uppercase hover:shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 md:order-none md:mt-auto md:w-full"
-		>
-			<FingerprintIcon size={18} aria-hidden />
-			guest — save shelf
-		</Link>
-	)
-}
-
-function NavItem({
-	label,
-	icon: Icon,
-	to,
-	active,
-	disabled,
-	bottom,
-}: {
-	label: string
-	icon: typeof HouseIcon
-	to?: '/' | '/recipes' | '/settings'
-	active?: boolean
-	disabled?: boolean
-	bottom?: boolean
-}) {
-	const className = cn(
-		'flex items-center gap-2.5 border-2 px-2.5 py-2 text-xs font-bold tracking-wide uppercase md:w-full',
-		bottom && 'md:mt-auto',
-		active
-			? 'border-foreground bg-kitchen-yolk shadow-sm'
-			: 'hover:border-foreground hover:bg-card focus-visible:border-foreground border-transparent hover:shadow-sm',
-		disabled && 'opacity-35',
-	)
-
-	const content = (
 		<>
-			<Icon size={18} weight={active ? 'fill' : 'regular'} aria-hidden />
-			{label}
-		</>
-	)
-
-	if (disabled || !to) {
-		return (
-			<span
-				aria-disabled="true"
-				title="Not in this prototype"
-				className={className}
+			<nav
+				aria-label="Primary"
+				className="border-border bg-background pb-safe fixed inset-x-0 bottom-0 z-20 flex items-stretch border-t md:hidden"
 			>
-				{content}
-			</span>
-		)
-	}
+				{navItems.map(({ label, icon: Icon, to }) => {
+					const active = pathname === to || pathname.startsWith(`${to}/`)
 
-	return (
-		<Link
-			to={to}
-			aria-current={active ? 'page' : undefined}
-			className={cn(
-				className,
-				'focus-visible:outline-kitchen-eggplant focus-visible:outline-2 focus-visible:outline-offset-2',
-			)}
-		>
-			{content}
-		</Link>
+					return (
+						<Link
+							key={to}
+							to={to}
+							aria-current={active ? 'page' : undefined}
+							className={cn(
+								tabClassName,
+								active ? 'bg-kitchen-yolk/30' : 'hover:bg-card',
+							)}
+						>
+							<span aria-hidden className="grid size-8 place-items-center">
+								<Icon size={22} weight={active ? 'fill' : 'regular'} />
+							</span>
+							{label}
+						</Link>
+					)
+				})}
+			</nav>
+			{mode === 'bar-fab' ? (
+				<Link
+					to="/recipes/new"
+					aria-label="add recipe"
+					className="bg-kitchen-yolk focus-visible:outline-kitchen-eggplant bottom-fab fixed right-4 z-20 grid size-14 place-items-center rounded-full shadow-md transition-colors hover:brightness-95 focus-visible:outline-2 focus-visible:outline-offset-2 md:hidden"
+				>
+					<PlusIcon size={26} weight="bold" aria-hidden />
+				</Link>
+			) : null}
+		</>
 	)
 }

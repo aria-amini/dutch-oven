@@ -2,6 +2,7 @@ import * as Sentry from '@sentry/tanstackstart-react'
 import { createRouter } from '@tanstack/react-router'
 
 import { NotFoundComponent, ServerErrorComponent } from '@/components/errors'
+import { pendingOptions } from '@/components/page-pending'
 import { queryClient } from '@/lib/utils/query'
 
 import { routeTree } from './routeTree.gen'
@@ -9,6 +10,7 @@ import { routeTree } from './routeTree.gen'
 export const getRouter = () => {
 	const router = createRouter({
 		routeTree,
+		...pendingOptions,
 		scrollRestoration: true,
 		defaultPreloadStaleTime: 0,
 		context: { queryClient },

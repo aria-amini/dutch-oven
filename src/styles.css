@@ -238,6 +238,8 @@
 
 	body {
 		@apply bg-background text-foreground;
+		/* viewport-fit=cover runs the page under the notch. */
+		padding-top: env(safe-area-inset-top);
 	}
 
 	html {
@@ -257,5 +259,12 @@
 		font-weight: 600;
 		letter-spacing: -0.025em;
 		line-height: 1.15;
+	}
+}
+
+/* Toasts clear the tab bar below md; with no tab bar they sit at the corner. */
+@media (min-width: 768px) {
+	[data-sonner-toaster] {
+		--offset-bottom: 24px !important;
 	}
 }
