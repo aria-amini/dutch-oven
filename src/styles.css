@@ -261,3 +261,10 @@
 		line-height: 1.15;
 	}
 }
+
+/* Toasts clear the tab bar below md; with no tab bar they sit at the corner. */
+@media (min-width: 768px) {
+	[data-sonner-toaster] {
+		--offset-bottom: 24px !important;
+	}
+}

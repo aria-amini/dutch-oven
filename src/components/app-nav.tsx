@@ -69,6 +69,14 @@ function useTyping() {
 	return typing
 }
 
+// Whether the tab bar is on screen, for what has to sit above it.
+export function useTabBarVisible() {
+	const mode = useTabBar()
+	const typing = useTyping()
+
+	return mode !== 'none' && !typing
+}
+
 export function AppNav() {
 	return (
 		<>
@@ -156,13 +164,13 @@ function MobileHeader() {
 // adds one round action for its one job.
 function TabBar() {
 	const mode = useTabBar()
-	const typing = useTyping()
+	const visible = useTabBarVisible()
 
 	const pathname = useRouterState({
 		select: (state) => state.location.pathname,
 	})
 
-	if (mode === 'none' || typing) return null
+	if (!visible) return null
 
 	return (
 		<>

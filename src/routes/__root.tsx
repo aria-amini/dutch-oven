@@ -8,9 +8,15 @@ import {
 } from '@tanstack/react-router'
 import { Toaster } from 'sonner'
 
+import { useTabBarVisible } from '@/components/app-nav'
 import { queryClient } from '@/lib/utils/query'
 
 import appCss from '../styles.css?url'
+
+// Clears the tab bar, which shows below the md breakpoint. Sonner's own mobile
+// offset stops at 600px, so the desktop offset is put back from md up in
+// styles.css.
+const tabBarOffset = 'calc(5rem + env(safe-area-inset-bottom))'
 
 const posthogOptions = {
 	api_host: import.meta.env.VITE_POSTHOG_HOST,
@@ -47,6 +53,7 @@ export const Route = createRootRoute({
 
 function RootComponent() {
 	const posthogToken = import.meta.env.VITE_POSTHOG_PROJECT_TOKEN
+	const tabBar = useTabBarVisible()
 
 	return (
 		<html lang="en">
@@ -65,7 +72,10 @@ function RootComponent() {
 				</QueryClientProvider>
 				<Toaster
 					position="bottom-right"
-					mobileOffset={{ bottom: 'calc(5rem + env(safe-area-inset-bottom))' }}
+					{...(tabBar && {
+						offset: { bottom: tabBarOffset },
+						mobileOffset: { bottom: tabBarOffset },
+					})}
 					toastOptions={{
 						unstyled: true,
 						classNames: {
