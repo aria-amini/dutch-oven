@@ -4,10 +4,16 @@ import { z } from 'zod'
 
 import { serverEnv as env } from '@/env.server'
 import { requireUserId } from '@/lib/auth/session'
-import { createRecipeForUser } from '@/lib/recipes/repository'
+import { clampRecipeTitle, recipeInput } from '@/lib/recipes/model'
+import {
+	createSharedRecipe,
+	findSharedRecipeByUrl,
+	saveRecipeForUser,
+} from '@/lib/recipes/repository'
 
 import { fetchRecipeHtml, type RelayConfig } from './fetch'
 import { rateLimit, withImportSlot } from './rate-limit'
+import { canonicalRecipeUrl } from './url'
 
 // Set only where datacenter addresses get blocked, which is every deploy.
 function relayConfig(): RelayConfig | undefined {
@@ -16,23 +22,50 @@ function relayConfig(): RelayConfig | undefined {
 		: undefined
 }
 
+// Finds the shared recipe for a page, fetching it the first time anyone asks,
+// and puts it on the importer's shelf.
 export const importRecipe = createServerFn({ method: 'POST' })
 	.validator(z.object({ url: z.url({ protocol: /^https?$/ }).max(2000) }))
 	.handler(async ({ data }) => {
 		const userId = await requireUserId()
+		const sourceUrl = canonicalRecipeUrl(data.url)
 		const ip = getRequestIP() ?? 'unknown'
 		rateLimit(`user:${userId}`, 10)
 		rateLimit(`ip:${ip}`, 20)
 
 		return withImportSlot(userId, async () => {
+			const known = await findSharedRecipeByUrl(sourceUrl)
+
+			if (known) {
+				await saveRecipeForUser(userId, known.id)
+
+				return known
+			}
+
 			const page = await fetchRecipeHtml(data.url, relayConfig())
 
 			if (!page) throw new Error("that site won't let us in — try another link")
 
 			if (!page.recipe) throw new Error("couldn't find a recipe on that page")
-			const recipe = await createRecipeForUser(userId, page.recipe)
+
+			const input = recipeInput.safeParse({
+				title: clampRecipeTitle(page.recipe.title),
+				imageUrl: page.recipe.imageUrl,
+				sourceUrl,
+				ingredients: page.recipe.ingredients.map(({ raw }) => raw),
+				steps: page.recipe.steps,
+			})
+
+			if (!input.success) throw new Error("couldn't read a recipe on that page")
+
+			const recipe = await createSharedRecipe({
+				...input.data,
+				sourceUrl,
+			})
 
 			if (!recipe) throw new Error("couldn't save that — try again")
+
+			await saveRecipeForUser(userId, recipe.id)
 
 			return recipe
 		})

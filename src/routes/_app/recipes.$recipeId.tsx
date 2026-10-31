@@ -3,11 +3,12 @@ import {
 	createFileRoute,
 	Link,
 	notFound,
+	useNavigate,
 	useRouter,
 } from '@tanstack/react-router'
 import { useState } from 'react'
 
-import { getRecipe, updateRecipeContent } from '@/lib/recipes/server'
+import { getRecipe, updateRecipe } from '@/lib/recipes/server'
 
 export const Route = createFileRoute('/_app/recipes/$recipeId')({
 	loader: async ({ params }) => {
@@ -29,6 +30,7 @@ const dateFormat = new Intl.DateTimeFormat('en', {
 function RecipeDetail() {
 	const recipe = Route.useLoaderData()
 	const router = useRouter()
+	const navigate = useNavigate()
 	const [editing, setEditing] = useState(false)
 	const [ingredients, setIngredients] = useState(recipe.ingredients.join('\n'))
 	const [steps, setSteps] = useState(recipe.steps.join('\n'))
@@ -38,15 +40,25 @@ function RecipeDetail() {
 		setPending(true)
 
 		try {
-			await updateRecipeContent({
+			const saved = await updateRecipe({
 				data: {
 					id: recipe.id,
+					title: recipe.title,
+					notes: recipe.notes,
 					ingredients: ingredients.split('\n'),
 					steps: steps.split('\n'),
 				},
 			})
-			await router.invalidate()
+
 			setEditing(false)
+
+			// Editing a shared recipe makes the user's own copy; show that one.
+			if (saved && saved.id !== recipe.id)
+				await navigate({
+					to: '/recipes/$recipeId',
+					params: { recipeId: saved.id },
+				})
+			else await router.invalidate()
 		} finally {
 			setPending(false)
 		}

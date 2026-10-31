@@ -5,14 +5,25 @@ import {
 	type Database,
 } from '@tests/support/fixtures/db'
 
-import { user } from '@/db/schema'
+import { mealLogs, user } from '@/db/schema'
 
+import { recipeUpdateInput } from './model'
 import {
 	createCollectionForUser,
 	createRecipeForUser,
+	deleteCollectionForUser,
+	deleteRecipeForUser,
 	getRecipeForUser,
+	listCollectionsForUser,
 	listShelfForUser,
-	updateRecipeContentForUser,
+	moveRecipeForUser,
+	renameCollectionForUser,
+	saveRecipeForUser,
+	createSharedRecipe,
+	findSharedRecipeByUrl,
+	searchSharedRecipes,
+	sharedRecipeUrls,
+	updateRecipeForUser,
 } from './repository'
 
 async function seedUser(db: Database) {
@@ -50,7 +61,10 @@ describe('recipe shelf', () => {
 			db,
 		)
 
-		expect(recipe?.collectionId).toBe(weeknight?.id)
+		if (!recipe) throw new Error('recipe was not created')
+		await expect(
+			getRecipeForUser(userId, recipe.id, db),
+		).resolves.toMatchObject({ collectionId: weeknight?.id, saved: true })
 
 		const shelf = await listShelfForUser(userId, db)
 		expect(shelf.collections.map((c) => c.name)).toEqual([
@@ -63,7 +77,11 @@ describe('recipe shelf', () => {
 	test('shelves recipes without a group', async ({ db }) => {
 		const userId = await seedUser(db)
 		const recipe = await createRecipeForUser(userId, { title: 'dal' }, db)
-		expect(recipe?.collectionId).toBeNull()
+
+		if (!recipe) throw new Error('recipe was not created')
+		await expect(
+			getRecipeForUser(userId, recipe.id, db),
+		).resolves.toMatchObject({ collectionId: null })
 	})
 
 	test('scopes the shelf to the user', async ({ db }) => {
@@ -99,7 +117,9 @@ describe('recipe shelf', () => {
 		})
 	})
 
-	test('replaces recipe content and checks ownership', async ({ db }) => {
+	test('updates recipe details and content and checks ownership', async ({
+		db,
+	}) => {
 		const userId = await seedUser(db)
 
 		const recipe = await createRecipeForUser(
@@ -110,32 +130,57 @@ describe('recipe shelf', () => {
 
 		if (!recipe) throw new Error('recipe was not created')
 
-		await updateRecipeContentForUser(
-			userId,
-			recipe.id,
-			{ ingredients: ['tomatoes'], steps: ['toast', '', 'serve'] },
-			db,
-		)
+		const update = recipeUpdateInput.parse({
+			id: recipe.id,
+			title: 'tomato dal',
+			notes: '  ',
+			ingredients: ['tomatoes'],
+			steps: ['toast', '', 'serve'],
+		})
+
+		await updateRecipeForUser(userId, update, db)
 		await expect(
 			getRecipeForUser(userId, recipe.id, db),
 		).resolves.toMatchObject({
+			title: 'tomato dal',
+			notes: null,
 			ingredients: ['tomatoes'],
 			steps: ['toast', 'serve'],
 		})
 		await expect(
-			updateRecipeContentForUser(
+			updateRecipeForUser(
 				'user-2',
-				recipe.id,
-				{ ingredients: [], steps: [] },
+				{ ...update, title: 'stolen', ingredients: [], steps: [] },
 				db,
 			),
 		).resolves.toBeNull()
 		await expect(
 			getRecipeForUser(userId, recipe.id, db),
 		).resolves.toMatchObject({
+			title: 'tomato dal',
 			ingredients: ['tomatoes'],
 			steps: ['toast', 'serve'],
 		})
+	})
+
+	test("deletes only the owner's recipe", async ({ db }) => {
+		const userId = await seedUser(db)
+
+		const recipe = await createRecipeForUser(
+			userId,
+			{ title: 'dal', ingredients: ['lentils'] },
+			db,
+		)
+
+		if (!recipe) throw new Error('recipe was not created')
+
+		await expect(
+			deleteRecipeForUser('user-2', recipe.id, db),
+		).resolves.toBeNull()
+		await expect(deleteRecipeForUser(userId, recipe.id, db)).resolves.toEqual({
+			id: recipe.id,
+		})
+		await expect(getRecipeForUser(userId, recipe.id, db)).resolves.toBeNull()
 	})
 
 	test('rejects collections owned by another user', async ({ db }) => {
@@ -150,5 +195,360 @@ describe('recipe shelf', () => {
 				db,
 			),
 		).rejects.toThrow('collection not found')
+	})
+
+	test('finalizes new recipes unless they are drafts, and finalizes on update', async ({
+		db,
+	}) => {
+		const userId = await seedUser(db)
+		const made = await createRecipeForUser(userId, { title: 'dal' }, db)
+
+		const draft = await createRecipeForUser(
+			userId,
+			{ title: 'stew', finalized: false },
+			db,
+		)
+
+		expect(made?.finalizedAt).toBeInstanceOf(Date)
+		expect(draft?.finalizedAt).toBeNull()
+
+		if (!draft) throw new Error('draft was not created')
+
+		const saved = await updateRecipeForUser(
+			userId,
+			{
+				id: draft.id,
+				title: 'stew',
+				notes: null,
+				ingredients: [],
+				steps: [],
+			},
+			db,
+		)
+
+		expect(saved?.finalizedAt).toBeNull()
+
+		const finalized = await updateRecipeForUser(
+			userId,
+			{
+				id: draft.id,
+				title: 'stew',
+				notes: null,
+				ingredients: [],
+				steps: [],
+				finalize: true,
+			},
+			db,
+		)
+
+		expect(finalized?.finalizedAt).toBeInstanceOf(Date)
+	})
+
+	test('keeps uploaded photos to their owner', async ({ db }) => {
+		const userId = await seedUser(db)
+
+		await expect(
+			createRecipeForUser(
+				userId,
+				{ title: 'dal', imageUrl: 'recipes/other-1' },
+				db,
+			),
+		).rejects.toThrow('Invalid recipe photo')
+
+		const recipe = await createRecipeForUser(
+			userId,
+			{ title: 'dal', imageUrl: `recipes/${userId}-abc` },
+			db,
+		)
+
+		expect(recipe?.imageUrl).toBe(`recipes/${userId}-abc`)
+	})
+
+	test('keeps, replaces, and clears the photo on update', async ({ db }) => {
+		const userId = await seedUser(db)
+
+		const recipe = await createRecipeForUser(
+			userId,
+			{ title: 'dal', imageUrl: 'https://example.com/dal.jpg' },
+			db,
+		)
+
+		if (!recipe) throw new Error('recipe was not created')
+
+		const edit = {
+			id: recipe.id,
+			title: 'dal',
+			notes: null,
+			ingredients: [],
+			steps: [],
+		}
+
+		await updateRecipeForUser(userId, recipeUpdateInput.parse(edit), db)
+		await expect(
+			getRecipeForUser(userId, recipe.id, db),
+		).resolves.toMatchObject({ imageUrl: 'https://example.com/dal.jpg' })
+
+		await updateRecipeForUser(
+			userId,
+			recipeUpdateInput.parse({ ...edit, imageUrl: `recipes/${userId}-new` }),
+			db,
+		)
+		await expect(
+			getRecipeForUser(userId, recipe.id, db),
+		).resolves.toMatchObject({ imageUrl: `recipes/${userId}-new` })
+
+		await expect(
+			updateRecipeForUser(
+				userId,
+				recipeUpdateInput.parse({ ...edit, imageUrl: 'recipes/other-1' }),
+				db,
+			),
+		).rejects.toThrow('Invalid recipe photo')
+
+		await updateRecipeForUser(
+			userId,
+			recipeUpdateInput.parse({ ...edit, imageUrl: null }),
+			db,
+		)
+		await expect(
+			getRecipeForUser(userId, recipe.id, db),
+		).resolves.toMatchObject({ imageUrl: null })
+	})
+})
+
+describe('books', () => {
+	test('renames, moves recipes, and deletes without losing recipes', async ({
+		db,
+	}) => {
+		const userId = await seedUser(db)
+		const book = await createCollectionForUser(userId, 'weeknight', db)
+		const recipe = await createRecipeForUser(userId, { title: 'dal' }, db)
+
+		if (!book || !recipe) throw new Error('seed failed')
+
+		await expect(
+			renameCollectionForUser(userId, book.id, 'school nights', db),
+		).resolves.toMatchObject({ name: 'school nights' })
+		await expect(
+			moveRecipeForUser(userId, recipe.id, book.id, db),
+		).resolves.toMatchObject({ collectionId: book.id })
+
+		await expect(deleteCollectionForUser(userId, book.id, db)).resolves.toEqual(
+			{ id: book.id },
+		)
+		await expect(
+			getRecipeForUser(userId, recipe.id, db),
+		).resolves.toMatchObject({ title: 'dal', collectionId: null })
+	})
+
+	test("ignores other users' books and recipes", async ({ db }) => {
+		const userId = await seedUser(db)
+		const otherId = await seedUser(db)
+		const foreignBook = await createCollectionForUser(otherId, 'theirs', db)
+		const recipe = await createRecipeForUser(userId, { title: 'dal' }, db)
+
+		const foreignRecipe = await createRecipeForUser(
+			otherId,
+			{ title: 'stew' },
+			db,
+		)
+
+		if (!foreignBook || !recipe || !foreignRecipe) {
+			throw new Error('seed failed')
+		}
+
+		await expect(
+			moveRecipeForUser(userId, recipe.id, foreignBook.id, db),
+		).rejects.toThrow('collection not found')
+		await expect(
+			moveRecipeForUser(userId, foreignRecipe.id, null, db),
+		).resolves.toBeNull()
+		await expect(
+			renameCollectionForUser(userId, foreignBook.id, 'mine', db),
+		).resolves.toBeNull()
+		await expect(
+			deleteCollectionForUser(userId, foreignBook.id, db),
+		).resolves.toBeNull()
+		await expect(listCollectionsForUser(otherId, db)).resolves.toHaveLength(1)
+	})
+})
+
+describe('shared recipes', () => {
+	async function seedShared(db: Database, url = 'https://example.com/dal') {
+		const recipe = await createSharedRecipe(
+			{
+				title: 'shared dal',
+				sourceUrl: url,
+				ingredients: ['lentils', 'salt'],
+				steps: ['simmer'],
+			},
+			db,
+		)
+
+		if (!recipe) throw new Error('shared recipe was not created')
+
+		return recipe
+	}
+
+	test('stores one recipe per page, for everyone', async ({ db }) => {
+		const first = await seedShared(db)
+		const again = await seedShared(db)
+		expect(again.id).toBe(first.id)
+		expect(first.userId).toBeNull()
+		await expect(
+			findSharedRecipeByUrl('https://example.com/dal', db),
+		).resolves.toMatchObject({ id: first.id })
+		await expect(searchSharedRecipes('DAL', 20, db)).resolves.toEqual([
+			expect.objectContaining({ id: first.id }),
+		])
+		await expect(searchSharedRecipes('100%', 20, db)).resolves.toEqual([])
+		await expect(
+			sharedRecipeUrls(
+				['https://example.com/dal', 'https://example.com/x'],
+				db,
+			),
+		).resolves.toEqual(['https://example.com/dal'])
+		await expect(sharedRecipeUrls([], db)).resolves.toEqual([])
+	})
+
+	test('opens unsaved, then saves to the shelf once', async ({ db }) => {
+		const userId = await seedUser(db)
+		const recipe = await seedShared(db)
+
+		await expect(
+			getRecipeForUser(userId, recipe.id, db),
+		).resolves.toMatchObject({ saved: false, owned: false, steps: ['simmer'] })
+		expect((await listShelfForUser(userId, db)).recipes).toHaveLength(0)
+
+		await saveRecipeForUser(userId, recipe.id, db)
+		await saveRecipeForUser(userId, recipe.id, db)
+		await expect(
+			getRecipeForUser(userId, recipe.id, db),
+		).resolves.toMatchObject({ saved: true })
+		expect((await listShelfForUser(userId, db)).recipes).toHaveLength(1)
+	})
+
+	test("never shows or saves someone else's own recipe", async ({ db }) => {
+		const userId = await seedUser(db)
+		const otherId = await seedUser(db)
+		const theirs = await createRecipeForUser(otherId, { title: 'secret' }, db)
+
+		if (!theirs) throw new Error('recipe was not created')
+		await expect(getRecipeForUser(userId, theirs.id, db)).resolves.toBeNull()
+		await expect(saveRecipeForUser(userId, theirs.id, db)).resolves.toBeNull()
+	})
+
+	test('keeps notes personal without copying the recipe', async ({ db }) => {
+		const userId = await seedUser(db)
+		const otherId = await seedUser(db)
+		const recipe = await seedShared(db)
+		await saveRecipeForUser(userId, recipe.id, db)
+		await saveRecipeForUser(otherId, recipe.id, db)
+
+		const saved = await updateRecipeForUser(
+			userId,
+			recipeUpdateInput.parse({
+				id: recipe.id,
+				title: 'shared dal',
+				notes: 'more cumin',
+				ingredients: ['lentils', 'salt'],
+				steps: ['simmer'],
+			}),
+			db,
+		)
+
+		expect(saved?.id).toBe(recipe.id)
+		await expect(
+			getRecipeForUser(userId, recipe.id, db),
+		).resolves.toMatchObject({ notes: 'more cumin' })
+		await expect(
+			getRecipeForUser(otherId, recipe.id, db),
+		).resolves.toMatchObject({ notes: null })
+	})
+
+	test('copies a shared recipe on its first edit and moves the shelf and cooks', async ({
+		db,
+	}) => {
+		const userId = await seedUser(db)
+		const otherId = await seedUser(db)
+		const book = await createCollectionForUser(userId, 'weeknight', db)
+		const recipe = await seedShared(db)
+		await saveRecipeForUser(userId, recipe.id, db)
+		await saveRecipeForUser(otherId, recipe.id, db)
+		await moveRecipeForUser(userId, recipe.id, book?.id ?? null, db)
+		await db.insert(mealLogs).values({
+			id: crypto.randomUUID(),
+			userId,
+			recipeId: recipe.id,
+			cookedAt: new Date(),
+		})
+
+		const copy = await updateRecipeForUser(
+			userId,
+			recipeUpdateInput.parse({
+				id: recipe.id,
+				title: 'my dal',
+				notes: null,
+				ingredients: ['lentils', 'salt', 'lime'],
+				steps: ['simmer'],
+			}),
+			db,
+		)
+
+		if (!copy) throw new Error('copy was not made')
+		expect(copy.id).not.toBe(recipe.id)
+		expect(copy).toMatchObject({
+			userId,
+			forkedFromId: recipe.id,
+			sourceUrl: 'https://example.com/dal',
+		})
+		await expect(getRecipeForUser(userId, copy.id, db)).resolves.toMatchObject({
+			title: 'my dal',
+			ingredients: ['lentils', 'salt', 'lime'],
+			collectionId: book?.id,
+			cookCount: 1,
+			owned: true,
+		})
+
+		const shelf = await listShelfForUser(userId, db)
+		expect(shelf.recipes.map((item) => item.id)).toEqual([copy.id])
+
+		await expect(
+			getRecipeForUser(otherId, recipe.id, db),
+		).resolves.toMatchObject({ title: 'shared dal', saved: true })
+		await expect(getRecipeForUser(otherId, copy.id, db)).resolves.toBeNull()
+
+		// Later edits change the copy in place.
+		const again = await updateRecipeForUser(
+			userId,
+			recipeUpdateInput.parse({
+				id: copy.id,
+				title: 'my dal 2',
+				notes: null,
+				ingredients: [],
+				steps: [],
+			}),
+			db,
+		)
+
+		expect(again?.id).toBe(copy.id)
+	})
+
+	test('removing a shared recipe only takes it off your shelf', async ({
+		db,
+	}) => {
+		const userId = await seedUser(db)
+		const recipe = await seedShared(db)
+		await saveRecipeForUser(userId, recipe.id, db)
+
+		await expect(deleteRecipeForUser(userId, recipe.id, db)).resolves.toEqual({
+			id: recipe.id,
+		})
+		await expect(
+			getRecipeForUser(userId, recipe.id, db),
+		).resolves.toMatchObject({ saved: false })
+		await expect(
+			findSharedRecipeByUrl('https://example.com/dal', db),
+		).resolves.not.toBeNull()
 	})
 })
