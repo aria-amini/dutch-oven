@@ -10,3 +10,12 @@ auto = ["start", "stop"]
 retry = 3
 port = 3000
 ready_cmd = { run = 'curl -fsS "http://127.0.0.1:$PORT/" > /dev/null', timeout = "30s" }
+
+# The home import relay (src/lib/import/relay.ts). It holds a fixed port and is
+# exposed with Tailscale Funnel, so start it by hand from one checkout:
+# `pitchfork start relay`. The token lives outside the repo.
+[daemons.relay]
+run = 'vp build --config vite.relay.config.ts && IMPORT_RELAY_TOKEN_FILE="$HOME/.config/dutch-oven/import-relay-token" IMPORT_RELAY_PORT=8790 exec node .relay/import-relay.mjs'
+mise = true
+retry = 3
+ready_cmd = { run = 'curl -fsS http://127.0.0.1:8790/health > /dev/null', timeout = "30s" }

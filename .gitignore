@@ -21,6 +21,7 @@ src/components/__screenshots__/
 **/__screenshots__/**/*-1.png
 .vitest/
 .varlock-frozen-env
+.relay
 
 # Local design-tool working files
 .impeccable/

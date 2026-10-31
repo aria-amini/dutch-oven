@@ -29,6 +29,14 @@ Error monitoring is wired through Sentry (`@sentry/tanstackstart-react`).
 
 Product analytics run through PostHog behind a `/api/ingest` proxy.
 
+Some recipe sites refuse datacenter addresses, so link imports fall back to a
+relay on a home connection (`src/lib/import/relay.ts`). Deploys reach it through
+`IMPORT_RELAY_URL` and `IMPORT_RELAY_TOKEN`; with them unset, imports skip the
+relay. On the VM, `pitchfork start relay` runs it on `127.0.0.1:8790` from one
+checkout, and `tailscale funnel --bg --https=10000 http://127.0.0.1:8790`
+exposes it. The token lives in `~/.config/dutch-oven/import-relay-token`. Never
+route the discovery crawler through it.
+
 ## Environment
 
 Varlock resolves the env from `.env.schema` and detects `APP_ENV`. Secrets are
