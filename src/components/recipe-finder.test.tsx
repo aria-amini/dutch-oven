@@ -141,6 +141,32 @@ describe('the one box', () => {
 			.toBeVisible()
 	})
 
+	test('opens a paste dialog and returns to the finder on cancel', async () => {
+		const { screen } = await openBox()
+		await screen.getByRole('option', { name: /paste text/ }).click()
+		const dialog = screen.getByRole('dialog', { name: 'Paste a recipe' })
+		await expect.element(dialog).toBeVisible()
+		await dialog.getByRole('textbox', { name: 'recipe text' }).fill('Pasta')
+		await dialog.getByRole('button', { name: 'cancel' }).click()
+		await expect
+			.element(screen.getByRole('combobox', { name: 'find a recipe' }))
+			.toBeVisible()
+	})
+
+	test('adds pasted text from the finder dialog', async () => {
+		const { screen, router } = await openBox()
+		await screen.getByRole('option', { name: /paste text/ }).click()
+		const dialog = screen.getByRole('dialog', { name: 'Paste a recipe' })
+		await dialog
+			.getByRole('textbox', { name: 'recipe text' })
+			.fill('weeknight dal\ningredients\n1 cup lentils\nmethod\n1. simmer')
+		await dialog.getByRole('button', { name: 'add recipe' }).click()
+		await expect.poll(() => router.state.location.pathname).toBe('/recipes/new')
+		await expect
+			.element(screen.getByRole('textbox', { name: 'name', exact: true }))
+			.toHaveValue('weeknight dal')
+	})
+
 	test('opens from anywhere with ⌘K and closes with escape', async () => {
 		const { screen } = await renderRoute({
 			path: '/groceries',

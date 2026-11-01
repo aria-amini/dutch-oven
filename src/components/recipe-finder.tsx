@@ -16,6 +16,7 @@ import { useNavigate } from '@tanstack/react-router'
 import { useEffect, useId, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
+import { PasteRecipeDialog } from '@/components/paste-recipe-dialog'
 import {
 	asRecipeUrl,
 	RecipeThumb,
@@ -241,6 +242,7 @@ function FinderPanel({
 }) {
 	const navigate = useNavigate()
 	const listboxId = useId()
+	const [pasteOpen, setPasteOpen] = useState(false)
 	const [value, setValue] = useState(defaultQuery)
 	const [picked, setPicked] = useState<string>()
 	// Picking a recipe fills the box; results stay mounted for the way back.
@@ -461,19 +463,6 @@ function FinderPanel({
 		void navigate({ to: '/recipes/new', state: { pasted: text } })
 	}
 
-	// What is on the clipboard decides: a link imports, a recipe gets sorted.
-	async function pasteFromClipboard() {
-		const text = await navigator.clipboard.readText().catch(() => '')
-		const link = asRecipeUrl(text.trim())
-
-		if (link) return onImportLink(link)
-
-		if (text.trim()) return writePasted(text)
-
-		// Nothing readable: the new recipe page takes a paste too.
-		write()
-	}
-
 	function activate(option: Option) {
 		if (busy) return
 
@@ -483,7 +472,7 @@ function FinderPanel({
 
 				if (option.start === 'import') return onImportLink()
 
-				return void pasteFromClipboard()
+				return setPasteOpen(true)
 			case 'recipe':
 				setSelected(option.recipe)
 				setPicked(optionKey(option))
@@ -566,6 +555,16 @@ function FinderPanel({
 
 	return (
 		<>
+			<PasteRecipeDialog
+				open={pasteOpen}
+				onOpenChange={setPasteOpen}
+				onAdd={(text) => {
+					const link = asRecipeUrl(text.trim())
+
+					if (link) onImportLink(link)
+					else writePasted(text)
+				}}
+			/>
 			<div
 				className={cn(
 					'border-border flex items-center gap-2.5 border-b px-4 py-3',

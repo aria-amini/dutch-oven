@@ -14,6 +14,7 @@ import {
 import { toast } from 'sonner'
 
 import { IngredientListField } from '@/components/ingredient-list-field'
+import { PasteRecipeDialog } from '@/components/paste-recipe-dialog'
 import {
 	FieldError,
 	fieldClassName,
@@ -195,6 +196,7 @@ export function RecipeEditor({
 	onImportLink?: (url?: string) => void
 	onDone: (recipeId: string) => void
 }) {
+	const [pasteOpen, setPasteOpen] = useState(false)
 	const router = useRouter()
 	const navigate = useNavigate()
 	const form = useRef<HTMLFormElement>(null)
@@ -404,6 +406,27 @@ export function RecipeEditor({
 				void done()
 			}}
 		>
+			<PasteRecipeDialog
+				open={pasteOpen}
+				onOpenChange={setPasteOpen}
+				onAdd={(text) => {
+					if (
+						!form.current ||
+						!empty(form.current) ||
+						form.current
+							.querySelector<HTMLTextAreaElement>('#edit-title')
+							?.value.trim()
+					) {
+						toast('Start with an empty recipe to paste text')
+
+						return
+					}
+
+					if (/^https?:\/\/\S+$/i.test(text.trim()) && onImportLink)
+						onImportLink(text.trim())
+					else sortPasted(text)
+				}}
+			/>
 			{shared ? (
 				<p className="bg-kitchen-eggplant/10 border-border rounded-xl border px-4 py-3 text-sm font-semibold">
 					{onShared
@@ -491,45 +514,7 @@ export function RecipeEditor({
 								quietActionClassName,
 								'border-foreground/40 inline-flex items-center gap-1.5 border',
 							)}
-							onClick={async () => {
-								if (
-									!form.current ||
-									!empty(form.current) ||
-									form.current
-										.querySelector<HTMLInputElement>('#edit-title')
-										?.value.trim()
-								) {
-									toast('Start with an empty recipe to paste text')
-
-									return
-								}
-
-								const text = await navigator.clipboard
-									.readText()
-									.catch(() => '')
-
-								if (
-									!form.current ||
-									!empty(form.current) ||
-									form.current
-										.querySelector<HTMLInputElement>('#edit-title')
-										?.value.trim()
-								)
-									return
-
-								if (!text.trim()) {
-									toast('Paste a whole recipe into the name field')
-									form.current
-										.querySelector<HTMLInputElement>('#edit-title')
-										?.focus()
-
-									return
-								}
-
-								if (/^https?:\/\/\S+$/i.test(text.trim()) && onImportLink)
-									onImportLink(text.trim())
-								else sortPasted(text)
-							}}
+							onClick={() => setPasteOpen(true)}
 						>
 							<ClipboardTextIcon size={16} aria-hidden /> paste text
 						</button>
