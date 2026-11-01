@@ -149,6 +149,21 @@ describe('parseRecipe', () => {
 		})
 	})
 
+	test('tidies the spaces and brackets stripped tags leave behind', () => {
+		const page = JSON_LD_PAGE.replace(
+			'"1/2 cup extra-virgin olive oil"',
+			'"1 cup broth (<a href=\\"/broth\\">preferably homemade</a> )"',
+		).replace(
+			'"3 tablespoons balsamic vinegar"',
+			'"((5 to 6)) garlic cloves , minced"',
+		)
+
+		expect(parseRecipe(page)?.ingredients.slice(0, 2)).toEqual([
+			{ raw: '1 cup broth (preferably homemade)' },
+			{ raw: '(5 to 6) garlic cloves, minced' },
+		])
+	})
+
 	test('handles @graph wrappers, array @type, and HowToSection flattening', () => {
 		const recipe = parseRecipe(GRAPH_PAGE)
 		expect(recipe?.title).toBe('Miso Butter Pasta')

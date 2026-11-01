@@ -41,14 +41,21 @@ function decodeCodePoint(codePoint: number, entity: string) {
 }
 
 function stripTags(html: string) {
-	return decodeEntities(
-		html
-			.replaceAll(/<script\b[\s\S]*?<\/script>/gi, ' ')
-			.replaceAll(/<style\b[\s\S]*?<\/style>/gi, ' ')
-			.replaceAll(/<[^>]+>/g, ' '),
+	return (
+		decodeEntities(
+			html
+				.replaceAll(/<script\b[\s\S]*?<\/script>/gi, ' ')
+				.replaceAll(/<style\b[\s\S]*?<\/style>/gi, ' ')
+				.replaceAll(/<[^>]+>/g, ' '),
+		)
+			.replaceAll(/\s+/g, ' ')
+			// Tags stripped from inside brackets and before punctuation leave spaces
+			// behind, and some sites wrap amounts in two sets of brackets.
+			.replaceAll(/\(\s+/g, '(')
+			.replaceAll(/\s+([),.;:!?])/g, '$1')
+			.replaceAll(/\(\(([^()]*)\)\)/g, '($1)')
+			.trim()
 	)
-		.replaceAll(/\s+/g, ' ')
-		.trim()
 }
 
 function attrMap(tag: string) {

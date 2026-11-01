@@ -1,10 +1,17 @@
-import { CheckIcon, LinkSimpleIcon } from '@phosphor-icons/react'
+import { CheckIcon, ClipboardTextIcon } from '@phosphor-icons/react'
 import { useNavigate, useRouter } from '@tanstack/react-router'
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import {
+	useCallback,
+	useEffect,
+	useLayoutEffect,
+	useRef,
+	useState,
+} from 'react'
 import { toast } from 'sonner'
 
 import { IngredientListField } from '@/components/ingredient-list-field'
 import {
+	FieldError,
 	fieldClassName,
 	fieldLabelClassName,
 	FormActions,
@@ -14,7 +21,6 @@ import {
 	RecipeIntro,
 	RecipeNameField,
 } from '@/components/recipe-form'
-import { asRecipeUrl, useRecipeImport } from '@/components/recipe-online'
 import { RecipePhotoField } from '@/components/recipe-photo-field'
 import { StepsField, stepsFrom } from '@/components/steps-field'
 import { authClient } from '@/lib/auth/client'
@@ -70,10 +76,12 @@ function contentFrom(form: HTMLFormElement) {
 
 // Nothing to lose and no save button to find. Changes reach the form as typing,
 // clicks (add, remove, pick a suggestion), drags and finished photo uploads.
+// While `held`, nothing saves: a photo is still uploading.
 function useAutosave(
 	form: React.RefObject<HTMLFormElement | null>,
 	recipeId: React.RefObject<string | undefined>,
 	onSaved: (recipeId: string) => void,
+	held: boolean,
 ) {
 	const router = useRouter()
 	const [state, setState] = useState<SaveState>('saved')
@@ -136,6 +144,16 @@ function useAutosave(
 		}
 	}, [saver, router, recipeId])
 
+	// Let go, it saves what changed while it was held.
+	const wasHeld = useRef(held)
+
+	useEffect(() => {
+		saver.pause(held)
+
+		if (wasHeld.current && !held) saver.schedule()
+		wasHeld.current = held
+	}, [saver, held])
+
 	return {
 		state,
 		schedule: saver.schedule,
@@ -143,34 +161,31 @@ function useAutosave(
 		stop: saver.stop,
 		resume: saver.resume,
 		settle: saver.settle,
-		pause: (busy: boolean) => {
-			saver.pause(busy)
-
-			if (!busy) saver.schedule()
-		},
 	}
 }
 
-function hostOf(url: string) {
-	try {
-		return new URL(url).hostname.replace(/^www\./, '')
-	} catch {
-		return url
-	}
+function sortedLabel(ingredients: number, steps: number) {
+	const count = (n: number, one: string, many: string) =>
+		`${n} ${n === 1 ? one : many}`
+
+	return `sorted into ${count(ingredients, 'ingredient', 'ingredients')} and ${count(steps, 'step', 'steps')}`
 }
 
 // The recipe written where it will be read: the name as its heading, then
 // ingredients, steps and notes. It saves as you go; done finishes a draft.
-// Pasting a whole recipe into an empty one sorts it into its parts, and a link
-// pasted as a new recipe's name offers to fetch it instead.
+// Pasting a whole recipe into an empty one sorts it into its parts; so does a
+// recipe pasted into the one box, which arrives as `pasted`.
 export function RecipeEditor({
 	recipe,
 	defaultTitle = '',
+	pasted,
 	onDone,
 }: {
 	recipe?: EditableRecipe | undefined
 	// A new recipe's name, carried over from a search.
 	defaultTitle?: string
+	// A whole recipe pasted elsewhere, to sort into this new one.
+	pasted?: string | undefined
 	onDone: (recipeId: string) => void
 }) {
 	const router = useRouter()
@@ -178,26 +193,37 @@ export function RecipeEditor({
 	const form = useRef<HTMLFormElement>(null)
 	const recipeId = useRef(recipe?.id)
 	const [savedId, setSavedId] = useState(recipe?.id)
-	const autosave = useAutosave(form, recipeId, setSavedId)
 	const [pending, setPending] = useState(false)
 	const [error, setError] = useState<string>()
+	const [unnamed, setUnnamed] = useState(false)
 	const [confirmingDelete, setConfirmingDelete] = useState(false)
 	const [photoBusy, setPhotoBusy] = useState(false)
-	const [name, setName] = useState(recipe?.title ?? defaultTitle)
-	const user = authClient.useSession().data?.user
+
+	// A recipe pasted into the one box starts the page already sorted.
+	const [arrived] = useState(() =>
+		!recipe && pasted ? parsePastedRecipe(pasted) : undefined,
+	)
+
+	const [name, setName] = useState(
+		recipe?.title ?? arrived?.title ?? defaultTitle,
+	)
+
+	const session = authClient.useSession()
+	const user = session.data?.user
 	// Uploads need a real account, same as avatars.
 	const canAddPhoto = Boolean(user && !user.isAnonymous)
 	const isDraft = !recipe?.finalizedAt
 	const shared = recipe ? !recipe.owned : false
-	const link = recipe ? undefined : asRecipeUrl(name.trim())
-	const imported = useRecipeImport(onDone)
+
+	const autosave = useAutosave(form, recipeId, setSavedId, photoBusy)
+	const { schedule: scheduleAutosave, stop, settle, resume } = autosave
 
 	// A pasted recipe replaces the empty fields, so they start over from it.
 	const [seed, setSeed] = useState({
 		version: 0,
-		title: recipe?.title ?? defaultTitle,
-		ingredients: recipe?.ingredients ?? [],
-		steps: recipe?.steps ?? [],
+		title: recipe?.title ?? arrived?.title ?? defaultTitle,
+		ingredients: recipe?.ingredients ?? arrived?.ingredients ?? [],
+		steps: recipe?.steps ?? arrived?.steps ?? [],
 	})
 
 	// Read from the fields, not from `contentFrom`, which gives up without a name
@@ -225,11 +251,78 @@ export function RecipeEditor({
 		if (target) form.current?.querySelector<HTMLElement>(target)?.focus()
 	}, [recipe, isDraft])
 
+	// Takes the draft this editor saved back off the shelf, when what it held
+	// turned out not to be a recipe after all.
+	const discardDraft = useCallback(async () => {
+		stop()
+		await settle()
+		const draft = recipeId.current
+
+		try {
+			if (draft) await deleteRecipe({ data: { id: draft } })
+			recipeId.current = undefined
+			setSavedId(undefined)
+		} catch {
+			// Still a draft on the shelf, where it can be deleted by hand.
+		} finally {
+			resume()
+		}
+	}, [stop, settle, resume])
+
+	const announceSorted = useCallback(
+		(
+			sorted: ReturnType<typeof parsePastedRecipe>,
+			before: { name: string; draft: string | undefined },
+		) => {
+			toast(sortedLabel(sorted.ingredients.length, sorted.steps.length), {
+				action: {
+					label: 'undo',
+					onClick: () => {
+						setName(before.name)
+						setSeed((current) => ({
+							version: current.version + 1,
+							title: before.name,
+							ingredients: [],
+							steps: [],
+						}))
+
+						if (!before.draft) void discardDraft()
+						else scheduleAutosave()
+					},
+				},
+			})
+		},
+		[discardDraft, scheduleAutosave],
+	)
+
+	const announcedArrival = useRef(false)
+	useEffect(() => {
+		if (!arrived || announcedArrival.current) return
+		announcedArrival.current = true
+		scheduleAutosave()
+		announceSorted(arrived, { name: defaultTitle, draft: undefined })
+	}, [arrived, defaultTitle, scheduleAutosave, announceSorted])
+
+	// A pasted recipe is sorted at once, with a way back to the empty page.
+	const sortPasted = (text: string) => {
+		const sorted = parsePastedRecipe(text)
+		const before = { name, draft: recipeId.current }
+
+		setName(sorted.title)
+		setUnnamed(false)
+		setSeed((current) => ({ version: current.version + 1, ...sorted }))
+		autosave.schedule()
+
+		announceSorted(sorted, before)
+	}
+
 	const done = async () => {
+		if (photoBusy || pending) return
 		const content = form.current ? contentFrom(form.current) : undefined
 
 		if (!content) {
-			setError('give the recipe a name')
+			setUnnamed(true)
+			form.current?.querySelector<HTMLElement>('#edit-title')?.focus()
 
 			return
 		}
@@ -251,6 +344,9 @@ export function RecipeEditor({
 				await updateRecipe({ data: { id, ...latest, finalize: true } })
 
 			await router.invalidate()
+
+			// Finishing a recipe puts it on the shelf for real; that is worth saying.
+			if (isDraft) toast.success(`${latest.title} is on your shelf`)
 			onDone(id)
 		} catch {
 			setError("couldn't save that — try again")
@@ -313,16 +409,19 @@ export function RecipeEditor({
 						canAddPhoto ? (
 							<RecipePhotoField
 								current={recipe?.imageUrl}
-								onBusyChange={(busy) => {
-									setPhotoBusy(busy)
-									autosave.pause(busy)
-								}}
+								onBusyChange={setPhotoBusy}
 							/>
 						) : recipe?.imageUrl ? (
 							<img
 								src={recipe.imageUrl}
 								alt=""
 								className="border-border size-24 shrink-0 rounded-xl border object-cover"
+							/>
+						) : session.isPending ? (
+							// Holds the slot until we know whether this account adds photos.
+							<span
+								aria-hidden
+								className="border-input size-20 shrink-0 rounded-xl border border-dashed md:size-24"
 							/>
 						) : null
 					}
@@ -333,8 +432,12 @@ export function RecipeEditor({
 						label="name"
 						maxLength={recipeTitleMax}
 						defaultValue={seed.title}
-						placeholder="name it, or paste a recipe"
-						onChange={setName}
+						placeholder="name it"
+						errorId={unnamed && !name.trim() ? 'edit-title-error' : undefined}
+						onChange={(value) => {
+							setName(value)
+							setUnnamed(false)
+						}}
 						onPaste={(event) => {
 							const text = event.clipboardData.getData('text')
 
@@ -342,46 +445,20 @@ export function RecipeEditor({
 
 							if (!empty(form.current)) return
 							event.preventDefault()
-
-							const pasted = parsePastedRecipe(text)
-							setName(pasted.title)
-							setSeed((current) => ({
-								version: current.version + 1,
-								...pasted,
-							}))
-							autosave.schedule()
+							sortPasted(text)
 						}}
 					/>
 				</RecipeIntro>
-				{link ? (
-					<button
-						type="button"
-						disabled={imported.saving !== undefined}
-						onClick={() => void imported.save(link)}
-						className="bg-kitchen-yolk/30 hover:bg-kitchen-yolk/45 focus-visible:outline-kitchen-eggplant flex items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-60"
-					>
-						<span
-							aria-hidden
-							className="border-border bg-kitchen-basil/25 grid size-10 shrink-0 place-items-center rounded-lg border"
-						>
-							<LinkSimpleIcon size={18} weight="bold" />
-						</span>
-						<span className="min-w-0 flex-1">
-							<span className="block text-sm font-semibold">
-								get this recipe
-							</span>
-							<span className="text-muted-foreground block truncate text-xs font-semibold">
-								{imported.saving
-									? 'grabbing the page — some sites make us knock twice'
-									: hostOf(link)}
-							</span>
-						</span>
-					</button>
-				) : null}
-				{imported.error ? (
-					<p role="alert" className="text-kitchen-tomato text-sm font-semibold">
-						{imported.error}
+				{!recipe && !name.trim() && !unnamed ? (
+					<p className="text-muted-foreground flex flex-wrap items-center gap-x-1.5 gap-y-1 text-sm font-semibold">
+						<ClipboardTextIcon size={16} weight="bold" aria-hidden />
+						or paste a whole recipe and we&rsquo;ll sort it out
 					</p>
+				) : null}
+				{unnamed && !name.trim() ? (
+					<FieldError id="edit-title-error">
+						give the recipe a name to finish it
+					</FieldError>
 				) : null}
 			</div>
 			<div id="recipe-ingredients">
@@ -405,11 +482,7 @@ export function RecipeEditor({
 					className={cn(fieldClassName, 'resize-y', placeholderClassName)}
 				/>
 			</div>
-			{error ? (
-				<p role="alert" className="text-kitchen-tomato text-sm font-semibold">
-					{error}
-				</p>
-			) : null}
+			{error ? <FieldError>{error}</FieldError> : null}
 			<FormActions>
 				<button
 					type="submit"
