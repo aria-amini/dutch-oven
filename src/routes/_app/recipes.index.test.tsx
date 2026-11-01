@@ -132,6 +132,10 @@ describe('recipes shelf', () => {
 		await expect
 			.element(screen.getByText('save your first recipe', { exact: false }))
 			.toBeVisible()
+		await screen.getByRole('button', { name: /save your first recipe/ }).click()
+		await expect
+			.element(screen.getByRole('combobox', { name: 'find a recipe' }))
+			.toHaveFocus()
 	})
 
 	test('shows only search and the recipe cards', async () => {
@@ -252,11 +256,23 @@ describe('recipes shelf', () => {
 		expect(foundBounds.left).toBe(ownBounds.left)
 		expect(foundBounds.height).toBeLessThan(ownBounds.height)
 
+		if (!isPhone()) {
+			expect(
+				Math.abs(
+					discover.element().getBoundingClientRect().right -
+						screen
+							.getByRole('button', { name: 'add recipe', exact: true })
+							.element()
+							.getBoundingClientRect().right,
+				),
+			).toBeLessThan(1)
+		}
+
 		const visible = [...discover.element().querySelectorAll('a')].filter(
 			(node) => getComputedStyle(node).display !== 'none',
 		)
 
-		expect(visible.length).toBe(isPhone() ? 2 : 8)
+		expect(visible.length).toBe(isPhone() ? 2 : 4)
 
 		for (const tile of visible)
 			expect(tile.getBoundingClientRect().top).toBe(foundBounds.top)

@@ -54,7 +54,7 @@ export function PopularRecipes() {
 		<section
 			aria-labelledby="popular-recipes"
 			aria-busy={loading || undefined}
-			className="border-border mt-4 flex min-w-0 flex-col gap-3 border-t pt-8"
+			className="border-border mt-4 flex w-full max-w-3xl min-w-0 flex-col gap-3 border-t pt-8"
 		>
 			<div className="flex flex-wrap items-start justify-between gap-3">
 				<div className="flex flex-col gap-2">
@@ -76,7 +76,7 @@ export function PopularRecipes() {
 			</div>
 
 			{imported.error ? <FieldError>{imported.error}</FieldError> : null}
-			<div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-8 [&>*:nth-child(n+3)]:hidden sm:[&>*:nth-child(n+3)]:flex sm:[&>*:nth-child(n+5)]:hidden lg:[&>*:nth-child(n+5)]:flex lg:[&>*:nth-child(n+9)]:hidden">
+			<div className="grid grid-cols-2 gap-3 sm:grid-cols-4 [&>*:nth-child(n+3)]:hidden sm:[&>*:nth-child(n+3)]:flex sm:[&>*:nth-child(n+5)]:hidden">
 				{loading
 					? Array.from({ length: placeholderCount }, (_, index) => (
 							<Skeleton key={index} className="h-28" />

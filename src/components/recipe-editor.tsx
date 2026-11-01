@@ -1,4 +1,8 @@
-import { CheckIcon, ClipboardTextIcon } from '@phosphor-icons/react'
+import {
+	CheckIcon,
+	ClipboardTextIcon,
+	LinkSimpleIcon,
+} from '@phosphor-icons/react'
 import { useNavigate, useRouter } from '@tanstack/react-router'
 import {
 	useCallback,
@@ -180,6 +184,7 @@ export function RecipeEditor({
 	recipe,
 	defaultTitle = '',
 	pasted,
+	onImportLink,
 	onDone,
 }: {
 	recipe?: EditableRecipe | undefined
@@ -187,6 +192,7 @@ export function RecipeEditor({
 	defaultTitle?: string
 	// A whole recipe pasted elsewhere, to sort into this new one.
 	pasted?: string | undefined
+	onImportLink?: (url?: string) => void
 	onDone: (recipeId: string) => void
 }) {
 	const router = useRouter()
@@ -452,10 +458,82 @@ export function RecipeEditor({
 					/>
 				</RecipeIntro>
 				{!recipe && !name.trim() && !unnamed ? (
-					<p className="text-muted-foreground flex flex-wrap items-center gap-x-1.5 gap-y-1 text-sm font-semibold">
-						<ClipboardTextIcon size={16} weight="bold" aria-hidden />
-						or paste a whole recipe and we&rsquo;ll sort it out
-					</p>
+					<div className="flex flex-wrap gap-2" aria-label="start a recipe">
+						{onImportLink ? (
+							<button
+								type="button"
+								className={cn(
+									quietActionClassName,
+									'border-foreground/40 inline-flex items-center gap-1.5 border',
+								)}
+								onClick={() => {
+									if (
+										!form.current ||
+										!empty(form.current) ||
+										form.current
+											.querySelector<HTMLInputElement>('#edit-title')
+											?.value.trim()
+									) {
+										toast('Start with an empty recipe to import a link')
+
+										return
+									}
+
+									onImportLink()
+								}}
+							>
+								<LinkSimpleIcon size={16} aria-hidden /> import link
+							</button>
+						) : null}
+						<button
+							type="button"
+							className={cn(
+								quietActionClassName,
+								'border-foreground/40 inline-flex items-center gap-1.5 border',
+							)}
+							onClick={async () => {
+								if (
+									!form.current ||
+									!empty(form.current) ||
+									form.current
+										.querySelector<HTMLInputElement>('#edit-title')
+										?.value.trim()
+								) {
+									toast('Start with an empty recipe to paste text')
+
+									return
+								}
+
+								const text = await navigator.clipboard
+									.readText()
+									.catch(() => '')
+
+								if (
+									!form.current ||
+									!empty(form.current) ||
+									form.current
+										.querySelector<HTMLInputElement>('#edit-title')
+										?.value.trim()
+								)
+									return
+
+								if (!text.trim()) {
+									toast('Paste a whole recipe into the name field')
+									form.current
+										.querySelector<HTMLInputElement>('#edit-title')
+										?.focus()
+
+									return
+								}
+
+								if (/^https?:\/\/\S+$/i.test(text.trim()) && onImportLink)
+									onImportLink(text.trim())
+								else sortPasted(text)
+							}}
+						>
+							<ClipboardTextIcon size={16} aria-hidden /> paste text
+						</button>
+					</div>
 				) : null}
 				{unnamed && !name.trim() ? (
 					<FieldError id="edit-title-error">

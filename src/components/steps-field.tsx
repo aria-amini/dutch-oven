@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from 'react'
 
 import {
 	fieldClassName,
-	fieldHintClassName,
 	fieldLabelClassName,
 	placeholderClassName,
 } from '@/components/recipe-form'
@@ -92,10 +91,6 @@ export function StepsField({
 	return (
 		<fieldset className="flex flex-col gap-2">
 			<legend className={cn(fieldLabelClassName, 'text-lg')}>steps</legend>
-			<p id="steps-hint" className={cn(fieldHintClassName, 'mb-1')}>
-				one at a time, in the order you cook. enter starts the next, and a
-				pasted list splits into steps
-			</p>
 			<SortableList
 				items={rows.map((row) => row.id)}
 				describe={describe}
@@ -128,7 +123,6 @@ export function StepsField({
 										rows={1}
 										value={row.text}
 										aria-label={`Step ${index + 1}`}
-										aria-describedby="steps-hint"
 										enterKeyHint="next"
 										placeholder={
 											index === 0 ? 'boil the pasta' : 'stir in the miso'

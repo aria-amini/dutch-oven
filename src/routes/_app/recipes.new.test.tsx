@@ -93,6 +93,59 @@ describe('write a recipe', () => {
 			.not.toBeInTheDocument()
 	})
 
+	test('sorts clipboard text from the new recipe action', async () => {
+		const clipboard = vi
+			.spyOn(navigator.clipboard, 'readText')
+			.mockResolvedValue(
+				'Toast\nIngredients\n2 slices bread\nSteps\nToast the bread.',
+			)
+
+		try {
+			const { screen } = await renderRoute({
+				path: '/recipes/new',
+				session: testSession,
+			})
+
+			await screen
+				.getByRole('button', { name: 'paste text', exact: true })
+				.click()
+			await expect
+				.element(screen.getByRole('textbox', { name: 'name' }))
+				.toHaveValue('Toast')
+			await expect
+				.element(screen.getByRole('textbox', { name: 'Step 1' }))
+				.toHaveValue('Toast the bread.')
+		} finally {
+			clipboard.mockRestore()
+		}
+	})
+
+	test('offers import from the empty editor and keeps the editor when cancelled', async () => {
+		const { screen } = await renderRoute({
+			path: '/recipes/new',
+			session: testSession,
+		})
+
+		await expect
+			.element(
+				screen.getByRole('button', { name: 'blank recipe', exact: true }),
+			)
+			.not.toBeInTheDocument()
+		await expect
+			.element(screen.getByRole('button', { name: 'paste text', exact: true }))
+			.toBeVisible()
+		await screen
+			.getByRole('button', { name: 'import link', exact: true })
+			.click()
+		await expect
+			.element(screen.getByRole('dialog', { name: 'import a recipe' }))
+			.toBeVisible()
+		await userEvent.keyboard('{Escape}')
+		await expect
+			.element(screen.getByRole('textbox', { name: 'name' }))
+			.toBeVisible()
+	})
+
 	test('saves a draft once it has a name, then keeps it up to date', async () => {
 		const { screen } = await renderRoute({
 			path: '/recipes/new',

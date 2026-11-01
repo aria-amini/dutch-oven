@@ -41,7 +41,6 @@ export function RecipeActionsProvider({
 		() => ({
 			find: (query = '') => setFinder({ open: true, query }),
 			importLink: (url) => {
-				setFinder((current) => ({ ...current, open: false }))
 				setImporting({ open: true, url })
 			},
 		}),
@@ -61,6 +60,15 @@ export function RecipeActionsProvider({
 		return () => window.removeEventListener('keydown', toggle)
 	}, [])
 
+	const importDialog = (
+		<ImportDialog
+			open={importing.open}
+			defaultValue={importing.url}
+			onOpenChange={(open) => setImporting((current) => ({ ...current, open }))}
+			onImported={() => setFinder((current) => ({ ...current, open: false }))}
+		/>
+	)
+
 	return (
 		<RecipeActionsContext.Provider value={actions}>
 			{children}
@@ -69,14 +77,10 @@ export function RecipeActionsProvider({
 				defaultQuery={finder.query}
 				onOpenChange={(open) => setFinder((current) => ({ ...current, open }))}
 				onImportLink={actions.importLink}
-			/>
-			<ImportDialog
-				open={importing.open}
-				defaultValue={importing.url}
-				onOpenChange={(open) =>
-					setImporting((current) => ({ ...current, open }))
-				}
-			/>
+			>
+				{finder.open ? importDialog : null}
+			</RecipeFinder>
+			{finder.open ? null : importDialog}
 		</RecipeActionsContext.Provider>
 	)
 }

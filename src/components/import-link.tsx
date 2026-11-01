@@ -151,10 +151,12 @@ export function ImportLinkForm({
 
 // The link field on its own, centered over the page.
 export function ImportDialog({
+	onImported,
 	open,
 	onOpenChange,
 	defaultValue,
 }: {
+	onImported?: () => void
 	open: boolean
 	onOpenChange: (open: boolean) => void
 	// A link carried over from the search.
@@ -184,7 +186,10 @@ export function ImportDialog({
 					<ImportLinkForm
 						inputRef={field}
 						defaultValue={defaultValue}
-						onImported={() => onOpenChange(false)}
+						onImported={() => {
+							onOpenChange(false)
+							onImported?.()
+						}}
 					/>
 				</Dialog.Popup>
 			</Dialog.Portal>

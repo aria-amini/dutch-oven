@@ -123,6 +123,9 @@ describe('the one box', () => {
 		for (const name of [/blank recipe/, /import link/, /paste text/])
 			await expect.element(screen.getByRole('option', { name })).toBeVisible()
 
+		await expect
+			.element(screen.getByText('start', { exact: true }))
+			.not.toBeInTheDocument()
 		await expect.element(screen.getByText('still writing')).toBeVisible()
 		await expect
 			.element(screen.getByRole('option', { name: /shakshuka/ }))
@@ -299,10 +302,7 @@ describe('the one box', () => {
 			.getByRole('list', { name: 'ingredients' })
 			.element()
 
-		expect(ingredients.querySelectorAll('img')).toHaveLength(2)
-		expect(
-			ingredients.querySelectorAll('img')[1]?.getAttribute('src'),
-		).toContain('/sprites/pantry/lemon.png')
+		expect(ingredients.querySelectorAll('img')).toHaveLength(0)
 		const dialog = document.querySelector('[role="dialog"]')
 
 		if (!dialog) throw new Error('missing finder dialog')
@@ -346,7 +346,9 @@ describe('the one box', () => {
 		})
 		const { screen, queryClient } = await openBox()
 		await screen.getByRole('option', { name: /lemon chicken/ }).click()
-		await expect.element(screen.getByText('1 lemon')).toBeVisible()
+		await expect
+			.element(screen.getByRole('list', { name: 'ingredients' }))
+			.toHaveTextContent('1 lemon')
 		queryClient.setQueryData(['popular-recipes'], {
 			warming: false,
 			results: [
@@ -536,15 +538,24 @@ describe('the one box', () => {
 			.toHaveValue('weeknight dal')
 	})
 
-	test('opens the import dialog from its way to start', async () => {
-		const { screen } = await openBox()
-
+	test('layers import over the finder and restores its search on close', async () => {
+		const { screen, input } = await openBox()
 		await screen.getByRole('option', { name: /import link/ }).click()
 		await expect
 			.element(screen.getByRole('textbox', { name: 'recipe link' }))
 			.toHaveFocus()
 		await expect
-			.element(screen.getByRole('combobox', { name: 'find a recipe' }))
+			.element(screen.getByRole('dialog', { name: 'import a recipe' }))
+			.toBeVisible()
+		await userEvent.keyboard('{Escape}')
+		await expect
+			.element(screen.getByRole('dialog', { name: 'find a recipe' }))
+			.toBeVisible()
+		await input.fill('lemon')
+		await expect.element(input).toHaveValue('lemon')
+		await userEvent.keyboard('{Escape}')
+		await expect
+			.element(screen.getByRole('dialog', { name: 'find a recipe' }))
 			.not.toBeInTheDocument()
 	})
 })

@@ -7,12 +7,10 @@ import {
 	type LineCompletion,
 } from '@/components/ingredient-combobox'
 import {
-	fieldHintClassName,
 	fieldLabelClassName,
 	placeholderClassName,
 } from '@/components/recipe-form'
 import { SortableList, SortableRow } from '@/components/sortable-list'
-import { resolveSpriteSrc } from '@/lib/pantry/sprites'
 import {
 	formatIngredientHeading,
 	ingredientHeading,
@@ -53,25 +51,6 @@ const completion: LineCompletion = {
 
 		return line.replace(name, '') + suggestion
 	},
-}
-
-// The food's pixel icon, found from the line's name as it is typed.
-function IngredientIcon({ line }: { line: string }) {
-	const food = parseIngredientLine(line).name.trim()
-
-	return (
-		<span aria-hidden className="grid size-11 shrink-0 place-items-center">
-			{food ? (
-				<img
-					src={resolveSpriteSrc(food)}
-					alt=""
-					className="size-8 object-contain [image-rendering:pixelated]"
-				/>
-			) : (
-				<CarrotIcon size={20} className="text-foreground/25" />
-			)}
-		</span>
-	)
 }
 
 const addButtonClassName =
@@ -192,12 +171,14 @@ export function IngredientListField({
 	return (
 		<fieldset className="flex flex-col gap-2">
 			<legend className={cn(fieldLabelClassName, 'text-lg')}>
+				<CarrotIcon
+					size={18}
+					weight="duotone"
+					aria-hidden
+					className="text-kitchen-basil mr-2 inline-block align-middle"
+				/>
 				ingredients
 			</legend>
-			<p className={cn(fieldHintClassName, 'mb-1')}>
-				one per row, the way you&rsquo;d write it. paste a list and it splits
-				into rows, and add a section to group them, like for the sauce
-			</p>
 			<SortableList
 				items={rows.map((row) => row.id)}
 				describe={describe}
@@ -216,6 +197,12 @@ export function IngredientListField({
 								row.heading ? (
 									<>
 										{handle}
+										<CarrotIcon
+											size={18}
+											weight="duotone"
+											aria-hidden
+											className="text-kitchen-basil shrink-0"
+										/>
 										<input
 											type="hidden"
 											name="ingredient"
@@ -254,7 +241,6 @@ export function IngredientListField({
 											value={lineOf(row)}
 										/>
 										<div className="border-input bg-card focus-within:outline-kitchen-eggplant relative flex min-w-0 flex-1 items-start rounded-xl border group-data-[dragging=true]:border-transparent focus-within:outline-2 focus-within:outline-offset-2">
-											<IngredientIcon line={row.text} />
 											<div className="min-w-0 flex-1">
 												<IngredientCombobox
 													bare

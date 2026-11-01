@@ -24,11 +24,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton'
 import { popularRecipes, type FoundRecipe } from '@/lib/discover/server'
 import { importRecipe } from '@/lib/import/server'
-import { resolveSpriteSrc } from '@/lib/pantry/sprites'
-import {
-	ingredientHeading,
-	parseIngredientLine,
-} from '@/lib/recipes/ingredient-line'
+import { ingredientHeading } from '@/lib/recipes/ingredient-line'
 import { formatMinutes, matchesRecipeQuery } from '@/lib/recipes/model'
 import { isPastedRecipe } from '@/lib/recipes/paste'
 import { getRecipe, listShelf } from '@/lib/recipes/server'
@@ -50,25 +46,21 @@ type Option =
 const starts: {
 	start: Start
 	label: string
-	hint: string
 	icon: typeof PencilSimpleIcon
 }[] = [
 	{
 		start: 'write',
 		label: 'blank recipe',
-		hint: 'write your own',
 		icon: PencilSimpleIcon,
 	},
 	{
 		start: 'import',
 		label: 'import link',
-		hint: 'from any site',
 		icon: LinkSimpleIcon,
 	},
 	{
 		start: 'paste',
 		label: 'paste text',
-		hint: 'we sort it',
 		icon: ClipboardTextIcon,
 	},
 ]
@@ -200,6 +192,7 @@ function Status({ children }: { children: React.ReactNode }) {
 // from. Opened from the shelf's search, ⌘K anywhere, or the phone's round
 // button.
 export function RecipeFinder({
+	children,
 	open,
 	onOpenChange,
 	defaultQuery,
@@ -209,6 +202,7 @@ export function RecipeFinder({
 	onOpenChange: (open: boolean) => void
 	defaultQuery: string
 	onImportLink: (url?: string) => void
+	children?: React.ReactNode
 }) {
 	const input = useRef<HTMLInputElement>(null)
 
@@ -229,6 +223,7 @@ export function RecipeFinder({
 					/>
 				</Dialog.Popup>
 			</Dialog.Portal>
+			{children}
 		</Dialog.Root>
 	)
 }
@@ -304,7 +299,7 @@ function FinderPanel({
 		section('', [{ kind: 'link', url }])
 	} else if (!trimmed) {
 		section(
-			'start',
+			'',
 			starts.map(({ start }): Option => ({ kind: 'start', start })),
 		)
 
@@ -753,19 +748,19 @@ function SectionRows({
 		<>
 			{label ? <SectionLabel>{label}</SectionLabel> : null}
 			{startRow ? (
-				<li role="presentation" className="grid gap-2 px-3 pb-1 md:grid-cols-3">
+				<li
+					role="presentation"
+					className="grid grid-cols-3 gap-2 px-3 pt-3 pb-1"
+				>
 					<ul role="group" aria-label="start" className="contents">
 						{options.map((option, offset) => {
 							if (option.kind !== 'start') return null
 							const index = from + offset
 
-							const {
-								label: name,
-								hint,
-								icon: Icon,
-							} = starts.find((start) => start.start === option.start) ?? {
+							const { label: name, icon: Icon } = starts.find(
+								(start) => start.start === option.start,
+							) ?? {
 								label: '',
-								hint: '',
 								icon: PencilSimpleIcon,
 							}
 
@@ -775,15 +770,12 @@ function SectionRows({
 									{...optionProps(index, option)}
 									className={cn(
 										rowClassName(index),
-										'border-input flex-col items-start gap-0.5 rounded-xl border px-3 py-2.5',
+										'border-foreground/40 rounded-lg border px-3 py-2',
 									)}
 								>
 									<span className="flex items-center gap-1.5 text-sm font-semibold">
 										<Icon size={16} weight="bold" aria-hidden />
 										{name}
-									</span>
-									<span className="text-muted-foreground text-xs font-semibold">
-										{hint}
 									</span>
 								</li>
 							)
@@ -1067,11 +1059,6 @@ function RecipePreview({
 										key={line + index}
 										className="border-foreground/15 flex items-center gap-3 border-b px-4 py-2.5 text-sm font-semibold last:border-b-0"
 									>
-										<img
-											src={resolveSpriteSrc(parseIngredientLine(line).name)}
-											alt=""
-											className="size-8 shrink-0 object-contain [image-rendering:pixelated]"
-										/>
 										<span>
 											<Marked text={line} terms={terms} />
 										</span>

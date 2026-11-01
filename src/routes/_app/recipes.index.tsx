@@ -50,7 +50,7 @@ function Shelf() {
 		<main className="flex-1">
 			<motion.div {...enter} className="flex flex-col gap-8 p-6 md:p-10">
 				<h1 className="sr-only">recipes</h1>
-				<div className="flex flex-wrap items-center gap-3">
+				<div className="flex w-full max-w-3xl flex-wrap items-center gap-3">
 					<FinderBox onOpen={() => find()} />
 					<div className="hidden items-center gap-3 md:flex">
 						<ImportLinkButton onClick={() => importLink()} />
@@ -66,9 +66,10 @@ function Shelf() {
 					</div>
 				</div>
 				{isEmpty ? (
-					<Link
-						to="/recipes/new"
-						className="border-foreground/50 bg-kitchen-yolk/25 text-foreground hover:bg-kitchen-yolk/40 focus-visible:outline-kitchen-eggplant relative block aspect-square w-full max-w-md rounded-xl border border-dashed text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 md:aspect-auto md:h-[calc(var(--spacing-tile)*2+16px)] md:w-[calc(var(--spacing-tile)*2+16px)]"
+					<button
+						type="button"
+						onClick={() => find()}
+						className="border-foreground/50 bg-kitchen-yolk/25 text-foreground hover:bg-kitchen-yolk/40 focus-visible:outline-kitchen-eggplant relative block aspect-square w-full max-w-md cursor-pointer rounded-xl border border-dashed text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 md:aspect-auto md:h-[calc(var(--spacing-tile)*2+16px)] md:w-[calc(var(--spacing-tile)*2+16px)]"
 					>
 						<span className="bg-kitchen-yolk absolute top-4 right-4 grid size-12 place-items-center rounded-full">
 							<ArrowRight weight="bold" className="size-6" aria-hidden />
@@ -78,10 +79,10 @@ function Shelf() {
 								save your first recipe
 							</span>
 							<span className="text-foreground/70 text-sm font-semibold">
-								write your own to start
+								find one, import a link, or write your own
 							</span>
 						</span>
-					</Link>
+					</button>
 				) : null}
 				{isEmpty ? null : (
 					<section
