@@ -202,8 +202,8 @@ importers:
         version: 1.23.0
     devDependencies:
       '@aamini/config':
-        specifier: ^0.2.2
-        version: 0.2.2(b55059ffea05941ce10371a12636f28a)
+        specifier: ^0.2.3
+        version: 0.2.3(b55059ffea05941ce10371a12636f28a)
       '@aws-sdk/client-s3':
         specifier: ^3.1073.0
         version: 3.1151.0
@@ -390,8 +390,8 @@ importers:
 
 packages:
 
-  '@aamini/config@0.2.2':
-    resolution: {integrity: sha512-K1L/3H2aMF0KNgeHqfPT5Ai8BGfanwOuHAXV5cxQ0e5zPA6QevrcsPD0dBGFN9H/hINJm06Gp5jHXw9K94Xq0w==}
+  '@aamini/config@0.2.3':
+    resolution: {integrity: sha512-TBUoEknaYURTbH9NnYiWfNYmNc+LstGxJKVJDGkCkZzqtYyB01ZNSIaY1ALCMZBkwzaOFE12T+zcM2Gt0c5WMA==}
     hasBin: true
     peerDependencies:
       '@playwright/test': ^1.61.0
@@ -6237,7 +6237,7 @@ packages:
 
 snapshots:
 
-  '@aamini/config@0.2.2(b55059ffea05941ce10371a12636f28a)':
+  '@aamini/config@0.2.3(b55059ffea05941ce10371a12636f28a)':
     dependencies:
       execa: 10.1.1
       vite-plus: 1.1.0(@opentelemetry/api@1.9.1)(@types/node@26.6.5)(@vitest/browser-playwright@5.0.3)(@vitest/ui@5.0.3)(esbuild@0.28.2)(jiti@2.7.0)(msw@2.15.0(@types/node@26.6.5)(typescript@6.0.3))(playwright@1.64.0)(tsx@4.23.15)(typescript@6.0.3)(yaml@2.9.1)

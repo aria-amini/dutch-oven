@@ -40,7 +40,7 @@
 		"varlock": "^1.14.1"
 	},
 	"devDependencies": {
-		"@aamini/config": "^0.2.2",
+		"@aamini/config": "^0.2.3",
 		"@aws-sdk/client-s3": "^3.1073.0",
 		"@aws-sdk/s3-request-presigner": "^3.1073.0",
 		"@base-ui/react": "^1.9.0",
