@@ -1,7 +1,7 @@
 import { and, eq } from 'drizzle-orm'
 
 import { type Database, getDb } from '@/db/connection'
-import { cookingProgress, mealLogs, recipes } from '@/db/schema'
+import { cookingProgress, recipes } from '@/db/schema'
 import { ingredientHeading } from '@/lib/recipes/ingredient-line'
 import { getRecipeForUser } from '@/lib/recipes/repository'
 
@@ -78,13 +78,6 @@ export async function updateCookingForUser(
 		}
 
 		if (data.action === 'finish') {
-			if (stored.active)
-				await tx.insert(mealLogs).values({
-					id: crypto.randomUUID(),
-					userId,
-					recipeId: data.recipeId,
-					cookedAt: new Date(),
-				})
 			await tx.delete(cookingProgress).where(where)
 
 			return null

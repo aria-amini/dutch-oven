@@ -339,18 +339,10 @@ function RecipeView({
 						<button
 							type="button"
 							disabled={busy}
-							onClick={() => command.mutate({ action: 'pause' })}
-							className="focus-visible:outline-kitchen-eggplant rounded-lg px-3 py-2 text-sm font-semibold underline focus-visible:outline-2 disabled:opacity-50"
-						>
-							exit cooking
-						</button>
-						<button
-							type="button"
-							disabled={busy}
 							onClick={() => command.mutate({ action: 'finish' })}
 							className="bg-kitchen-basil focus-visible:outline-kitchen-eggplant rounded-lg px-4 py-2 text-sm font-bold focus-visible:outline-2 disabled:opacity-50"
 						>
-							finish cooking
+							end cooking
 						</button>
 					</div>
 				) : null}

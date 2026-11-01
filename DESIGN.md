@@ -348,9 +348,9 @@ source headings stay text-only.
 Start cooking restores source order. Checkboxes are visible before cooking;
 clicking one asks to start, and confirmation checks the selected item. Cancel
 leaves the checklist unchanged. Progress is saved per user and recipe on the
-server, including across devices. Exit cooking keeps progress for Resume
-cooking; Finish cooking clears it and records a meal. Changed ingredient or step
-content invalidates stale checkoffs.
+server, including across devices. End cooking clears the session without
+recording a meal. Changed ingredient or step content invalidates stale
+checkoffs.
 
 A warm yolk card at the bottom of the sidebar links to each active recipe, shows
 step progress, and counts elapsed time since starting (including time away). On

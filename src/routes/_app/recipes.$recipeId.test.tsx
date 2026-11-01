@@ -526,7 +526,7 @@ describe('recipe detail', () => {
 		await expect
 			.poll(() =>
 				screen
-					.getByRole('button', { name: 'finish cooking', exact: true })
+					.getByRole('button', { name: 'end cooking', exact: true })
 					.element()
 					.hasAttribute('disabled'),
 			)
@@ -557,7 +557,7 @@ describe('recipe detail', () => {
 			)
 			.toBeChecked()
 		await screen
-			.getByRole('button', { name: 'finish cooking', exact: true })
+			.getByRole('button', { name: 'end cooking', exact: true })
 			.click()
 		await expect.poll(() => cookingState.progress).toBeNull()
 	})

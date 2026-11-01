@@ -45,7 +45,7 @@ async function setup(db: Database) {
 }
 
 describe('server cooking progress', () => {
-	test('persists, resumes, checks, and finishes exactly once', async ({
+	test('persists progress and ends without recording a meal', async ({
 		db,
 	}) => {
 		const { userId, recipeId } = await setup(db)
@@ -96,7 +96,7 @@ describe('server cooking progress', () => {
 				.where(
 					and(eq(mealLogs.userId, userId), eq(mealLogs.recipeId, recipeId)),
 				),
-		).toHaveLength(1)
+		).toHaveLength(0)
 	})
 
 	test('rejects private recipes, headings, and checks outside cooking; invalidates progress after an edit', async ({
