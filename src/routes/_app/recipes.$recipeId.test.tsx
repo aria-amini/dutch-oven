@@ -449,6 +449,22 @@ describe('recipe detail', () => {
 		expect(updateCalls.calls.at(-1)?.finalize).toBe(true)
 	})
 
+	test('starts cooking directly from the start button', async () => {
+		if (!recipeState.recipe) throw new Error('recipe was not seeded')
+		recipeState.recipe.ingredients = ['1 carrot']
+		const { screen } = await renderRoute({ path: '/recipes/recipe-1', session })
+		await screen
+			.getByRole('button', { name: 'start cooking', exact: true })
+			.click()
+		await expect
+			.element(screen.getByRole('button', { name: 'end cooking' }))
+			.toBeVisible()
+		await expect
+			.element(screen.getByRole('dialog', { name: 'Start cooking?' }))
+			.not.toBeInTheDocument()
+		expect(cookingState.progress?.active).toBe(true)
+	})
+
 	test('starts from a checklist confirmation, persists checks, and finishes', async () => {
 		if (!recipeState.recipe) throw new Error('recipe was not seeded')
 		recipeState.recipe.owned = false

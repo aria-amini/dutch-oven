@@ -370,9 +370,7 @@ function RecipeView({
 							progress.isError ||
 							(!recipe.ingredients.length && !recipe.steps.length)
 						}
-						onClick={() => {
-							setStartPrompt('')
-						}}
+						onClick={() => command.mutate({ action: 'start' })}
 						className={cn(
 							recipeActionClassName,
 							'border-input w-auto border bg-kitchen-basil/15',
