@@ -42,7 +42,7 @@ const guest = {
 const isPhone = () => window.innerWidth < 768
 
 describe('app nav', () => {
-	test('disables unfinished destinations and opens the shelf from the root', async () => {
+	test('opens WIP pages for unfinished destinations and opens the shelf from the root', async () => {
 		const { screen, router } = await renderRoute({ path: '/', session: member })
 
 		const nav = screen.getByRole('navigation', { name: 'Primary' })
@@ -50,11 +50,11 @@ describe('app nav', () => {
 			.element(nav.getByRole('link', { name: 'recipes' }))
 			.toHaveAttribute('aria-current', 'page')
 		await expect
-			.element(nav.getByRole('button', { name: 'ingredients — coming soon' }))
-			.toBeDisabled()
+			.element(nav.getByRole('link', { name: 'ingredients' }))
+			.toHaveAttribute('href', '/coming-soon/ingredients')
 		await expect
-			.element(nav.getByRole('button', { name: 'groceries — coming soon' }))
-			.toBeDisabled()
+			.element(nav.getByRole('link', { name: 'groceries' }))
+			.toHaveAttribute('href', '/coming-soon/groceries')
 		expect(router.state.location.pathname).toBe('/recipes')
 		expect(
 			nav
@@ -62,8 +62,31 @@ describe('app nav', () => {
 				.elements()
 				.map((link) => link.textContent)
 				.filter((label) => label !== 'dutch-oven' && label !== 'add'),
-		).toEqual(['recipes'])
+		).toEqual(['recipes', 'ingredients', 'groceries'])
 	})
+
+	test.each(['ingredients', 'groceries'])(
+		'opens the %s WIP page from navigation',
+		async (label) => {
+			const { screen } = await renderRoute({
+				path: '/recipes',
+				session: member,
+			})
+
+			await screen
+				.getByRole('navigation', { name: 'Primary' })
+				.getByRole('link', { name: label })
+				.click()
+			await expect
+				.element(screen.getByRole('heading', { name: label, exact: true }))
+				.toBeVisible()
+			await expect.element(screen.getByText('work in progress')).toBeVisible()
+			await screen.getByRole('link', { name: 'back to recipes' }).click()
+			await expect
+				.element(screen.getByRole('button', { name: /find a recipe/ }))
+				.toBeVisible()
+		},
+	)
 
 	test('puts profile and sign out in the account menu', async () => {
 		const { screen } = await renderRoute({ path: '/recipes', session: member })

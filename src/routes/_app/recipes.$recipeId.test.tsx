@@ -3,6 +3,7 @@ import { toast } from 'sonner'
 import { beforeEach, describe, expect, test, vi } from 'vite-plus/test'
 import { userEvent } from 'vitest/browser'
 
+import type { getCooking, updateCooking } from '@/lib/cooking/server'
 import type { getRecipe } from '@/lib/recipes/server'
 
 type Recipe = NonNullable<Awaited<ReturnType<typeof getRecipe>>>
@@ -23,6 +24,60 @@ const updateCalls = vi.hoisted(() => {
 
 	return { calls, deleted, saved }
 })
+
+const cookingState = vi.hoisted<{
+	progress: Awaited<ReturnType<typeof getCooking>>
+	checkGate: Promise<void> | null
+	failCheck: boolean
+}>(() => ({ progress: null, checkGate: null, failCheck: false }))
+
+vi.mock('@/lib/cooking/server', () => ({
+	listActiveCooking: () =>
+		Promise.resolve(
+			cookingState.progress?.active
+				? [{ ...cookingState.progress, title: 'Pasta', steps: 1 }]
+				: [],
+		),
+	getCooking: () => Promise.resolve(cookingState.progress),
+	updateCooking: async ({ data }: Parameters<typeof updateCooking>[0]) => {
+		if (data.action === 'check') {
+			await cookingState.checkGate
+
+			if (cookingState.failCheck) throw new Error('Could not save check')
+		}
+
+		if (data.action === 'finish') {
+			cookingState.progress = null
+
+			return null
+		}
+
+		const current = cookingState.progress ?? {
+			userId: 'user-1',
+			recipeId: data.recipeId,
+			active: false,
+			checked: [],
+			content: '',
+			startedAt: new Date(),
+			updatedAt: new Date(),
+		}
+
+		const checked = new Set(current.checked)
+
+		if (data.item) {
+			if (data.done) checked.add(data.item)
+			else checked.delete(data.item)
+		}
+
+		cookingState.progress = {
+			...current,
+			active: data.action !== 'pause',
+			checked: [...checked],
+		}
+
+		return cookingState.progress
+	},
+}))
 
 vi.mock('@/lib/recipes/server', () => ({
 	listShelf: () => Promise.resolve({ recipes: [], collections: [] }),
@@ -97,7 +152,9 @@ describe('recipe detail', () => {
 	beforeEach(() => {
 		// A toast left over from the last test would cover the pinned actions.
 		toast.dismiss()
-		sessionStorage.clear()
+		cookingState.progress = null
+		cookingState.checkGate = null
+		cookingState.failCheck = false
 		updateCalls.calls.length = 0
 		updateCalls.deleted.length = 0
 		updateCalls.saved.length = 0
@@ -148,6 +205,67 @@ describe('recipe detail', () => {
 		await expect.element(screen.getByText('no steps yet')).toBeVisible()
 	})
 
+	test('aligns ingredient starts and switches between category and recipe order', async () => {
+		if (!recipeState.recipe) throw new Error('recipe was not seeded')
+		recipeState.recipe.ingredients = [
+			'200g pasta',
+			'2 large eggs',
+			'⅓ cup flour',
+			'salt to taste',
+		]
+		const { screen } = await renderRoute({ path: '/recipes/recipe-1', session })
+		await expect
+			.element(screen.getByText('dairy & eggs', { exact: true }))
+			.toBeVisible()
+
+		const left = (text: string) =>
+			screen.getByText(text, { exact: true }).element().getBoundingClientRect()
+				.left
+
+		expect(Math.abs(left('200g pasta') - left('⅓ cup flour'))).toBeLessThan(1)
+		await screen
+			.getByRole('button', { name: 'recipe order', exact: true })
+			.click()
+		await expect
+			.element(screen.getByText('dairy & eggs', { exact: true }))
+			.not.toBeInTheDocument()
+	})
+
+	test('keeps mixed fractions and dual-unit amounts visible in an indented list', async () => {
+		if (!recipeState.recipe) throw new Error('recipe was not seeded')
+		recipeState.recipe.ingredients = [
+			'## Ingredients',
+			'1 large onion - diced',
+			'4 large garlic cloves - diced',
+			'1 ½ tablespoons dried mint',
+			'1 1/2 teaspoons turmeric powder',
+			'½ cup dried chickpeas soaked overnight (or 1 cup canned chickpeas)',
+			'12oz / 340g fresh spinach',
+			'4oz / 120g reshteh noodles (or dried udon noodles / linguine)',
+			'½ cup liquid kashk mixture',
+			'2 tablespoons extra virgin olive oil',
+			'Salt and black pepper to taste',
+		]
+		const { screen } = await renderRoute({ path: '/recipes/recipe-1', session })
+
+		for (const amount of [
+			'1 ½ tablespoons dried mint',
+			'1 1/2 teaspoons turmeric powder',
+			'12oz / 340g fresh spinach',
+			'4oz / 120g reshteh noodles (or dried udon noodles / linguine)',
+		]) {
+			const element = screen.getByText(amount, { exact: true }).element()
+			expect(element.getBoundingClientRect().width).toBeGreaterThan(0)
+			expect(element.getBoundingClientRect().right).toBeLessThanOrEqual(
+				window.innerWidth - 16,
+			)
+		}
+
+		expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(
+			window.innerWidth,
+		)
+	})
+
 	test('shows a heading line as a group label, not a checkbox', async () => {
 		if (!recipeState.recipe) throw new Error('recipe was not seeded')
 		recipeState.recipe.ingredients = ['## for the sauce', '1 tbsp miso']
@@ -157,12 +275,18 @@ describe('recipe detail', () => {
 			session,
 		})
 
+		await expect
+			.element(screen.getByText('for the sauce'))
+			.not.toBeInTheDocument()
+		await screen
+			.getByRole('button', { name: 'recipe order', exact: true })
+			.click()
 		await expect.element(screen.getByText('for the sauce')).toBeVisible()
 		await expect
 			.element(screen.getByText('## for the sauce'))
 			.not.toBeInTheDocument()
 		await expect
-			.element(screen.getByRole('checkbox', { name: '1 tbsp miso' }))
+			.element(screen.getByText('1 tbsp miso', { exact: true }))
 			.toBeVisible()
 		await expect
 			.element(screen.getByRole('checkbox', { name: /for the sauce/ }))
@@ -225,23 +349,6 @@ describe('recipe detail', () => {
 		expect(updateCalls.calls.at(-1)).toMatchObject({
 			ingredients: ['1 tbsp miso', '200 g pasta'],
 		})
-	})
-
-	test('shows an ingredient icon in the list and the editor', async () => {
-		if (!recipeState.recipe) throw new Error('recipe was not seeded')
-		recipeState.recipe.ingredients = ['2 large eggs, beaten']
-
-		const { screen } = await renderRoute({
-			path: '/recipes/recipe-1',
-			session,
-		})
-
-		const icon = () =>
-			document.querySelector('img[src="/sprites/pantry/egg.png"]')
-
-		await expect.poll(icon).not.toBeNull()
-		await screen.getByRole('button', { name: 'edit' }).click()
-		await expect.poll(icon).not.toBeNull()
 	})
 
 	test('keeps an imported photo unless it is changed', async () => {
@@ -334,7 +441,7 @@ describe('recipe detail', () => {
 		await screen.getByRole('button', { name: 'done' }).click()
 
 		await expect
-			.element(screen.getByRole('checkbox', { name: '⅓ cup flour' }))
+			.element(screen.getByText('⅓ cup flour', { exact: true }))
 			.toBeVisible()
 		await expect
 			.element(screen.getByRole('button', { name: 'edit' }))
@@ -342,31 +449,117 @@ describe('recipe detail', () => {
 		expect(updateCalls.calls.at(-1)?.finalize).toBe(true)
 	})
 
-	test('checks off ingredients and steps while cooking, and resets on edit', async () => {
+	test('starts from a checklist confirmation, persists checks, and finishes', async () => {
 		if (!recipeState.recipe) throw new Error('recipe was not seeded')
-		recipeState.recipe.ingredients = ['200 g pasta', '1 tbsp miso']
-		recipeState.recipe.steps = ['boil the pasta']
+		recipeState.recipe.owned = false
+		recipeState.recipe.userId = null
+		recipeState.recipe.saved = false
+		recipeState.recipe.ingredients = ['1 tbsp olive oil', '200g pasta']
+		recipeState.recipe.steps = ['Boil pasta']
 
-		const { screen } = await renderRoute({
+		const { screen, router } = await renderRoute({
 			path: '/recipes/recipe-1',
 			session,
 		})
 
-		const pasta = screen.getByRole('checkbox', { name: '200 g pasta' })
-		const step = screen.getByRole('checkbox', { name: /boil the pasta/ })
+		const start = screen.getByRole('button', {
+			name: 'start cooking',
+			exact: true,
+		})
 
-		await pasta.click()
-		await step.click()
-		await expect.element(pasta).toBeChecked()
-		await expect.element(step).toBeChecked()
+		await expect.element(start).toBeEnabled()
+		expect(
+			document.querySelector('img[src="/sprites/pantry/olive-oil.png"]'),
+		).not.toBeNull()
+
+		const save = screen.getByRole('button', {
+			name: 'save to shelf',
+			exact: true,
+		})
+
+		expect(start.element().getBoundingClientRect().height).toBe(
+			save.element().getBoundingClientRect().height,
+		)
+		expect(start.element().getBoundingClientRect().top).toBe(
+			save.element().getBoundingClientRect().top,
+		)
+		expect(cookingState.progress).toBeNull()
+		const checkbox = screen.getByRole('checkbox').first()
+		await checkbox.click()
+		await expect.element(screen.getByRole('dialog')).toBeVisible()
+		expect(cookingState.progress).toBeNull()
+		await screen.getByRole('button', { name: 'cancel', exact: true }).click()
+		await expect.element(checkbox).not.toBeChecked()
+		await checkbox.click()
+		await screen
+			.getByRole('dialog')
+			.getByRole('button', { name: 'start cooking', exact: true })
+			.click()
+		await expect.poll(() => cookingState.progress?.checked.length).toBe(1)
 		await expect
-			.element(screen.getByRole('checkbox', { name: '1 tbsp miso' }))
-			.not.toBeChecked()
+			.poll(
+				() =>
+					document.querySelector('[aria-label="elapsed cooking time"]') !==
+					null,
+			)
+			.toBe(true)
 
-		await screen.getByRole('button', { name: 'edit' }).click()
-		await screen.getByRole('button', { name: 'done' }).click()
-		await expect.element(pasta).not.toBeChecked()
+		let release: () => void = () => {}
+
+		cookingState.checkGate = new Promise<void>((resolve) => {
+			release = resolve
+		})
+		const step = screen.getByRole('checkbox', { name: /Boil pasta/ })
+		await step.click()
+		await expect.element(step).toBeChecked()
+		await expect.element(step).toBeEnabled()
+		expect(
+			document.querySelector('[aria-label="Cooking tracker"]')?.textContent,
+		).toContain('1/1 steps')
+		expect(cookingState.progress?.checked).not.toContain('s0')
+		await step.click()
 		await expect.element(step).not.toBeChecked()
+		expect(
+			document.querySelector('[aria-label="Cooking tracker"]')?.textContent,
+		).toContain('0/1 steps')
+		release()
+		await expect
+			.poll(() =>
+				screen
+					.getByRole('button', { name: 'finish cooking', exact: true })
+					.element()
+					.hasAttribute('disabled'),
+			)
+			.toBe(false)
+		cookingState.checkGate = null
+		cookingState.failCheck = true
+		await step.click()
+		await expect.element(screen.getByText('Could not save check')).toBeVisible()
+		await expect.element(step).not.toBeChecked()
+		cookingState.failCheck = false
+		await router.navigate({
+			to: '/coming-soon/$feature',
+			params: { feature: 'groceries' },
+		})
+		await expect
+			.element(screen.getByRole('heading', { name: /groceries/i }))
+			.toBeVisible()
+		expect(
+			document.querySelector('[aria-label="elapsed cooking time"]'),
+		).not.toBeNull()
+		await router.navigate({
+			to: '/recipes/$recipeId',
+			params: { recipeId: 'recipe-1' },
+		})
+		await expect
+			.element(
+				screen.getByRole('checkbox', { name: '200g pasta', exact: true }),
+			)
+			.toBeChecked()
+		await screen
+			.getByRole('button', { name: 'finish cooking', exact: true })
+			.click()
+		await expect.poll(() => cookingState.progress).toBeNull()
 	})
 
 	test('edits the name and notes without asking for servings or time', async () => {

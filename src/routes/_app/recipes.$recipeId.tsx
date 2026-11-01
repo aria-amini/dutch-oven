@@ -1,9 +1,10 @@
 import {
 	ArrowLeft,
 	BookmarkSimpleIcon,
+	CookingPotIcon,
 	PencilSimple,
 } from '@phosphor-icons/react'
-import { useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
 	createFileRoute,
 	Link,
@@ -11,23 +12,26 @@ import {
 	useNavigate,
 	useRouter,
 } from '@tanstack/react-router'
-import { Fragment, useMemo, useState, useSyncExternalStore } from 'react'
+import { Fragment, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
+import { IngredientText } from '@/components/ingredient-text'
 import { RecipeEditor } from '@/components/recipe-editor'
+import {
+	Dialog,
+	DialogContent,
+	DialogTitle,
+	DialogDescription,
+} from '@/components/ui/dialog'
 import type { collections } from '@/db/schema'
+import {
+	getCooking,
+	updateCooking,
+	type listActiveCooking,
+} from '@/lib/cooking/server'
 import { importSiteForUrl, importSiteLogo } from '@/lib/import/sites'
-import { resolveSpriteSrc } from '@/lib/pantry/sprites'
-import {
-	checklistKey,
-	readChecklist,
-	subscribeChecklist,
-	writeChecklist,
-} from '@/lib/recipes/checklist'
-import {
-	ingredientHeading,
-	parseIngredientLine,
-} from '@/lib/recipes/ingredient-line'
+import { categorySprites } from '@/lib/pantry/catalog'
+import { ingredientViewRows } from '@/lib/recipes/ingredient-groups'
 import { formatMinutes } from '@/lib/recipes/model'
 import {
 	deleteRecipe,
@@ -72,7 +76,6 @@ function RecipeDetail() {
 	const navigate = useNavigate()
 	// A recipe you are writing stays in the editor until it is finished.
 	const [editing, setEditing] = useState(recipe.owned && !recipe.finalizedAt)
-	const checklist = useChecklist(recipe.id)
 
 	return (
 		<main
@@ -108,9 +111,7 @@ function RecipeDetail() {
 					<RecipeView
 						recipe={recipe}
 						books={books}
-						checklist={checklist}
 						onEdit={() => {
-							checklist.clear()
 							setEditing(true)
 						}}
 					/>
@@ -120,47 +121,182 @@ function RecipeDetail() {
 	)
 }
 
-type Checklist = ReturnType<typeof useChecklist>
-
-function useChecklist(recipeId: string) {
-	const key = checklistKey(recipeId)
-
-	const stored = useSyncExternalStore(
-		subscribeChecklist,
-		() => readChecklist(key),
-		() => '',
-	)
-
-	const checked = useMemo(
-		() => new Set(stored ? stored.split(',') : []),
-		[stored],
-	)
-
-	return {
-		has: (item: string) => checked.has(item),
-		toggle: (item: string) => {
-			const next = new Set(checked)
-
-			if (!next.delete(item)) next.add(item)
-			writeChecklist(key, [...next].join(','))
-		},
-		clear: () => writeChecklist(key, ''),
-	}
-}
-
 function RecipeView({
 	recipe,
 	books,
-	checklist,
 	onEdit,
 }: {
 	recipe: Recipe
 	books: Book[]
-	checklist: Checklist
 	onEdit: () => void
 }) {
+	const [grouped, setGrouped] = useState(true)
+	const [startPrompt, setStartPrompt] = useState<string | null>(null)
+	const versions = useRef(new Map<string, number>())
+	const client = useQueryClient()
+	const queryKey = ['cooking', recipe.id, recipe.ingredients, recipe.steps]
+
+	const updateTrackerCheck = (item: string, done: boolean) => {
+		client.setQueryData<Awaited<ReturnType<typeof listActiveCooking>>>(
+			['active-cooking'],
+			(sessions) =>
+				sessions?.map((session) => {
+					if (session.recipeId !== recipe.id) return session
+					const checked = new Set(session.checked)
+
+					if (done) checked.add(item)
+					else checked.delete(item)
+
+					return { ...session, checked: [...checked] }
+				}),
+		)
+	}
+
+	const progress = useQuery({
+		queryKey,
+		queryFn: () => getCooking({ data: { recipeId: recipe.id } }),
+		retry: false,
+		refetchOnWindowFocus: true,
+	})
+
+	const command = useMutation({
+		mutationKey: ['cooking-command', recipe.id],
+		scope: { id: `cooking-${recipe.id}` },
+		mutationFn: (
+			data: Omit<Parameters<typeof updateCooking>[0]['data'], 'recipeId'>,
+		) => updateCooking({ data: { ...data, recipeId: recipe.id } }),
+
+		onMutate: async (variables) => {
+			await client.cancelQueries({ queryKey })
+
+			if (variables.action !== 'check' || !variables.item) return null
+			const item = variables.item
+			const version = (versions.current.get(item) ?? 0) + 1
+			versions.current.set(item, version)
+
+			const previous =
+				client.getQueryData<Awaited<ReturnType<typeof getCooking>>>(queryKey)
+
+			client.setQueryData<Awaited<ReturnType<typeof getCooking>>>(
+				queryKey,
+				(current) => {
+					if (!current) return current
+					const checked = new Set(current.checked)
+
+					if (variables.done) checked.add(item)
+					else checked.delete(item)
+
+					return { ...current, checked: [...checked] }
+				},
+			)
+
+			updateTrackerCheck(item, variables.done === true)
+
+			return {
+				item,
+				version,
+				wasChecked: previous?.checked.includes(item) ?? false,
+			}
+		},
+		onSuccess: (data, variables) => {
+			if (variables.action !== 'check') {
+				setStartPrompt(null)
+				client.setQueryData(queryKey, data)
+			}
+
+			if (!data) void client.invalidateQueries({ queryKey: ['shelf'] })
+		},
+		onError: (error, _variables, context) => {
+			if (context && versions.current.get(context.item) === context.version) {
+				updateTrackerCheck(context.item, context.wasChecked)
+				client.setQueryData<Awaited<ReturnType<typeof getCooking>>>(
+					queryKey,
+					(current) => {
+						if (!current) return current
+						const checked = new Set(current.checked)
+
+						if (context.wasChecked) checked.add(context.item)
+						else checked.delete(context.item)
+
+						return { ...current, checked: [...checked] }
+					},
+				)
+			}
+
+			toast.error(
+				error.message || 'Could not save cooking progress. Please retry.',
+			)
+		},
+		onSettled: () => {
+			if (
+				client.isMutating({ mutationKey: ['cooking-command', recipe.id] }) === 1
+			) {
+				void client.invalidateQueries({ queryKey })
+				void client.invalidateQueries({ queryKey: ['active-cooking'] })
+			}
+		},
+	})
+
+	const cooking = progress.data?.active === true
+	const checked = new Set(progress.data?.checked ?? [])
+	const rows = ingredientViewRows(recipe.ingredients, !cooking && grouped)
+	const RowBody = 'label'
+	const busy = command.isPending
+
+	const toggle = (item: string) =>
+		cooking
+			? command.mutate({ action: 'check', item, done: !checked.has(item) })
+			: setStartPrompt(item)
+
 	return (
 		<>
+			<Dialog
+				open={startPrompt !== null}
+				onOpenChange={(open) => {
+					if (!open && !busy) setStartPrompt(null)
+				}}
+			>
+				<DialogContent>
+					<DialogTitle>Start cooking?</DialogTitle>
+					<DialogDescription>
+						Track ingredients and steps for {recipe.title}. Your progress is
+						saved, so you can come back anytime.
+					</DialogDescription>
+					<div className="flex justify-end gap-3">
+						<button
+							type="button"
+							onClick={() => setStartPrompt(null)}
+							disabled={busy}
+							className="rounded-md border px-3 py-2 text-sm"
+						>
+							cancel
+						</button>
+						<button
+							type="button"
+							disabled={busy}
+							className="bg-kitchen-basil rounded-md px-3 py-2 text-sm font-semibold disabled:opacity-50"
+							onClick={async () => {
+								const item = startPrompt
+
+								try {
+									await command.mutateAsync({ action: 'start' })
+
+									if (item)
+										await command.mutateAsync({
+											action: 'check',
+											item,
+											done: true,
+										})
+								} catch {
+									/* The mutation reports the error and leaves the action available. */
+								}
+							}}
+						>
+							{busy ? 'starting…' : 'start cooking'}
+						</button>
+					</div>
+				</DialogContent>
+			</Dialog>
 			<div className="flex items-start gap-4">
 				{recipe.imageUrl ? (
 					<img
@@ -176,12 +312,98 @@ function RecipeView({
 					<RecipeMeta recipe={recipe} />
 				</div>
 			</div>
+			<div
+				className={cn(
+					'mt-6 flex flex-wrap items-center gap-3',
+					!cooking && !progress.isError && 'hidden',
+				)}
+			>
+				{cooking ? (
+					<div className="border-kitchen-basil/50 bg-kitchen-basil/10 flex w-full flex-wrap items-center gap-3 rounded-xl border p-4">
+						<output
+							aria-live="polite"
+							className="mr-auto text-sm font-semibold"
+						>
+							{
+								recipe.steps.filter((_, index) => checked.has(`s${index}`))
+									.length
+							}{' '}
+							of {recipe.steps.length} steps ·{' '}
+							{
+								recipe.ingredients.filter((_, index) =>
+									checked.has(`i${index}`),
+								).length
+							}{' '}
+							ingredients ready{busy ? ' · saving…' : ''}
+						</output>
+						<button
+							type="button"
+							disabled={busy}
+							onClick={() => command.mutate({ action: 'pause' })}
+							className="focus-visible:outline-kitchen-eggplant rounded-lg px-3 py-2 text-sm font-semibold underline focus-visible:outline-2 disabled:opacity-50"
+						>
+							exit cooking
+						</button>
+						<button
+							type="button"
+							disabled={busy}
+							onClick={() => command.mutate({ action: 'finish' })}
+							className="bg-kitchen-basil focus-visible:outline-kitchen-eggplant rounded-lg px-4 py-2 text-sm font-bold focus-visible:outline-2 disabled:opacity-50"
+						>
+							finish cooking
+						</button>
+					</div>
+				) : null}
+				{progress.isError ? (
+					<p role="alert" className="text-sm">
+						Could not load cooking progress.{' '}
+						<button
+							type="button"
+							onClick={() => void progress.refetch()}
+							className="font-semibold underline"
+						>
+							retry
+						</button>
+					</p>
+				) : null}
+			</div>
 			<div className="mt-6 flex flex-wrap items-center gap-3">
 				{recipe.owned ? null : <SaveButton recipe={recipe} />}
+				{!cooking ? (
+					<button
+						type="button"
+						disabled={
+							busy ||
+							progress.isPending ||
+							progress.isError ||
+							(!recipe.ingredients.length && !recipe.steps.length)
+						}
+						onClick={() => {
+							setStartPrompt('')
+						}}
+						className={cn(
+							recipeActionClassName,
+							'border-input w-auto border bg-kitchen-basil/15',
+						)}
+					>
+						<CookingPotIcon
+							size={14}
+							weight="duotone"
+							aria-hidden
+							className="size-3.5"
+						/>
+						{busy
+							? 'starting…'
+							: progress.data
+								? 'resume cooking'
+								: 'start cooking'}
+					</button>
+				) : null}
 				<button
 					type="button"
 					className="text-muted-foreground hover:text-foreground focus-visible:outline-kitchen-eggplant inline-flex items-center gap-1 px-1 py-1 text-xs font-semibold underline focus-visible:outline-2 focus-visible:outline-offset-2"
 					onClick={onEdit}
+					disabled={cooking || busy}
 				>
 					<PencilSimple size={12} weight="bold" aria-hidden />
 					edit
@@ -196,51 +418,84 @@ function RecipeView({
 						ingredients
 					</span>
 				</h2>
-				<ul className="border-border bg-card mt-4 overflow-hidden rounded-xl border">
+				{!cooking ? (
+					<fieldset
+						aria-label="ingredient order"
+						className="border-input mt-4 inline-flex gap-1 rounded-lg border p-1"
+					>
+						{[
+							{ label: 'by category', value: true },
+							{ label: 'recipe order', value: false },
+						].map(({ label, value }) => (
+							<button
+								key={label}
+								type="button"
+								aria-pressed={grouped === value}
+								onClick={() => setGrouped(value)}
+								className={cn(
+									'focus-visible:outline-kitchen-eggplant rounded-md px-3 py-2 text-sm font-semibold focus-visible:outline-2',
+									grouped === value && 'bg-kitchen-yolk/40',
+								)}
+							>
+								{label}
+							</button>
+						))}
+					</fieldset>
+				) : null}
+
+				<ul
+					aria-label="ingredients"
+					className="border-border bg-card mt-5 overflow-hidden rounded-xl border"
+				>
 					{recipe.ingredients.length ? (
-						recipe.ingredients.map((ingredient, index) => {
-							const heading = ingredientHeading(ingredient)
+						rows.map((row) => {
+							const ingredient = row.text
+							const heading = row.kind === 'heading' ? row.text : undefined
 
 							if (heading !== undefined)
 								return (
 									<li
-										key={`${ingredient}-${index}`}
-										className="border-foreground/15 bg-muted/50 border-b px-4 pt-3 pb-2 text-sm font-bold last:border-b-0"
+										key={row.key}
+										className="border-border bg-background border-b px-4 py-3 text-sm font-semibold"
 									>
-										{heading}
+										<span className="flex items-center gap-2">
+											{row.kind === 'heading' && row.category ? (
+												<img
+													src={`/sprites/pantry/${categorySprites[row.category]}.png`}
+													alt=""
+													className="size-6 shrink-0 object-contain [image-rendering:pixelated]"
+												/>
+											) : null}
+											{heading}
+										</span>
 									</li>
 								)
 
-							const item = `i${index}`
-							const done = checklist.has(item)
+							if (row.kind !== 'ingredient') return null
+							const item = `i${row.index}`
+							const done = cooking && checked.has(item)
 
 							return (
 								<li
-									key={`${ingredient}-${index}`}
+									key={row.key}
 									className="border-foreground/15 border-b last:border-b-0"
 								>
-									<label className="flex cursor-pointer items-center gap-3 px-4 py-2.5 text-sm font-semibold">
+									<RowBody
+										className={cn(
+											'flex cursor-pointer items-start gap-3 px-4 py-3',
+											cooking && 'cursor-pointer',
+										)}
+									>
 										<input
 											type="checkbox"
+											aria-label={ingredient}
 											checked={done}
-											onChange={() => checklist.toggle(item)}
-											className="accent-kitchen-basil size-5 shrink-0"
+											onChange={() => toggle(item)}
+											disabled={progress.isPending || progress.isError}
+											className="accent-kitchen-basil mt-1 size-5 shrink-0"
 										/>
-										<img
-											src={resolveSpriteSrc(
-												parseIngredientLine(ingredient).name,
-											)}
-											alt=""
-											className="size-8 shrink-0 object-contain [image-rendering:pixelated]"
-										/>
-										<span
-											className={cn(
-												done && 'text-muted-foreground line-through',
-											)}
-										>
-											{ingredient}
-										</span>
-									</label>
+										<IngredientText text={ingredient} done={done} />
+									</RowBody>
 								</li>
 							)
 						})
@@ -263,18 +518,25 @@ function RecipeView({
 					{recipe.steps.length ? (
 						recipe.steps.map((step, index) => {
 							const item = `s${index}`
-							const done = checklist.has(item)
+							const done = cooking && checked.has(item)
 
 							return (
 								<li
 									key={`${step}-${index}`}
 									className="border-foreground/15 border-b last:border-b-0"
 								>
-									<label className="flex cursor-pointer items-start gap-3 px-4 py-3">
+									<RowBody
+										className={cn(
+											'flex cursor-pointer items-start gap-3 px-4 py-3',
+											cooking && 'cursor-pointer',
+										)}
+									>
 										<input
 											type="checkbox"
+											aria-label={`step ${index + 1}: ${step}`}
 											checked={done}
-											onChange={() => checklist.toggle(item)}
+											onChange={() => toggle(item)}
+											disabled={progress.isPending || progress.isError}
 											className="accent-kitchen-basil mt-0.5 size-5 shrink-0"
 										/>
 										<span className="text-muted-foreground mt-0.5 text-xs font-bold">
@@ -288,7 +550,7 @@ function RecipeView({
 										>
 											{step}
 										</span>
-									</label>
+									</RowBody>
 								</li>
 							)
 						})
@@ -362,13 +624,9 @@ function RecipeMeta({ recipe }: { recipe: Recipe }) {
 	)
 }
 
-// The pinned bar that holds a recipe's one solid action: in thumb reach on
-// phones, inline with the other actions from md up.
-const pinnedBarClassName =
-	'border-border bg-background pb-bar fixed inset-x-0 bottom-0 z-20 border-t px-3 pt-3 md:static md:border-t-0 md:bg-transparent md:p-0'
-
-const pinnedActionClassName =
-	'focus-visible:outline-kitchen-eggplant flex w-full items-center justify-center gap-2 rounded-md px-4 py-3.5 text-base font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 md:inline-flex md:w-auto md:gap-1.5 md:px-3 md:py-1.5 md:text-xs'
+// Shared dimensions keep the recipe's actions aligned in one compact row.
+const recipeActionClassName =
+	'focus-visible:outline-kitchen-eggplant inline-flex items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50'
 
 // A shared recipe someone opened from a search or a link. Adding it puts it on
 // the shelf as is; books come after. A secondary button, not a solid one: the
@@ -402,13 +660,13 @@ function SaveButton({ recipe }: { recipe: Recipe }) {
 	}
 
 	return (
-		<div className={pinnedBarClassName}>
+		<div className="contents">
 			<button
 				type="button"
 				disabled={pending}
 				onClick={() => void save()}
 				className={cn(
-					pinnedActionClassName,
+					recipeActionClassName,
 					'border-input bg-background hover:bg-card border md:bg-transparent',
 				)}
 			>
@@ -416,7 +674,7 @@ function SaveButton({ recipe }: { recipe: Recipe }) {
 					size={14}
 					weight={recipe.saved ? 'fill' : 'bold'}
 					aria-hidden
-					className="size-5 md:size-3.5"
+					className="size-3.5"
 				/>
 				{recipe.saved ? 'remove from shelf' : 'save to shelf'}
 			</button>

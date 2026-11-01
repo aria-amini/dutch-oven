@@ -230,14 +230,14 @@ slot, empty states — are drawn dashed; once real, the border goes solid.
   recipes. A pasted URL offers “import this recipe”; a whole recipe opens the
   editor already sorted with an Undo action.
 - Arrow keys and pointer movement highlight results. Desktop hover previews show
-  a thumbnail, ingredient sprites, and recipe sections without actions.
-  Selecting a result fills the dialog with that preview and a pinned bottom
-  “open recipe” action; Back restores the results. Desktop dialogs leave 32px
-  above and below; phones use the full screen. Saving happens on the recipe
-  page.
+  a thumbnail, ingredient sections, and recipe steps without actions. Selecting
+  a result fills the dialog with that preview and a pinned bottom “open recipe”
+  action; Back restores the results. Desktop dialogs leave 32px above and below;
+  phones use the full screen. Saving happens on the recipe page.
 
 ### Popular Recipes
 
+- The empty shelf's first-recipe card opens the finder.
 - Discovery follows the user's shelf, separated by space and a hairline. The
   “discover recipes” heading is small and muted, without a colored underline.
 - One row of compact cards uses full-color photos, readable titles and muted
@@ -250,9 +250,9 @@ slot, empty states — are drawn dashed; once real, the border goes solid.
 ### Shared Recipes
 
 - A recipe from the web exists once for everyone. An outlined “save to shelf”
-  action becomes “remove from shelf” once saved, pinned at the bottom on phones.
-  Saving does not copy the recipe. Saved recipes can be organized into books.
-  Cook logging is not part of the current MVP.
+  action becomes “remove from shelf” once saved, inline with the compact Start
+  cooking action. Saving does not copy the recipe. Saved recipes can be
+  organized into books. Cook logging is not part of the current MVP.
 - Editing a shared recipe makes your own copy on its first real change; an
   eggplant-tinted note in the editor explains this. Notes remain personal.
   Removing a shared recipe only takes it off your shelf.
@@ -270,9 +270,10 @@ slot, empty states — are drawn dashed; once real, the border goes solid.
   nothing. Pasting a whole recipe into an empty one sorts it into name,
   ingredients and steps, with Undo. Links are imported through the finder or the
   explicit import dialog.
-- Each ingredient is one free-form line with its sprite and a reorder handle.
-  Suggestions complete the food name while preserving amounts and wording. Lines
-  wrap, and the add row is dashed.
+- Each ingredient is one free-form line with a reorder handle. Only section
+  headings carry an ingredient icon; individual rows remain text. Suggestions
+  complete the food name while preserving amounts and wording. Lines wrap, and
+  the add row is dashed.
 
 ### Chips and Active States
 
@@ -299,8 +300,9 @@ slot, empty states — are drawn dashed; once real, the border goes solid.
 
 - Left rail of full-width rows: Phosphor icon (18px, filled when active) +
   lowercase 13px semibold label. Active row = yolk 30% tint with a hairline
-  border; hover = card fill. Ingredients and groceries remain visible but
-  disabled with a muted appearance and a normal arrow cursor until ready.
+  border; hover = card fill. Ingredients and groceries open dedicated
+  work-in-progress pages with a route back to recipes until those features are
+  ready.
 - Phone tab bar: three equal tabs (recipes, ingredients, groceries; icon over
   label, 56px tall, safe-area padded) pinned to the bottom behind a hairline.
   The recipes shelf alone adds a round yolk button (56px, soft float shadow)
@@ -331,3 +333,30 @@ slot, empty states — are drawn dashed; once real, the border goes solid.
 - **Don't** use gray-on-color secondary text; tint from the surface's ink.
 - **Don't** resurrect rejected worlds: neobrutalist, metro-black, pantry-shelf,
   diner ticket-rail.
+
+### Ingredient overview and cooking
+
+The recipe overview offers category and source-order views. Categories reuse
+Ingredients' catalog assignments and food aliases; source sections appear only
+in recipe order and cooking mode. Unknown foods stay under Other. Display
+grouping never changes saved ingredient order. Ingredients and steps use
+bordered, rounded lists with separated rows and naturally wrapping text.
+Quantities stay verbatim, at the same weight as the ingredient. Category
+headings use generic pantry sprites, including a bottle for oils and sauces;
+source headings stay text-only.
+
+Start cooking restores source order. Checkboxes are visible before cooking;
+clicking one asks to start, and confirmation checks the selected item. Cancel
+leaves the checklist unchanged. Progress is saved per user and recipe on the
+server, including across devices. Exit cooking keeps progress for Resume
+cooking; Finish cooking clears it and records a meal. Changed ingredient or step
+content invalidates stale checkoffs.
+
+A warm yolk card at the bottom of the sidebar links to each active recipe, shows
+step progress, and counts elapsed time since starting (including time away). On
+phones it sits above the bottom navigation. Start cooking remains a compact
+action beside Save.
+
+Checklist changes appear immediately while serialized background requests save
+them. Failed changes roll back with a retryable error; checks remain interactive
+during saves.

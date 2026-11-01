@@ -22,16 +22,16 @@ describe('groceries', () => {
 			.toBeVisible()
 	})
 
-	test('keeps its navigation disabled while the feature is unfinished', async () => {
+	test('links its navigation to a WIP page', async () => {
 		const { screen } = await renderRoute({ path: '/groceries', session })
 
 		await expect
 			.element(
 				screen
 					.getByRole('navigation', { name: 'Primary' })
-					.getByRole('button', { name: 'groceries — coming soon' }),
+					.getByRole('link', { name: 'groceries' }),
 			)
-			.toBeDisabled()
+			.toHaveAttribute('href', '/coming-soon/groceries')
 	})
 
 	test('links back to recipes', async () => {

@@ -8,6 +8,7 @@ import { Link, useRouterState } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 
 import { AccountMenu, tabClassName } from '@/components/account-menu'
+import { CookingTracker } from '@/components/cooking-tracker'
 import { useRecipeActions } from '@/components/recipe-actions'
 import { cn } from '@/lib/utils/ui'
 
@@ -38,7 +39,9 @@ export function useTabBar(): TabBarMode {
 
 	if (path === '/recipes') return 'bar-fab'
 
-	return tabBarRoutes.has(path) ? 'bar' : 'none'
+	return tabBarRoutes.has(path) || path.startsWith('/coming-soon/')
+		? 'bar'
+		: 'none'
 }
 
 // The on-screen keyboard shoves fixed bars up over the field being typed in,
@@ -79,11 +82,16 @@ export function useTabBarVisible() {
 }
 
 export function AppNav() {
+	const tabsVisible = useTabBarVisible()
+
 	return (
 		<>
 			<MobileHeader />
 			<Sidebar />
 			<TabBar />
+			<div className={cn('md:hidden', tabsVisible && '[&_aside]:bottom-20')}>
+				<CookingTracker />
+			</div>
 		</>
 	)
 }
@@ -111,27 +119,16 @@ function Sidebar() {
 				dutch-oven
 			</Link>
 			{navItems.map(({ label, icon: Icon, to }) => {
-				const active = pathname === to || pathname.startsWith(`${to}/`)
-
-				if (to !== '/recipes')
-					return (
-						<button
-							key={to}
-							type="button"
-							disabled
-							title="coming soon"
-							className="flex w-full shrink-0 cursor-default items-center gap-2 rounded-md border border-transparent px-2.5 py-1.5 text-left text-xs font-semibold opacity-40"
-						>
-							<Icon size={18} aria-hidden />
-							{label}
-							<span className="sr-only"> — coming soon</span>
-						</button>
-					)
+				const active =
+					pathname === to ||
+					pathname.startsWith(`${to}/`) ||
+					pathname === `/coming-soon/${label}`
 
 				return (
 					<Link
 						key={to}
-						to={to}
+						to={to === '/recipes' ? '/recipes' : '/coming-soon/$feature'}
+						params={to === '/recipes' ? {} : { feature: label }}
 						aria-current={active ? 'page' : undefined}
 						className={cn(
 							'focus-visible:outline-kitchen-eggplant flex w-full shrink-0 items-center gap-2 border px-2.5 py-1.5 text-xs font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 rounded-md',
@@ -145,7 +142,10 @@ function Sidebar() {
 					</Link>
 				)
 			})}
-			<AccountMenu variant="rail" />
+			<div className="mt-auto flex flex-col gap-4 pt-6">
+				<CookingTracker />
+				<AccountMenu variant="rail" />
+			</div>
 		</nav>
 	)
 }
@@ -196,29 +196,16 @@ function TabBar() {
 				className="border-border bg-background pb-safe fixed inset-x-0 bottom-0 z-20 flex items-stretch border-t md:hidden"
 			>
 				{navItems.map(({ label, icon: Icon, to }) => {
-					const active = pathname === to || pathname.startsWith(`${to}/`)
-
-					if (to !== '/recipes')
-						return (
-							<button
-								key={to}
-								type="button"
-								disabled
-								title="coming soon"
-								className={cn(tabClassName, 'cursor-default opacity-40')}
-							>
-								<span aria-hidden className="grid size-8 place-items-center">
-									<Icon size={22} />
-								</span>
-								{label}
-								<span className="sr-only"> — coming soon</span>
-							</button>
-						)
+					const active =
+						pathname === to ||
+						pathname.startsWith(`${to}/`) ||
+						pathname === `/coming-soon/${label}`
 
 					return (
 						<Link
 							key={to}
-							to={to}
+							to={to === '/recipes' ? '/recipes' : '/coming-soon/$feature'}
+							params={to === '/recipes' ? {} : { feature: label }}
 							aria-current={active ? 'page' : undefined}
 							className={cn(
 								tabClassName,
