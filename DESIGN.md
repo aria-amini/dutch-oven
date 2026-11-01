@@ -223,36 +223,39 @@ slot, empty states — are drawn dashed; once real, the border goes solid.
 
 ### Search
 
-- One search field for every recipe, one dropdown (Float shadow over a 30% ink
-  border, 14px). Typing lists your shelf first ("on your shelf": match in bold,
-  how often each was cooked, a tinted thumbnail), then "more recipes" anyone can
-  save (shared recipes open at once; recipe-site pages are brought in on pick),
-  then a closing "write “x”" row above a hairline that starts your own. A pasted
-  link becomes one "get this recipe" row, picked by Enter. Under the field, a
-  quiet line of the importer's site logos (14px, 80% opacity) ends "& most
-  recipe sites". Arrow keys move a yolk 30% highlight, Enter picks, Escape
-  closes. The highlight follows mouse movement, never a resting pointer.
+- The shelf's search control opens the global finder dialog, also available
+  through ⌘K and the round add button. It offers blank recipe, import link, and
+  paste text, followed by drafts, shelf recipes, and popular suggestions.
+- Typing matches names and ingredients, showing shelf results before more
+  recipes. A pasted URL offers “import this recipe”; a whole recipe opens the
+  editor already sorted with an Undo action.
+- Arrow keys and pointer movement highlight results. Desktop hover previews show
+  a thumbnail, ingredient sprites, and recipe sections without actions.
+  Selecting a result fills the dialog with that preview and a pinned bottom
+  “open recipe” action; Back restores the results. Desktop dialogs leave 32px
+  above and below; phones use the full screen. Saving happens on the recipe
+  page.
 
 ### Popular Recipes
 
-- The shelf has two sections, each under a small label with a 3px ingredient
-  underline: "your recipes" (yolk), then "popular recipes" (basil). Popular is
-  what other cooks save and cook, topped up with pictured recipes from the
-  indexed sites so the page never ends empty. Its tiles are photo tiles with the
-  title and the site's name on the cream strip. Picking one opens it without
-  saving it. While it loads, quiet paper blocks hold the grid; when it fails,
-  the section is left out. A search hides it.
+- Discovery follows the user's shelf, separated by space and a hairline. The
+  “discover recipes” heading is small and muted, without a colored underline.
+- One row of compact cards uses full-color photos, readable titles and muted
+  source names. More cards fit at wider breakpoints; “browse more recipes” opens
+  the finder. No tinted container, horizontal overflow, or dimming.
+- Results combine shared recipes and indexed recipe sites. Picking one opens it
+  without saving. Paper placeholders hold space while loading; errors or no
+  results leave the section out.
 
 ### Shared Recipes
 
-- A recipe from the web exists once, for everyone; saving puts it on your shelf
-  without copying it. An unsaved recipe's page offers "save to shelf" as its one
-  solid action (basil, pinned in thumb reach on phones); once saved, "cooked it"
-  takes that place and books appear.
+- A recipe from the web exists once for everyone. An outlined “save to shelf”
+  action becomes “remove from shelf” once saved, pinned at the bottom on phones.
+  Saving does not copy the recipe. Saved recipes can be organized into books.
+  Cook logging is not part of the current MVP.
 - Editing a shared recipe makes your own copy on its first real change; an
-  eggplant-tinted note in the editor says so before and after. Notes are always
-  yours and never copy anything. Removing a shared recipe only takes it off your
-  shelf.
+  eggplant-tinted note in the editor explains this. Notes remain personal.
+  Removing a shared recipe only takes it off your shelf.
 
 ### Recipe Form
 
@@ -265,11 +268,11 @@ slot, empty states — are drawn dashed; once real, the border goes solid.
   which finishes a draft and returns to the view. There is no save or cancel.
 - A recipe exists once it has a name, as a draft, so leaving early loses
   nothing. Pasting a whole recipe into an empty one sorts it into name,
-  ingredients and steps; a link pasted as a new recipe's name offers "get this
-  recipe".
-- An ingredient is one outlined line: sprite, quantity, unit and name divided by
-  hairlines inside a single row; phones stack the name over quantity and unit.
-  The add row is dashed.
+  ingredients and steps, with Undo. Links are imported through the finder or the
+  explicit import dialog.
+- Each ingredient is one free-form line with its sprite and a reorder handle.
+  Suggestions complete the food name while preserving amounts and wording. Lines
+  wrap, and the add row is dashed.
 
 ### Chips and Active States
 
@@ -296,7 +299,8 @@ slot, empty states — are drawn dashed; once real, the border goes solid.
 
 - Left rail of full-width rows: Phosphor icon (18px, filled when active) +
   lowercase 13px semibold label. Active row = yolk 30% tint with a hairline
-  border; hover = card fill.
+  border; hover = card fill. Ingredients and groceries remain visible but
+  disabled with a muted appearance and a normal arrow cursor until ready.
 - Phone tab bar: three equal tabs (recipes, ingredients, groceries; icon over
   label, 56px tall, safe-area padded) pinned to the bottom behind a hairline.
   The recipes shelf alone adds a round yolk button (56px, soft float shadow)
