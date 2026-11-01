@@ -380,15 +380,20 @@ function FinderPanel({
 				.then((recipe) =>
 					setResolved((known) => ({ ...known, [lookUrl]: recipe.id })),
 				)
-				.catch((cause: unknown) =>
-					setLookErrors((known) => ({
-						...known,
-						[lookUrl]:
-							cause instanceof Error
-								? cause.message
-								: "couldn't read that page",
-					})),
-				)
+				.catch((cause: unknown) => {
+					const message =
+						cause instanceof Error ? cause.message : "couldn't read that page"
+
+					// Limits are temporary: keep Open available for an explicit retry.
+					if (message.startsWith('too many imports')) {
+						setError(message)
+
+						return
+					}
+
+					setLookErrors((known) => ({ ...known, [lookUrl]: message }))
+				})
+
 				.finally(() => {
 					if (!cancelled)
 						setLooking((now) => (now === lookUrl ? undefined : now))

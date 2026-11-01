@@ -278,6 +278,23 @@ describe('write a recipe', () => {
 			.element(screen.getByRole('combobox', { name: 'Ingredient 1' }))
 			.toHaveValue('')
 		await expect.poll(() => state.deleted).toEqual(['recipe-new'])
+		// Pasting the same content after Undo must create another draft.
+		screen
+			.getByRole('textbox', { name: 'name' })
+			.element()
+			.dispatchEvent(
+				new ClipboardEvent('paste', {
+					clipboardData: data,
+					bubbles: true,
+					cancelable: true,
+				}),
+			)
+		await expect.poll(() => state.created).toHaveLength(2)
+		await screen.getByRole('textbox', { name: 'name' }).click()
+		await userEvent.keyboard('{Enter}')
+		await expect
+			.poll(() => state.updated.some((saved) => saved.finalize))
+			.toBe(true)
 	})
 
 	test('keeps rows already typed when a recipe is pasted into the empty name', async () => {

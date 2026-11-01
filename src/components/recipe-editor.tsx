@@ -161,6 +161,7 @@ function useAutosave(
 		stop: saver.stop,
 		resume: saver.resume,
 		settle: saver.settle,
+		forget: saver.forget,
 	}
 }
 
@@ -216,7 +217,7 @@ export function RecipeEditor({
 	const shared = recipe ? !recipe.owned : false
 
 	const autosave = useAutosave(form, recipeId, setSavedId, photoBusy)
-	const { schedule: scheduleAutosave, stop, settle, resume } = autosave
+	const { schedule: scheduleAutosave, stop, settle, resume, forget } = autosave
 
 	// A pasted recipe replaces the empty fields, so they start over from it.
 	const [seed, setSeed] = useState({
@@ -261,13 +262,14 @@ export function RecipeEditor({
 		try {
 			if (draft) await deleteRecipe({ data: { id: draft } })
 			recipeId.current = undefined
+			forget()
 			setSavedId(undefined)
 		} catch {
 			// Still a draft on the shelf, where it can be deleted by hand.
 		} finally {
 			resume()
 		}
-	}, [stop, settle, resume])
+	}, [stop, settle, resume, forget])
 
 	const announceSorted = useCallback(
 		(

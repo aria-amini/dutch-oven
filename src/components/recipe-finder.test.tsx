@@ -362,6 +362,33 @@ describe('the one box', () => {
 			.not.toBeInTheDocument()
 	})
 
+	test.each([
+		'too many imports — wait a minute and try again',
+		'too many imports in flight — try again in a moment',
+	])(
+		'keeps Open available after a temporary preview failure: %s',
+		async (message) => {
+			server.search.mockResolvedValue({
+				warming: false,
+				results: [
+					found({ url: 'https://example.com/lemon', title: 'lemon chicken' }),
+				],
+			})
+			server.import
+				.mockRejectedValueOnce(new Error(message))
+				.mockResolvedValue({ id: 'shared-1', title: 'lemon chicken' })
+			const { screen, input, router } = await openBox()
+			await input.fill('lemon')
+			await screen.getByRole('option', { name: /lemon chicken/ }).click()
+			await expect.element(screen.getByRole('alert')).toHaveTextContent(message)
+			await screen.getByRole('button', { name: 'open recipe' }).click()
+			await expect
+				.poll(() => router.state.location.pathname)
+				.toBe('/recipes/shared-1')
+			expect(server.import).toHaveBeenCalledTimes(2)
+		},
+	)
+
 	test('replaces failed preview actions with a link to the source', async () => {
 		server.search.mockResolvedValue({
 			warming: false,
