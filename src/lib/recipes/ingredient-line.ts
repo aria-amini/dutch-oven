@@ -61,7 +61,7 @@ function quantityFrom(text: string) {
 
 // ===== Lines =====
 
-const QUANTITY = `\\d+\\s+\\d+/\\d+|\\d+/\\d+|\\d*\\.\\d+|\\d+[${FRACTION_GLYPHS}]?|[${FRACTION_GLYPHS}]`
+const QUANTITY = `\\d+\\s+[${FRACTION_GLYPHS}]|\\d+\\s+\\d+/\\d+|\\d+/\\d+|\\d*\\.\\d+|\\d+[${FRACTION_GLYPHS}]?|[${FRACTION_GLYPHS}]`
 
 // A quantity ends at a space, a letter ("200g") or a bracket, so "2-3 eggs" and
 // "100% cocoa" stay as written.
