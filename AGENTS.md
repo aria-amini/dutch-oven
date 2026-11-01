@@ -60,11 +60,12 @@ daemon auto-start alone does not register the proxy URL.
 ## Local URLs
 
 Caddy terminates TLS on the Tailscale IP at 443 and proxies to the pitchfork
-proxy on loopback 9443. URLs are portless: `https://<slug>.lvh.ariaamini.com`
-(`.dev.` aliases `.lvh.`). Worktree slugs flatten to `<app>-<worktree>`, for
-example `dutch-oven-my-task`. Nested hostnames (`worktree.app.lvh…`) and direct
-`:9443` access do not work: the wildcard cert covers one level, and the proxy
-binds loopback only.
+proxy on loopback 9443. URLs are portless: `https://<slug>.dev.ariaamini.com`.
+Caddy only holds a certificate for `*.dev.ariaamini.com`, so other domains fail
+TLS. Worktree slugs flatten to `<app>-<worktree>`, for example
+`dutch-oven-my-task`. Nested hostnames (`worktree.app.dev…`) and direct `:9443`
+access do not work: the wildcard cert covers one level, and the proxy binds
+loopback only.
 
 `mise run bootstrap` registers the workspace slug and writes `BASE_URL`. Never
 run `pitchfork proxy setup` here — it would grab port 443 from the global Caddy

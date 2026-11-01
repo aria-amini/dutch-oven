@@ -168,8 +168,10 @@ boxes.
 ## Elevation & Depth
 
 Resting surfaces are flat: depth comes from a hairline and a card-cream fill.
-Floating things (menus, listboxes, toasts, a dragged row) get one soft shadow
-and no border. A border under a wide shadow is never combined.
+Floating panels (menus, listboxes, popovers, toasts, sheets) get the Float
+shadow over a 1px border of ink at 30%: on the cream ground a shadow alone let
+them melt into the page (user decision, 2026-11-01). A dragged row keeps the
+shadow alone.
 
 ### Shadow Vocabulary
 
@@ -180,10 +182,11 @@ and no border. A border under a wide shadow is never combined.
 
 ### Named Rules
 
-**The Declare-Once Rule.** A surface is elevated by a hairline or by a shadow,
-never both. No hard offset shadows anywhere. The one exception is a recipe
-tile's hover lift: the Float shadow fades in over its hairline to show it can be
-picked up, and fades out again.
+**The Declare-Once Rule.** A resting surface is elevated by a hairline or by a
+shadow, never both. No hard offset shadows anywhere. Two exceptions: floating
+panels, which carry both so they hold their edge, and a recipe tile's hover
+lift, where the Float shadow fades in over its hairline to show it can be picked
+up, and fades out again.
 
 ## Shapes
 
@@ -220,15 +223,25 @@ slot, empty states — are drawn dashed; once real, the border goes solid.
 
 ### Search
 
-- One search field for every recipe, one dropdown (Float shadow, no border,
-  14px). Typing lists your shelf first ("on your shelf": match in bold, how
-  often each was cooked, a tinted thumbnail), then "more recipes" anyone can
+- One search field for every recipe, one dropdown (Float shadow over a 30% ink
+  border, 14px). Typing lists your shelf first ("on your shelf": match in bold,
+  how often each was cooked, a tinted thumbnail), then "more recipes" anyone can
   save (shared recipes open at once; recipe-site pages are brought in on pick),
   then a closing "write “x”" row above a hairline that starts your own. A pasted
   link becomes one "get this recipe" row, picked by Enter. Under the field, a
   quiet line of the importer's site logos (14px, 80% opacity) ends "& most
   recipe sites". Arrow keys move a yolk 30% highlight, Enter picks, Escape
   closes. The highlight follows mouse movement, never a resting pointer.
+
+### Popular Recipes
+
+- The shelf has two sections, each under a small label with a 3px ingredient
+  underline: "your recipes" (yolk), then "popular recipes" (basil). Popular is
+  what other cooks save and cook, topped up with pictured recipes from the
+  indexed sites so the page never ends empty. Its tiles are photo tiles with the
+  title and the site's name on the cream strip. Picking one opens it without
+  saving it. While it loads, quiet paper blocks hold the grid; when it fails,
+  the section is left out. A search hides it.
 
 ### Shared Recipes
 
