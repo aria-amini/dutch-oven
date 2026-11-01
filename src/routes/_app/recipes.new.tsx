@@ -1,5 +1,11 @@
 import { ArrowLeft } from '@phosphor-icons/react'
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import {
+	createFileRoute,
+	Link,
+	useNavigate,
+	useRouterState,
+} from '@tanstack/react-router'
+import { useEffect } from 'react'
 import { z } from 'zod'
 
 import { RecipeEditor } from '@/components/recipe-editor'
@@ -20,6 +26,22 @@ function NewRecipe() {
 	const navigate = useNavigate()
 	const { title } = Route.useSearch()
 
+	const pasted = useRouterState({
+		select: (state) => state.location.state.pasted,
+	})
+
+	// The editor keeps what arrived; a reload must not sort it into a second
+	// draft, so the page forgets it.
+	useEffect(() => {
+		if (pasted)
+			void navigate({
+				to: '/recipes/new',
+				search: (prev) => prev,
+				state: {},
+				replace: true,
+			})
+	}, [pasted, navigate])
+
 	return (
 		<main className="flex-1">
 			<div className="flex max-w-2xl flex-col gap-6 p-6 md:p-10">
@@ -33,6 +55,7 @@ function NewRecipe() {
 				<h1 className="sr-only">write a recipe</h1>
 				<RecipeEditor
 					defaultTitle={title?.slice(0, 120) ?? ''}
+					pasted={pasted}
 					onDone={(recipeId) =>
 						void navigate({ to: '/recipes/$recipeId', params: { recipeId } })
 					}

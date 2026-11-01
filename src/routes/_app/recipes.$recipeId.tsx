@@ -1,9 +1,9 @@
 import {
 	ArrowLeft,
 	BookmarkSimpleIcon,
-	CookingPot,
 	PencilSimple,
 } from '@phosphor-icons/react'
+import { useQueryClient } from '@tanstack/react-query'
 import {
 	createFileRoute,
 	Link,
@@ -16,7 +16,6 @@ import { toast } from 'sonner'
 
 import { RecipeEditor } from '@/components/recipe-editor'
 import type { collections } from '@/db/schema'
-import { logCook, undoCook } from '@/lib/cooks/server'
 import { importSiteForUrl, importSiteLogo } from '@/lib/import/sites'
 import { resolveSpriteSrc } from '@/lib/pantry/sprites'
 import {
@@ -31,6 +30,7 @@ import {
 } from '@/lib/recipes/ingredient-line'
 import { formatMinutes } from '@/lib/recipes/model'
 import {
+	deleteRecipe,
 	getRecipe,
 	listBooks,
 	moveRecipe,
@@ -177,11 +177,7 @@ function RecipeView({
 				</div>
 			</div>
 			<div className="mt-6 flex flex-wrap items-center gap-3">
-				{recipe.saved ? (
-					<CookedButton recipe={recipe} onCooked={checklist.clear} />
-				) : (
-					<SaveButton recipe={recipe} />
-				)}
+				{recipe.owned ? null : <SaveButton recipe={recipe} />}
 				<button
 					type="button"
 					className="text-muted-foreground hover:text-foreground focus-visible:outline-kitchen-eggplant inline-flex items-center gap-1 px-1 py-1 text-xs font-semibold underline focus-visible:outline-2 focus-visible:outline-offset-2"
@@ -374,21 +370,32 @@ const pinnedBarClassName =
 const pinnedActionClassName =
 	'focus-visible:outline-kitchen-eggplant flex w-full items-center justify-center gap-2 rounded-md px-4 py-3.5 text-base font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 md:inline-flex md:w-auto md:gap-1.5 md:px-3 md:py-1.5 md:text-xs'
 
-// A shared recipe someone opened from a search or a link. Saving puts it on the
-// shelf as is; cooking and books come after.
+// A shared recipe someone opened from a search or a link. Adding it puts it on
+// the shelf as is; books come after. A secondary button, not a solid one: the
+// recipe itself is what the page is for.
 function SaveButton({ recipe }: { recipe: Recipe }) {
 	const router = useRouter()
+	const queryClient = useQueryClient()
 	const [pending, setPending] = useState(false)
 
 	const save = async () => {
 		setPending(true)
 
 		try {
-			await saveRecipe({ data: { id: recipe.id } })
-			await router.invalidate()
-			toast.success(`${recipe.title} is on your shelf`)
+			if (recipe.saved) await deleteRecipe({ data: { id: recipe.id } })
+			else await saveRecipe({ data: { id: recipe.id } })
+			await Promise.all([
+				router.invalidate(),
+				queryClient.invalidateQueries({ queryKey: ['shelf'] }),
+				queryClient.invalidateQueries({ queryKey: ['recipe', recipe.id] }),
+			])
+			toast.success(
+				recipe.saved
+					? 'removed from your shelf'
+					: `${recipe.title} is on your shelf`,
+			)
 		} catch {
-			toast.error("couldn't save that — try again")
+			toast.error("couldn't update your shelf — try again")
 		} finally {
 			setPending(false)
 		}
@@ -400,76 +407,18 @@ function SaveButton({ recipe }: { recipe: Recipe }) {
 				type="button"
 				disabled={pending}
 				onClick={() => void save()}
-				className={cn(pinnedActionClassName, 'bg-kitchen-basil')}
+				className={cn(
+					pinnedActionClassName,
+					'border-input bg-background hover:bg-card border md:bg-transparent',
+				)}
 			>
 				<BookmarkSimpleIcon
 					size={14}
-					weight="bold"
+					weight={recipe.saved ? 'fill' : 'bold'}
 					aria-hidden
 					className="size-5 md:size-3.5"
 				/>
-				save to shelf
-			</button>
-		</div>
-	)
-}
-
-function CookedButton({
-	recipe,
-	onCooked,
-}: {
-	recipe: Recipe
-	onCooked: () => void
-}) {
-	const router = useRouter()
-	const [pending, setPending] = useState(false)
-
-	const undo = async (id: string) => {
-		try {
-			await undoCook({ data: { id } })
-			await router.invalidate()
-		} catch {
-			toast.error("couldn't undo that — try again")
-		}
-	}
-
-	const cooked = async () => {
-		setPending(true)
-
-		try {
-			const cook = await logCook({ data: { recipeId: recipe.id } })
-
-			if (!cook) throw new Error('recipe not found')
-
-			await router.invalidate()
-			onCooked()
-			toast.success(`logged ${recipe.title} — nice cooking`, {
-				action: { label: 'undo', onClick: () => void undo(cook.id) },
-			})
-		} catch {
-			toast.error("couldn't log that — try again")
-		} finally {
-			setPending(false)
-		}
-	}
-
-	// Pinned to the bottom on phones so a wet thumb can always reach it; inline
-	// with the other actions from md up.
-	return (
-		<div className={pinnedBarClassName}>
-			<button
-				type="button"
-				disabled={pending}
-				onClick={() => void cooked()}
-				className={cn(pinnedActionClassName, 'bg-kitchen-yolk')}
-			>
-				<CookingPot
-					size={14}
-					weight="bold"
-					aria-hidden
-					className="size-5 md:size-3.5"
-				/>
-				cooked it
+				{recipe.saved ? 'remove from shelf' : 'save to shelf'}
 			</button>
 		</div>
 	)

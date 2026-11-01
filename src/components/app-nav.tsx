@@ -8,6 +8,7 @@ import { Link, useRouterState } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 
 import { AccountMenu, tabClassName } from '@/components/account-menu'
+import { useRecipeActions } from '@/components/recipe-actions'
 import { cn } from '@/lib/utils/ui'
 
 const navItems = [
@@ -112,6 +113,21 @@ function Sidebar() {
 			{navItems.map(({ label, icon: Icon, to }) => {
 				const active = pathname === to || pathname.startsWith(`${to}/`)
 
+				if (to !== '/recipes')
+					return (
+						<button
+							key={to}
+							type="button"
+							disabled
+							title="coming soon"
+							className="flex w-full shrink-0 cursor-default items-center gap-2 rounded-md border border-transparent px-2.5 py-1.5 text-left text-xs font-semibold opacity-40"
+						>
+							<Icon size={18} aria-hidden />
+							{label}
+							<span className="sr-only"> — coming soon</span>
+						</button>
+					)
+
 				return (
 					<Link
 						key={to}
@@ -165,6 +181,7 @@ function MobileHeader() {
 function TabBar() {
 	const mode = useTabBar()
 	const visible = useTabBarVisible()
+	const { find } = useRecipeActions()
 
 	const pathname = useRouterState({
 		select: (state) => state.location.pathname,
@@ -180,6 +197,23 @@ function TabBar() {
 			>
 				{navItems.map(({ label, icon: Icon, to }) => {
 					const active = pathname === to || pathname.startsWith(`${to}/`)
+
+					if (to !== '/recipes')
+						return (
+							<button
+								key={to}
+								type="button"
+								disabled
+								title="coming soon"
+								className={cn(tabClassName, 'cursor-default opacity-40')}
+							>
+								<span aria-hidden className="grid size-8 place-items-center">
+									<Icon size={22} />
+								</span>
+								{label}
+								<span className="sr-only"> — coming soon</span>
+							</button>
+						)
 
 					return (
 						<Link
@@ -200,13 +234,14 @@ function TabBar() {
 				})}
 			</nav>
 			{mode === 'bar-fab' ? (
-				<Link
-					to="/recipes/new"
+				<button
+					type="button"
 					aria-label="add recipe"
+					onClick={() => find()}
 					className="bg-kitchen-yolk focus-visible:outline-kitchen-eggplant bottom-fab fixed right-4 z-20 grid size-14 place-items-center rounded-full shadow-md transition-colors hover:brightness-95 focus-visible:outline-2 focus-visible:outline-offset-2 md:hidden"
 				>
 					<PlusIcon size={26} weight="bold" aria-hidden />
-				</Link>
+				</button>
 			) : null}
 		</>
 	)

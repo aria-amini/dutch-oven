@@ -22,16 +22,16 @@ describe('groceries', () => {
 			.toBeVisible()
 	})
 
-	test('is a tab, highlighted while you are on it', async () => {
+	test('keeps its navigation disabled while the feature is unfinished', async () => {
 		const { screen } = await renderRoute({ path: '/groceries', session })
 
 		await expect
 			.element(
 				screen
 					.getByRole('navigation', { name: 'Primary' })
-					.getByRole('link', { name: 'groceries' }),
+					.getByRole('button', { name: 'groceries — coming soon' }),
 			)
-			.toHaveAttribute('aria-current', 'page')
+			.toBeDisabled()
 	})
 
 	test('links back to recipes', async () => {

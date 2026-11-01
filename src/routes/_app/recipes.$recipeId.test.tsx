@@ -1,7 +1,7 @@
 import { renderRoute } from '@tests/support/render/route'
 import { toast } from 'sonner'
 import { beforeEach, describe, expect, test, vi } from 'vite-plus/test'
-import { page, userEvent } from 'vitest/browser'
+import { userEvent } from 'vitest/browser'
 
 import type { getRecipe } from '@/lib/recipes/server'
 
@@ -70,6 +70,13 @@ vi.mock('@/lib/recipes/server', () => ({
 	},
 	deleteRecipe: async ({ data }: { data: { id: string } }) => {
 		updateCalls.deleted.push(data.id)
+
+		if (recipeState.recipe && !recipeState.recipe.owned)
+			recipeState.recipe = {
+				...recipeState.recipe,
+				saved: false,
+				collectionId: null,
+			}
 	},
 }))
 
@@ -79,33 +86,6 @@ vi.mock('@/lib/s3', () => ({
 			key: 'recipes/user-1-photo',
 			url: 'https://storage.test/upload',
 		}),
-}))
-
-vi.mock('@/lib/cooks/server', () => ({
-	logCook: async ({ data }: { data: { recipeId: string } }) => {
-		const recipe = recipeState.recipe
-
-		if (!recipe || recipe.id !== data.recipeId) return null
-		recipeState.recipe = {
-			...recipe,
-			cookCount: recipe.cookCount + 1,
-			lastCookedAt: new Date(),
-		}
-
-		return { id: 'cook-1' }
-	},
-	undoCook: async () => {
-		const recipe = recipeState.recipe
-
-		if (!recipe) return null
-		recipeState.recipe = {
-			...recipe,
-			cookCount: recipe.cookCount - 1,
-			lastCookedAt: recipe.cookCount > 1 ? recipe.lastCookedAt : null,
-		}
-
-		return { id: 'cook-1' }
-	},
 }))
 
 const session = {
@@ -201,9 +181,11 @@ describe('recipe detail', () => {
 
 		await screen.getByRole('button', { name: 'edit' }).click()
 		await screen.getByRole('button', { name: 'add ingredient' }).click()
-		await screen.getByRole('spinbutton', { name: 'Quantity 2' }).fill('2')
-		await screen.getByRole('combobox', { name: 'Unit 2' }).selectOptions('tbsp')
-		await screen.getByRole('combobox', { name: 'Ingredient 2' }).fill('butter')
+		await screen
+			.getByRole('combobox', { name: 'Ingredient 2' })
+			.fill('2 tbsp butter')
+		// The suggestions would sit over the button.
+		await userEvent.keyboard('{Escape}')
 		await screen.getByRole('button', { name: 'add step' }).click()
 		await screen
 			.getByRole('textbox', { name: 'Step 2' })
@@ -481,44 +463,7 @@ describe('recipe detail', () => {
 			.toHaveDisplayValue('weeknight')
 	})
 
-	test('pins cooked it to the bottom on phones', async () => {
-		const { screen } = await renderRoute({
-			path: '/recipes/recipe-1',
-			session,
-		})
-
-		const button = screen.getByRole('button', { name: 'cooked it' })
-
-		await expect.element(button).toBeVisible()
-
-		const bar = button.element().parentElement
-
-		if (!bar) throw new Error('missing action bar')
-
-		if (window.innerWidth < 768) {
-			expect(getComputedStyle(bar).position).toBe('fixed')
-			expect(button.element().getBoundingClientRect().bottom).toBeLessThan(
-				window.innerHeight,
-			)
-		} else {
-			expect(getComputedStyle(bar).position).toBe('static')
-		}
-	})
-
-	test('logs a cook with one tap and can undo it', async () => {
-		const { screen } = await renderRoute({
-			path: '/recipes/recipe-1',
-			session,
-		})
-
-		await screen.getByRole('button', { name: 'cooked it' }).click()
-
-		await expect.poll(() => recipeState.recipe?.cookCount).toBe(1)
-		await page.getByRole('button', { name: 'undo' }).click()
-		await expect.poll(() => recipeState.recipe?.cookCount).toBe(0)
-	})
-
-	test('offers to save a shared recipe before cooking it', async () => {
+	test('adds a shared recipe to the shelf without offering cook logging', async () => {
 		if (!recipeState.recipe) throw new Error('recipe was not seeded')
 		Object.assign(recipeState.recipe, {
 			userId: null,
@@ -539,11 +484,21 @@ describe('recipe detail', () => {
 			.element(screen.getByLabelText('book', { exact: true }))
 			.not.toBeInTheDocument()
 		await screen.getByRole('button', { name: 'save to shelf' }).click()
+		await expect.poll(() => recipeState.recipe?.saved).toBe(true)
+		expect(updateCalls.saved).toEqual(['recipe-1'])
+		await screen.getByRole('button', { name: 'remove from shelf' }).click()
+		await expect.poll(() => recipeState.recipe?.saved).toBe(false)
+		expect(updateCalls.deleted).toEqual(['recipe-1'])
+		await expect
+			.element(screen.getByRole('button', { name: 'save to shelf' }))
+			.toBeVisible()
+		await expect
+			.element(screen.getByRole('heading', { name: 'miso butter pasta' }))
+			.toBeVisible()
 
 		await expect
 			.element(screen.getByRole('button', { name: 'cooked it' }))
-			.toBeVisible()
-		expect(updateCalls.saved).toEqual(['recipe-1'])
+			.not.toBeInTheDocument()
 	})
 
 	test('edits a shared recipe into your own copy', async () => {
