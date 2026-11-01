@@ -8,7 +8,6 @@ import { clampRecipeTitle, recipeInput } from '@/lib/recipes/model'
 import {
 	createSharedRecipe,
 	findSharedRecipeByUrl,
-	saveRecipeForUser,
 } from '@/lib/recipes/repository'
 
 import { fetchRecipeHtml, type RelayConfig } from './fetch'
@@ -22,8 +21,8 @@ function relayConfig(): RelayConfig | undefined {
 		: undefined
 }
 
-// Finds the shared recipe for a page, fetching it the first time anyone asks,
-// and puts it on the importer's shelf.
+// Finds the shared recipe for a page, fetching it the first time anyone asks.
+// It is not saved to the shelf: the recipe opens, and saving is one tap.
 export const importRecipe = createServerFn({ method: 'POST' })
 	.validator(z.object({ url: z.url({ protocol: /^https?$/ }).max(2000) }))
 	.handler(async ({ data }) => {
@@ -36,11 +35,7 @@ export const importRecipe = createServerFn({ method: 'POST' })
 		return withImportSlot(userId, async () => {
 			const known = await findSharedRecipeByUrl(sourceUrl)
 
-			if (known) {
-				await saveRecipeForUser(userId, known.id)
-
-				return known
-			}
+			if (known) return known
 
 			const page = await fetchRecipeHtml(data.url, relayConfig())
 
@@ -64,8 +59,6 @@ export const importRecipe = createServerFn({ method: 'POST' })
 			})
 
 			if (!recipe) throw new Error("couldn't save that — try again")
-
-			await saveRecipeForUser(userId, recipe.id)
 
 			return recipe
 		})
