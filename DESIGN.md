@@ -233,7 +233,8 @@ slot, empty states — are drawn dashed; once real, the border goes solid.
   a thumbnail, ingredient sections, and recipe steps without actions. Selecting
   a result fills the dialog with that preview and a pinned bottom “open recipe”
   action; Back restores the results. Desktop dialogs leave 32px above and below;
-  phones use the full screen. Saving happens on the recipe page.
+  phones use the full screen. Previewing and opening results defer saving to the
+  recipe page; explicit link imports save before navigation.
 
 ### Popular Recipes
 
@@ -329,7 +330,8 @@ slot, empty states — are drawn dashed; once real, the border goes solid.
 
 - **Don't** use hard offset shadows, 2px ink borders, uppercase labels or
   rotated stickers — the rejected neobrutalist world.
-- **Don't** put a border and a shadow on the same surface.
+- **Don't** put a border and a shadow on the same surface, except for the
+  floating-panel and recipe-tile treatments defined above.
 - **Don't** use gray-on-color secondary text; tint from the surface's ink.
 - **Don't** resurrect rejected worlds: neobrutalist, metro-black, pantry-shelf,
   diner ticket-rail.

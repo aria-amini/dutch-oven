@@ -6,7 +6,7 @@ import {
 } from '@tests/support/fixtures/db'
 import { and, eq } from 'drizzle-orm'
 
-import { mealLogs, user } from '@/db/schema'
+import { mealLogs, recipes, user } from '@/db/schema'
 import {
 	createRecipeForUser,
 	updateRecipeForUser,
@@ -45,6 +45,18 @@ async function setup(db: Database) {
 }
 
 describe('server cooking progress', () => {
+	test('omits a session whose recipe is no longer visible', async ({ db }) => {
+		const { userId, recipeId } = await setup(db)
+		const other = await setup(db)
+		await updateCookingForUser(userId, { recipeId, action: 'start' }, db)
+		await db
+			.update(recipes)
+			.set({ userId: other.userId, finalizedAt: null })
+			.where(eq(recipes.id, recipeId))
+		expect(await getCookingForUser(userId, recipeId, db)).toBeNull()
+		expect(await listActiveCookingForUser(userId, db)).toEqual([])
+	})
+
 	test('persists progress and ends without recording a meal', async ({
 		db,
 	}) => {

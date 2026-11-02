@@ -314,17 +314,39 @@ export function RecipeEditor({
 	}, [arrived, defaultTitle, scheduleAutosave, announceSorted])
 
 	// A pasted recipe is sorted at once, with a way back to the empty page.
-	const sortPasted = (text: string) => {
-		const sorted = parsePastedRecipe(text)
-		const before = { name, draft: recipeId.current }
+	const sortPasted = useCallback(
+		(text: string) => {
+			const sorted = parsePastedRecipe(text)
+			const before = { name, draft: recipeId.current }
 
-		setName(sorted.title)
-		setUnnamed(false)
-		setSeed((current) => ({ version: current.version + 1, ...sorted }))
-		autosave.schedule()
+			setName(sorted.title)
+			setUnnamed(false)
+			setSeed((current) => ({ version: current.version + 1, ...sorted }))
+			scheduleAutosave()
 
-		announceSorted(sorted, before)
-	}
+			announceSorted(sorted, before)
+		},
+		[name, scheduleAutosave, announceSorted],
+	)
+
+	// Router state can deliver a paste while this uncontrolled form stays mounted.
+	const receivedPaste = useRef(pasted)
+	useEffect(() => {
+		if (receivedPaste.current === pasted) return
+		receivedPaste.current = pasted
+
+		if (recipe || !pasted || !form.current) return
+
+		if (!empty(form.current) || name.trim()) {
+			toast('Start with an empty recipe to paste text')
+
+			return
+		}
+
+		// Synchronize an external navigation payload with the mounted form.
+		// oxlint-disable-next-line react/set-state-in-effect
+		sortPasted(pasted)
+	}, [pasted, recipe, name, sortPasted])
 
 	const done = async () => {
 		if (photoBusy || pending) return

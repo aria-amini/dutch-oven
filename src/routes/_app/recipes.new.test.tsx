@@ -377,43 +377,91 @@ describe('write a recipe', () => {
 			.toHaveValue('my own onion')
 	})
 
-	test('sorts a recipe pasted into the one box, once', async () => {
+	test.each(['/recipes', '/recipes/new'])(
+		'sorts a recipe pasted into the one box from %s, once',
+		async (path) => {
+			const { router, screen } = await renderRoute({
+				path,
+				session: testSession,
+			})
+
+			await router.navigate({
+				to: '/recipes/new',
+				state: {
+					pasted:
+						'weeknight dal\ningredients\n1 cup red lentils\nmethod\n1. simmer',
+				},
+			})
+
+			await expect
+				.element(screen.getByRole('textbox', { name: 'name' }))
+				.toHaveValue('weeknight dal')
+			await expect
+				.element(screen.getByRole('textbox', { name: 'Step 1' }))
+				.toHaveValue('simmer')
+			await expect.poll(latest).toEqual(
+				expect.objectContaining({
+					title: 'weeknight dal',
+					ingredients: ['1 cup red lentils'],
+					steps: ['simmer'],
+				}),
+			)
+			// The page forgets it, so a reload starts blank instead of a second draft.
+			await expect
+				.poll(() => router.state.location.state.pasted)
+				.toBeUndefined()
+			await screen.getByRole('button', { name: 'undo' }).click()
+			await expect
+				.element(screen.getByRole('textbox', { name: 'name' }))
+				.toHaveValue('')
+			await expect
+				.element(screen.getByRole('combobox', { name: 'Ingredient 1' }))
+				.toHaveValue('')
+			await expect.poll(() => state.deleted).toEqual(['recipe-new'])
+		},
+	)
+
+	test('keeps a saved draft when another recipe arrives from the finder', async () => {
 		const { router, screen } = await renderRoute({
-			path: '/recipes',
+			path: '/recipes/new',
 			session: testSession,
 		})
 
-		await router.navigate({
-			to: '/recipes/new',
-			state: {
-				pasted:
-					'weeknight dal\ningredients\n1 cup red lentils\nmethod\n1. simmer',
-			},
-		})
-
-		await expect
-			.element(screen.getByRole('textbox', { name: 'name' }))
-			.toHaveValue('weeknight dal')
-		await expect
-			.element(screen.getByRole('textbox', { name: 'Step 1' }))
-			.toHaveValue('simmer')
+		await screen.getByRole('textbox', { name: 'name' }).fill('My pasta')
+		await screen.getByRole('combobox', { name: 'Ingredient 1' }).fill('1 onion')
+		await userEvent.keyboard('{Escape}')
+		await screen.getByRole('textbox', { name: 'Step 1' }).fill('Chop')
 		await expect.poll(latest).toEqual(
 			expect.objectContaining({
-				title: 'weeknight dal',
-				ingredients: ['1 cup red lentils'],
-				steps: ['simmer'],
+				title: 'My pasta',
+				ingredients: ['1 onion'],
+				steps: ['Chop'],
 			}),
 		)
-		// The page forgets it, so a reload starts blank instead of a second draft.
-		await expect.poll(() => router.state.location.state.pasted).toBeUndefined()
-		await screen.getByRole('button', { name: 'undo' }).click()
+		await router.navigate({
+			to: '/recipes/new',
+			state: { pasted: 'dal\ningredients\n1 cup lentils\nmethod\n1. simmer' },
+		})
+		await expect
+			.element(screen.getByText('Start with an empty recipe to paste text'))
+			.toBeVisible()
 		await expect
 			.element(screen.getByRole('textbox', { name: 'name' }))
-			.toHaveValue('')
+			.toHaveValue('My pasta')
 		await expect
 			.element(screen.getByRole('combobox', { name: 'Ingredient 1' }))
-			.toHaveValue('')
-		await expect.poll(() => state.deleted).toEqual(['recipe-new'])
+			.toHaveValue('1 onion')
+		await expect
+			.element(screen.getByRole('textbox', { name: 'Step 1' }))
+			.toHaveValue('Chop')
+		await expect.poll(() => router.state.location.state.pasted).toBeUndefined()
+		expect(latest()).toEqual(
+			expect.objectContaining({
+				title: 'My pasta',
+				ingredients: ['1 onion'],
+				steps: ['Chop'],
+			}),
+		)
 	})
 
 	test('writes each ingredient as one line, finishing the food from a suggestion', async () => {

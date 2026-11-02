@@ -14,7 +14,7 @@ export async function getCookingForUser(
 ) {
 	const recipe = await getRecipeForUser(userId, recipeId, database)
 
-	if (!recipe) throw new Error('Recipe not found')
+	if (!recipe) return null
 
 	const [progress] = await database
 		.select()
