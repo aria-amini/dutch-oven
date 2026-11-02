@@ -376,7 +376,7 @@ function RecipeView({
 									checked.has(`i${index}`),
 								).length
 							}{' '}
-							ingredients ready{busy ? ' · saving…' : ''}
+							ingredients ready
 						</output>
 						<button
 							type="button"
