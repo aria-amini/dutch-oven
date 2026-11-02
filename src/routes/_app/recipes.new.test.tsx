@@ -348,6 +348,39 @@ describe('write a recipe', () => {
 			.toBe(true)
 	})
 
+	test('keeps a finished recipe when its paste undo is clicked afterwards', async () => {
+		const { screen } = await renderRoute({
+			path: '/recipes/new',
+			session: testSession,
+		})
+
+		const data = new DataTransfer()
+		data.setData('text', 'weeknight dal\n1 cup red lentils\n1. simmer')
+		screen
+			.getByRole('textbox', { name: 'name' })
+			.element()
+			.dispatchEvent(
+				new ClipboardEvent('paste', {
+					clipboardData: data,
+					bubbles: true,
+					cancelable: true,
+				}),
+			)
+		await expect.poll(() => state.created).toHaveLength(1)
+		const undo = screen.getByRole('button', { name: 'undo' }).element()
+
+		await screen.getByRole('button', { name: 'done' }).click()
+		await expect
+			.poll(() => state.updated.some((saved) => saved.finalize))
+			.toBe(true)
+
+		await userEvent.click(undo)
+		await expect
+			.element(screen.getByRole('button', { name: 'undo' }))
+			.not.toBeInTheDocument()
+		expect(state.deleted).toEqual([])
+	})
+
 	test('keeps rows already typed when a recipe is pasted into the empty name', async () => {
 		const { screen } = await renderRoute({
 			path: '/recipes/new',
