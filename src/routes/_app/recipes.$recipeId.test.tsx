@@ -29,7 +29,15 @@ const cookingState = vi.hoisted<{
 	progress: Awaited<ReturnType<typeof getCooking>>
 	checkGate: Promise<void> | null
 	failCheck: boolean
-}>(() => ({ progress: null, checkGate: null, failCheck: false }))
+	finishGate: Promise<void> | null
+	failFinish: boolean
+}>(() => ({
+	progress: null,
+	checkGate: null,
+	failCheck: false,
+	finishGate: null,
+	failFinish: false,
+}))
 
 vi.mock('@/lib/cooking/server', () => ({
 	listActiveCooking: () =>
@@ -47,6 +55,9 @@ vi.mock('@/lib/cooking/server', () => ({
 		}
 
 		if (data.action === 'finish') {
+			await cookingState.finishGate
+
+			if (cookingState.failFinish) throw new Error('Could not end cooking')
 			cookingState.progress = null
 
 			return null
@@ -155,6 +166,8 @@ describe('recipe detail', () => {
 		cookingState.progress = null
 		cookingState.checkGate = null
 		cookingState.failCheck = false
+		cookingState.finishGate = null
+		cookingState.failFinish = false
 		updateCalls.calls.length = 0
 		updateCalls.deleted.length = 0
 		updateCalls.saved.length = 0
@@ -463,6 +476,53 @@ describe('recipe detail', () => {
 			.element(screen.getByRole('dialog', { name: 'Start cooking?' }))
 			.not.toBeInTheDocument()
 		expect(cookingState.progress?.active).toBe(true)
+	})
+
+	test('ends cooking immediately and restores the session if saving fails', async () => {
+		if (!recipeState.recipe) throw new Error('recipe was not seeded')
+		recipeState.recipe.ingredients = ['1 carrot']
+		const { screen } = await renderRoute({ path: '/recipes/recipe-1', session })
+		await screen
+			.getByRole('button', { name: 'start cooking', exact: true })
+			.click()
+		await expect
+			.element(screen.getByRole('button', { name: 'end cooking' }))
+			.toBeVisible()
+		await expect
+			.poll(
+				() => document.querySelector('[aria-label="Cooking tracker"]') !== null,
+			)
+			.toBe(true)
+		let release: () => void = () => {}
+
+		cookingState.finishGate = new Promise<void>((resolve) => {
+			release = resolve
+		})
+		cookingState.failFinish = true
+		await screen.getByRole('button', { name: 'end cooking' }).click()
+		await expect
+			.element(screen.getByRole('button', { name: 'end cooking' }))
+			.not.toBeInTheDocument()
+		await expect
+			.poll(() => document.querySelector('[aria-label="Cooking tracker"]'))
+			.toBeNull()
+		expect(cookingState.progress?.active).toBe(true)
+		release()
+		await expect
+			.element(screen.getByText('Could not end cooking'))
+			.toBeVisible()
+		await expect
+			.element(screen.getByRole('button', { name: 'end cooking' }))
+			.toBeVisible()
+		await expect
+			.poll(
+				() => document.querySelector('[aria-label="Cooking tracker"]') !== null,
+			)
+			.toBe(true)
+		cookingState.failFinish = false
+		cookingState.finishGate = null
+		await screen.getByRole('button', { name: 'end cooking' }).click()
+		await expect.poll(() => cookingState.progress).toBeNull()
 	})
 
 	test('starts from a checklist confirmation, persists checks, and finishes', async () => {

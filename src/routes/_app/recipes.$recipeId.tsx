@@ -169,6 +169,28 @@ function RecipeView({
 		onMutate: async (variables) => {
 			await client.cancelQueries({ queryKey })
 
+			if (variables.action === 'finish') {
+				await client.cancelQueries({ queryKey: ['active-cooking'] })
+
+				const previous =
+					client.getQueryData<Awaited<ReturnType<typeof getCooking>>>(queryKey)
+
+				const session = client
+					.getQueryData<Awaited<ReturnType<typeof listActiveCooking>>>([
+						'active-cooking',
+					])
+					?.find((entry) => entry.recipeId === recipe.id)
+
+				client.setQueryData(queryKey, null)
+				client.setQueryData<Awaited<ReturnType<typeof listActiveCooking>>>(
+					['active-cooking'],
+					(sessions) =>
+						sessions?.filter((entry) => entry.recipeId !== recipe.id),
+				)
+
+				return { kind: 'finish' as const, previous, session }
+			}
+
 			if (variables.action !== 'check' || !variables.item) return null
 			const item = variables.item
 			const version = (versions.current.get(item) ?? 0) + 1
@@ -193,6 +215,7 @@ function RecipeView({
 			updateTrackerCheck(item, variables.done === true)
 
 			return {
+				kind: 'check' as const,
 				item,
 				version,
 				wasChecked: previous?.checked.includes(item) ?? false,
@@ -207,7 +230,26 @@ function RecipeView({
 			if (!data) void client.invalidateQueries({ queryKey: ['shelf'] })
 		},
 		onError: (error, _variables, context) => {
-			if (context && versions.current.get(context.item) === context.version) {
+			if (context?.kind === 'finish') {
+				if (context.previous !== undefined)
+					client.setQueryData(queryKey, context.previous)
+
+				if (context.session) {
+					const session = context.session
+					client.setQueryData<Awaited<ReturnType<typeof listActiveCooking>>>(
+						['active-cooking'],
+						(sessions) =>
+							sessions?.some((entry) => entry.recipeId === recipe.id)
+								? sessions
+								: [...(sessions ?? []), session],
+					)
+				}
+			}
+
+			if (
+				context?.kind === 'check' &&
+				versions.current.get(context.item) === context.version
+			) {
 				updateTrackerCheck(context.item, context.wasChecked)
 				client.setQueryData<Awaited<ReturnType<typeof getCooking>>>(
 					queryKey,
@@ -481,7 +523,11 @@ function RecipeView({
 											aria-label={ingredient}
 											checked={done}
 											onChange={() => toggle(item)}
-											disabled={progress.isPending || progress.isError}
+											disabled={
+												progress.isPending ||
+												progress.isError ||
+												(busy && command.variables?.action === 'finish')
+											}
 											className="accent-kitchen-basil mt-1 size-5 shrink-0"
 										/>
 										<IngredientText text={ingredient} done={done} />
@@ -526,7 +572,11 @@ function RecipeView({
 											aria-label={`step ${index + 1}: ${step}`}
 											checked={done}
 											onChange={() => toggle(item)}
-											disabled={progress.isPending || progress.isError}
+											disabled={
+												progress.isPending ||
+												progress.isError ||
+												(busy && command.variables?.action === 'finish')
+											}
 											className="accent-kitchen-basil mt-0.5 size-5 shrink-0"
 										/>
 										<span className="text-muted-foreground mt-0.5 text-xs font-bold">
